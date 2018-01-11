@@ -4,7 +4,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 if (!class_exists('USI_Settings')) { class USI_Settings {
 
-   const VERSION = '1.0.0 (2017-10-29)';
+   const VERSION = '1.1.0 (2018-01-10)';
 
    public static $options = array();
 

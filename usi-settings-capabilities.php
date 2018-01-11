@@ -4,7 +4,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 if (!class_exists('USI_Settings_Capabilities')) { class USI_Settings_Capabilities {
 
-   const VERSION = '1.0.1 (2017-11-02)';
+   const VERSION = '1.1.0 (2018-01-10)';
 
    private $capabilities = null;
    private $disable_save = true;

@@ -6,7 +6,7 @@ require_once('usi-settings.php');
 
 if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
 
-   const VERSION = '1.0.5 (2018-01-07)';
+   const VERSION = '1.1.0 (2018-01-10)';
 
    protected $active_tab = null;
    protected $is_tabbed = false;

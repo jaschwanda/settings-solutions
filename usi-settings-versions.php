@@ -4,7 +4,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 if (!class_exists('USI_Settings_Versions')) { class USI_Settings_Versions {
 
-   const VERSION = '1.0.0 (2017-12-14)';
+   const VERSION = '1.1.0 (2018-01-10)';
 
    private function __construct() {
    } // __construct();
@@ -17,7 +17,7 @@ if (!class_exists('USI_Settings_Versions')) { class USI_Settings_Versions {
 
       $id = 'usi-settings-versions-' . $title;
 
-      $ajax = plugin_dir_url($file) . 'usi-settings-versions-scan.php';
+      $ajax = plugin_dir_url($file) . 'usi-settings/usi-settings-versions-scan.php';
 
       return(
          '<a id="' . $id . '-link" class="thickbox" href="">' . $link_text . '</a>' . 

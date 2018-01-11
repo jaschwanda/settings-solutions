@@ -2,28 +2,31 @@
 
 class USI_Settings_Versions_Scan {
 
-   const VERSION = '1.0.0 (2017-12-14)';
+   const VERSION = '1.1.0 (2018-01-10)';
 
    private function __construct() {
    } // __construct();
 
-   public static function versions() {
-      $files  = scandir(dirname(__FILE__));
-      $title  = !empty($_GET['title']) ? $_GET['title'] : null;
-      
-      $html = '<table>';
-
+   private static function scan($path) {
+      $files = scandir($path);
+      $html  = '';
       foreach ($files as $file) {
-         if ('.php' == substr($file, -4)) {
-            $contents = file_get_contents($file);
-            $status = preg_match('/VERSION\s*=\s*\'([(0-9\.\s\-\)]*)/', $contents, $matches);
+         $full_path = $path . DIRECTORY_SEPARATOR . $file;
+         if (('.' == $file) || ('..' == $file)) {
+         } else if (is_dir($full_path)) {
+            $html .= self::scan($full_path);
+         } else {
+            $contents = file_get_contents($full_path);
+            $status   = preg_match('/VERSION\s*=\s*\'([(0-9\.\s\-\)]*)/', $contents, $matches);
             if (!empty($matches[1])) $html .= '<tr><td>' . $file . ' &nbsp; &nbsp; </td><td>' . $matches[1] . '</td></tr>';
          }
       }
+      return($html);
+   } // scan();
 
-      $html .= '</table>';
-
-      echo($html);
+   public static function versions() {
+      $files  = scandir(dirname(dirname(__FILE__)));
+      die('<table>' . self::scan(dirname(dirname(__FILE__))) . '</table>');
    } // versions();
 
 } // Class USI_Settings_Versions_Scan;
