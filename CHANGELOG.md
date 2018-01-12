@@ -2,6 +2,9 @@
 
 usi-settings helper class changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 1.1.1 (2018-01-11) ##
+* Updated USI_Settings_Admin to optionally load settings link, previous update over written some how.
+
 ## 1.1.0 (2018-01-10) ##
 * Modified the version scanning function to scan recursively.
 * Moved files to their folder and made it a Git submodule.
