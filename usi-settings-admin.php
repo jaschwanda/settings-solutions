@@ -6,7 +6,12 @@ require_once('usi-settings.php');
 
 if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
 
-   const VERSION = '1.1.1 (2018-01-11)';
+   const VERSION = '1.2.0 (2018-01-13)';
+
+   const DEBUG_INIT   = 0x01;
+   const DEBUG_RENDER = 0x02;
+
+   public static $debug = 0;
 
    protected $active_tab = null;
    protected $is_tabbed = false;
@@ -82,6 +87,13 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
 
          if (!empty($section['settings'])) {
             foreach ($section['settings'] as $option_id => $attributes) {
+               $option_name  = $this->option_name . '[' . $section_id . ']['  . $option_id . ']';
+               $option_value = (!empty(USI_Settings::$options[$prefix][$section_id][$option_id]) ?
+                  USI_Settings::$options[$prefix][$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null));
+
+               if (self::DEBUG_INIT & self::$debug) USI_Debug::message(__METHOD__.':option_name=' . $option_name . 
+                  ' USI_Settings::$options[' . $prefix . '][' . $section_id . '][' . $option_id . ']=' . $option_value);
+
                add_settings_field(
                   $option_id, // Option name;
                   !empty($attributes['label']) ? $attributes['label'] : null, // Field title; 
@@ -90,9 +102,8 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
                   $section_id, // Section id;
                   array_merge($attributes, 
                     array(
-                        'name' => $this->option_name . '[' . $section_id . ']['  . $option_id . ']',
-                        'value' => !empty(USI_Settings::$options[$prefix][$section_id][$option_id]) 
-                           ? USI_Settings::$options[$prefix][$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null)
+                        'name'  => $option_name,
+                        'value' => $option_value
                      )
                   )
                );
@@ -121,7 +132,7 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
 
    static function fields_render($args) {
 
-      // USI_Debug::print_r(__METHOD__.':args=', $args);
+      if (self::DEBUG_RENDER & self::$debug) USI_Debug::print_r(__METHOD__.':args=', $args);
 
       $notes    = !empty($args['notes']) ? $args['notes'] : null;
       $type     = !empty($args['type'])  ? $args['type']  : 'text';

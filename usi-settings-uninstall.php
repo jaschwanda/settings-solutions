@@ -4,7 +4,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 if (!class_exists('USI_Settings_Uninstall')) { final class USI_Settings_Uninstall {
 
-   const VERSION = '1.1.0 (2018-01-10)';
+   const VERSION = '1.2.0 (2018-01-13)';
 
    private function __construct() {
    } // __construct();

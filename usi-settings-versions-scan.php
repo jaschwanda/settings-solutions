@@ -2,7 +2,7 @@
 
 class USI_Settings_Versions_Scan {
 
-   const VERSION = '1.1.0 (2018-01-10)';
+   const VERSION = '1.2.0 (2018-01-13)';
 
    private function __construct() {
    } // __construct();
