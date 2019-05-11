@@ -2,11 +2,11 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-require_once('usi-settings.php'); 
+require_once(plugin_dir_path(dirname(__FILE__)) . 'usi-settings-solutions/usi-settings-solutions-versions.php');
 
-if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
+class USI_Settings_Solutions_Admin {
 
-   const VERSION = '1.2.0 (2018-01-13)';
+   const VERSION = '2.0.0 (2019-04-13)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -25,7 +25,7 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
    protected $sections = null;
    protected $text_domain = null;
 
-   function __construct($name, $prefix, $text_domain, $add_setting_link = true) {
+   function __construct($name, $prefix, $text_domain, $add_settings_link = true) {
 
       $this->name = $name;
       $this->option_name = $prefix . '-options';
@@ -37,7 +37,7 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
          $prefix_tab = $this->prefix . '-tab';
          $active_tab = !empty($_POST[$prefix_tab]) ? $_POST[$prefix_tab] : (!empty($_GET['tab']) ? $_GET['tab'] : null);
          $default_tab = null;
-         foreach ($this->sections as $section_id => $section) {
+         if ($this->sections) foreach ($this->sections as $section_id => $section) {
             if (!$default_tab) $default_tab = $section_id;
             if ($section_id == $active_tab) {
                $this->active_tab = $active_tab;
@@ -51,7 +51,7 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
       add_action('admin_init', array($this, 'action_admin_init'));
       add_action('admin_menu', array($this, 'action_admin_menu'));
 
-      if ($add_setting_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
+      if ($add_settings_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
 
    } // __construct();
 
@@ -67,7 +67,7 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
 
       $prefix = $this->prefix;
 
-      foreach ($this->sections as $section_id => $section) {
+      if ($this->sections) foreach ($this->sections as $section_id => $section) {
 
          $this->section_callbacks[] = !empty($section['header_callback']) ? $section['header_callback'] : null;
          $this->section_ids[] = $section_id;
@@ -88,11 +88,11 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
          if (!empty($section['settings'])) {
             foreach ($section['settings'] as $option_id => $attributes) {
                $option_name  = $this->option_name . '[' . $section_id . ']['  . $option_id . ']';
-               $option_value = (!empty(USI_Settings::$options[$prefix][$section_id][$option_id]) ?
-                  USI_Settings::$options[$prefix][$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null));
+               $option_value = (!empty(USI_Settings_Solutions::$options[$prefix][$section_id][$option_id]) ?
+                  USI_Settings_Solutions::$options[$prefix][$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null));
 
                if (self::DEBUG_INIT & self::$debug) USI_Debug::message(__METHOD__.':option_name=' . $option_name . 
-                  ' USI_Settings::$options[' . $prefix . '][' . $section_id . '][' . $option_id . ']=' . $option_value);
+                  ' USI_Settings_Solutions::$options[' . $prefix . '][' . $section_id . '][' . $option_id . ']=' . $option_value);
 
                add_settings_field(
                   $option_id, // Option name;
@@ -227,7 +227,7 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
       if ($this->is_tabbed) {
          echo 
             '    <h2 class="nav-tab-wrapper">' . PHP_EOL;
-            foreach ($this->sections as $section_id => $section) {
+            if ($this->sections) foreach ($this->sections as $section_id => $section) {
                $active_class = null;
                if ($section_id == $this->active_tab) {
                   $active_class = ' nav-tab-active';
@@ -250,7 +250,7 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
          if ($this->section_callback_offset) echo PHP_EOL . '</div><!--' . $this->page_slug . '-' . 
             $this->section_ids[$this->section_callback_offset - 1] .'-->' . PHP_EOL . PHP_EOL;
 
-         foreach ($this->sections as $section_id => $section) {
+         if ($this->sections) foreach ($this->sections as $section_id => $section) {
             if ($section_id == $this->active_tab) {
                if (!empty($section['footer_callback'])) {
                   $object = $section['footer_callback'][0];
@@ -312,6 +312,39 @@ if (!class_exists('USI_Settings_Admin')) { class USI_Settings_Admin {
 
    } // section_render();
 
-} /* Class USI_Settings_Admin; */ }
+} // Class USI_Settings_Solutions_Admin;
+
+if (!class_exists('USI_Sort_Solutions_Settings')) {
+   final class USI_Sort_Solutions_Settings {
+      const VERSION = '1.0.0 (2017-10-29)';
+      function __construct() {
+         add_filter('custom_menu_order', function() { 
+            return(true); 
+         });
+         add_filter('menu_order', function($menu_order) {
+            global $submenu;
+            $keys = array();
+            $names = array();
+            $options = array();
+            if (!empty($submenu['options-general.php'])) {
+               foreach ($submenu['options-general.php'] as $key => $option) {
+                  if (!empty($option[2]) && preg_match('/^usi\-\w+-settings/', $option[2])) {
+                     $keys[] = $key;
+                     $names[] = $option[0];
+                     $options[] = $option;
+                     unset($submenu['options-general.php'][$key]);
+                  }
+               }
+            }
+            asort($names);
+            foreach ($names as $index => $value) {
+               $submenu['options-general.php'][$keys[$index]] = $options[$index];
+            }
+            return($menu_order);
+         });
+      } // __construct();
+   } // Class USI_Sort_Solutions_Settings;
+   new USI_Sort_Solutions_Settings();
+} // ENDIF USI_Sort_Solutions_Settings exists;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

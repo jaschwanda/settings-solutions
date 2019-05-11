@@ -2,22 +2,20 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-if (!class_exists('USI_Settings_Versions')) { class USI_Settings_Versions {
+class USI_Settings_Solutions_Versions {
 
-   const VERSION = '1.2.0 (2018-01-13)';
+   const VERSION = '2.0.0 (2019-04-13)';
 
    private function __construct() {
-   } // __construct();
-
-   public static function action() {
+      // Enqueues the default ThickBox js and css;
       add_action('init', 'add_thickbox');
-   } // action();
+   } // __construct();
 
    public static function link($link_text, $title, $version, $text_domain, $file) {
 
       $id = 'usi-settings-versions-' . $title;
 
-      $ajax = plugin_dir_url($file) . 'usi-settings/usi-settings-versions-scan.php';
+      $ajax = plugins_url(null, __FILE__) . '/usi-settings-solutions-versions-scan.php';
 
       return(
          '<a id="' . $id . '-link" class="thickbox" href="">' . $link_text . '</a>' . 
@@ -41,7 +39,7 @@ if (!class_exists('USI_Settings_Versions')) { class USI_Settings_Versions {
                '$("#' . $id . '-link").click(' . 
                   'function(event) {' . 
                      'tb_show("' . $title . ' &nbsp; &nbsp; Version ' . $version . ' ", "#TB_inline?inlineId=' . $id . '-popup", null);' . 
-                     '$("#' . $id . '-list").load("' . $ajax . '", "title=' . $title . '", resize);' . 
+                     '$("#' . $id . '-list").load("' . $ajax . '", "' . urlencode($file) . '", resize);' . 
                      'return(false);' . 
                   '}' . 
                ');' . 
@@ -51,6 +49,6 @@ if (!class_exists('USI_Settings_Versions')) { class USI_Settings_Versions {
          '</script>');
    } //link();
 
-} /* Class USI_Settings_Versions; */ }
+} // Class USI_Settings_Solutions_Versions;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

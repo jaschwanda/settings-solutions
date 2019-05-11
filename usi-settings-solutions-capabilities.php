@@ -2,9 +2,9 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-if (!class_exists('USI_Settings_Capabilities')) { class USI_Settings_Capabilities {
+class USI_Settings_Solutions_Capabilities {
 
-   const VERSION = '1.2.0 (2018-01-13)';
+   const VERSION = '2.0.0 (2019-04-13)';
 
    private $capabilities = null;
    private $disable_save = true;
@@ -55,7 +55,7 @@ if (!class_exists('USI_Settings_Capabilities')) { class USI_Settings_Capabilitie
                   $role = get_role($role_id);
                   foreach ($settings as $field_id => & $attributes) {
                      $capability_name = $this->name . '-' . $field_id;
-                     if (USI_Settings::$options[$prefix]['capabilities'][$field_id] = $role->has_cap($capability_name)) {
+                     if (USI_Settings_Solutions::$options[$prefix]['capabilities'][$field_id] = $role->has_cap($capability_name)) {
                         $attributes['readonly'] = true;
                         $attributes['notes'] = ' <i>(' . sprintf(__("Set by user's %s role settings", 
                            $this->text_domain), ucfirst($role_id)) . ')</i>';
@@ -63,7 +63,7 @@ if (!class_exists('USI_Settings_Capabilities')) { class USI_Settings_Capabilitie
                         $this->disable_save = false;
                      }
                      if ($user->has_cap($capability_name)) {
-                        USI_Settings::$options[$prefix]['capabilities'][$field_id] = true;
+                        USI_Settings_Solutions::$options[$prefix]['capabilities'][$field_id] = true;
                      }
                   }
                   unset($attributes);
@@ -74,7 +74,7 @@ if (!class_exists('USI_Settings_Capabilities')) { class USI_Settings_Capabilitie
       } else if ('administrator' == $this->role_id) {
 
          foreach ($settings as $field_id => & $attributes) {
-            USI_Settings::$options[$prefix]['capabilities'][$field_id] = true;
+            USI_Settings_Solutions::$options[$prefix]['capabilities'][$field_id] = true;
             $attributes['readonly'] = true;
             $attributes['notes'] = ' <i>(Default setting for Administrator)</i>';
          }
@@ -86,7 +86,7 @@ if (!class_exists('USI_Settings_Capabilities')) { class USI_Settings_Capabilitie
 
          foreach ($settings as $field_id => $attributes) {
             $capability_name = $this->name . '-' . $field_id;
-            USI_Settings::$options[$prefix]['capabilities'][$field_id] = $role->has_cap($capability_name);
+            USI_Settings_Solutions::$options[$prefix]['capabilities'][$field_id] = $role->has_cap($capability_name);
          }
 
       }
@@ -156,7 +156,7 @@ if (!class_exists('USI_Settings_Capabilities')) { class USI_Settings_Capabilitie
       echo PHP_EOL . 
          '<script>' . PHP_EOL .
          'jQuery(document).ready(function($) {' . PHP_EOL .
-         "   var url = 'options-general.php?page=" . USI_Settings_Admin::page_slug($this->prefix) . "&tab=capabilities&role_id='" . PHP_EOL .
+         "   var url = 'options-general.php?page=" . USI_Settings_Solutions_Admin::page_slug($this->prefix) . "&tab=capabilities&role_id='" . PHP_EOL .
          "   $('#{$this->prefix}-role-select').change(function(){window.location.href = url + $(this).val() + '&user_id={$this->user_id}';});" . PHP_EOL .
          "   $('#{$this->prefix}-user-select').change(function(){window.location.href = url + '{$this->role_id}' + '&user_id=' + $(this).val();});" . PHP_EOL .
          '});' . PHP_EOL .
@@ -176,7 +176,7 @@ if (!class_exists('USI_Settings_Capabilities')) { class USI_Settings_Capabilitie
 
    public static function section($name, $prefix, $text_domain, $capabilities) {
 
-      $that = new USI_Settings_Capabilities($name, $prefix, $text_domain, $capabilities);
+      $that = new USI_Settings_Solutions_Capabilities($name, $prefix, $text_domain, $capabilities);
 
       $section = array(
          'after_add_settings_section' => array($that, 'after_add_settings_section'),
@@ -200,6 +200,6 @@ if (!class_exists('USI_Settings_Capabilities')) { class USI_Settings_Capabilitie
 
    } // section();
 
-} /* Class USI_Settings_Capabilities; */ }
+} // Class USI_Settings_Solutions_Capabilities;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

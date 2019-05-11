@@ -2,58 +2,52 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-if (!class_exists('USI_Settings')) { class USI_Settings {
+/*
+Plugin Name: Settings-Solutions
+Plugin URI: https://github.com/jaschwanda/settings-solutions
+Description: The Settings-Solutions plugin provides WordPress settings functionality for themes and plugins. The Settings-Solutions plugin is developed and maintained by Universal Solutions.
+Version: 2.0.0 (2019-04-13)
+Author: Jim Schwanda
+Author URI: http://www.usi2solve.com/leader
+Text Domain: usi-settings-solutions
+*/
 
-   const VERSION = '1.2.0 (2018-01-13)';
+final class USI_Settings_Solutions {
+
+   const VERSION = '2.0.0 (2019-04-13)';
+
+   const NAME       = 'Settings-Solutions';
+   const PREFIX     = 'usi-settings';
+   const TEXTDOMAIN = 'usi-settings-solutions';
 
    public static $options = array();
 
-} /* Class USI_Settings; */ }
+   function __construct() {
+      add_filter('plugin_row_meta', array($this, 'filter_plugin_row_meta'), 10, 2);
+   } // __construct();
 
-if (!class_exists('USI_Sort_Solutions_Settings')) {
-   final class USI_Sort_Solutions_Settings {
-      const VERSION = '1.0.0 (2017-10-29)';
-      function __construct() {
-         add_filter('custom_menu_order', function() { 
-            return(true); 
-         });
-         add_filter('menu_order', function($menu_order) {
-            global $submenu;
-            $keys = array();
-            $names = array();
-            $options = array();
-            if (!empty($submenu['options-general.php'])) {
-               foreach ($submenu['options-general.php'] as $key => $option) {
-                  if (!empty($option[2]) && preg_match('/^usi\-\w+-settings/', $option[2])) {
-                     $keys[] = $key;
-                     $names[] = $option[0];
-                     $options[] = $option;
-                     unset($submenu['options-general.php'][$key]);
-                  }
-               }
-            }
-            asort($names);
-            foreach ($names as $index => $value) {
-               $submenu['options-general.php'][$keys[$index]] = $options[$index];
-            }
-            return($menu_order);
-         });
-      } // __construct();
-   } // Class USI_Sort_Solutions_Settings;
-   new USI_Sort_Solutions_Settings();
-} // ENDIF USI_Sort_Solutions_Settings exists;
+   function filter_plugin_row_meta($links, $file) {
+      if (false !== strpos($file, USI_Settings_Solutions::TEXTDOMAIN)) {
+         $links[0] = USI_Settings_Solutions_Versions::link(
+            $links[0], // Original link text;
+            USI_Settings_Solutions::NAME, // Title;
+            USI_Settings_Solutions::VERSION, // Version;
+            USI_Settings_Solutions::TEXTDOMAIN, // Text domain;
+            dirname(__FILE__) // Folder containing plugin or theme;
+         );
+         $links[] = '<a href="https://www.usi2solve.com/donate/settings-solutions" target="_blank">' . 
+            __('Donate', USI_Settings_Solutions::TEXTDOMAIN) . '</a>';
+      }
+      return($links);
+   } // filter_plugin_row_meta();
 
-if (!function_exists('usi_history')) {
-   function usi_history($action) {
-      global $wpdb;
-      $wpdb->insert($wpdb->prefix . 'USI_history', 
-         array(
-            'action' => $action,
-            'user_id' => get_current_user_id(), 
-         )
-      );
-   } // usi_history();
-} // ENDIF function_exists('usi_history');
+} // Class USI_Settings_Solutions;
+
+new USI_Settings_Solutions();
+
+if (is_admin() && !defined('WP_UNINSTALL_PLUGIN')) {
+   require_once('usi-settings-solutions-admin.php');
+}
 
 if (!function_exists('usi_log')) {
    function usi_log($action) {

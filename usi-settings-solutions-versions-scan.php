@@ -1,8 +1,8 @@
 <?php // ------------------------------------------------------------------------------------------------------------------------ //
 
-class USI_Settings_Versions_Scan {
+final class USI_Settings_Solutions_Versions_Scan {
 
-   const VERSION = '1.2.0 (2018-01-13)';
+   const VERSION = '2.0.0 (2019-04-13)';
 
    private function __construct() {
    } // __construct();
@@ -25,12 +25,11 @@ class USI_Settings_Versions_Scan {
    } // scan();
 
    public static function versions() {
-      $files  = scandir(dirname(dirname(__FILE__)));
-      die('<table>' . self::scan(dirname(dirname(__FILE__))) . '</table>');
+      die('<table>' . self::scan(urldecode($_SERVER['QUERY_STRING'])) . '</table>');
    } // versions();
 
-} // Class USI_Settings_Versions_Scan;
+} // Class USI_Settings_Solutions_Versions_Scan;
 
-USI_Settings_Versions_Scan::versions();
+USI_Settings_Solutions_Versions_Scan::versions();
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>
