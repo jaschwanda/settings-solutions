@@ -1,6 +1,6 @@
 # usi-settings-solutions #
 
-The usi-settings-solutions module is a helper class used by various WordPress plugins developed by Universal Solutions.
+The Settings-Solutions plugin is a helper class used by various WordPress plugins developed by Universal Solutions.
 
 ## Installation ##
 This module should be installed in the usi-settings-solutions folder under the main WordPress plugins folder.
