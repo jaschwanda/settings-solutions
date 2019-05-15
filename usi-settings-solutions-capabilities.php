@@ -17,12 +17,15 @@ class USI_Settings_Solutions_Capabilities {
    private $user = null;
    private $user_id = null;
 
-   private function __construct($name, $prefix, $text_domain, $capabilities) {
+   protected $options = null;
+
+   private function __construct($name, $prefix, $text_domain, $capabilities, $options = null) {
       $this->capabilities = $capabilities;
       $this->name = $name;
       $this->prefix = $prefix;
       $this->text_domain = $text_domain;
       $this->prefix_select_user = $this->prefix . '-select-user';
+      $this->options = $options;
    } // __construct();
 
    function after_add_settings_section($settings) {
@@ -55,7 +58,7 @@ class USI_Settings_Solutions_Capabilities {
                   $role = get_role($role_id);
                   foreach ($settings as $field_id => & $attributes) {
                      $capability_name = $this->name . '-' . $field_id;
-                     if (USI_Settings_Solutions::$options[$prefix]['capabilities'][$field_id] = $role->has_cap($capability_name)) {
+                     if ($this->options['capabilities'][$field_id] = $role->has_cap($capability_name)) {
                         $attributes['readonly'] = true;
                         $attributes['notes'] = ' <i>(' . sprintf(__("Set by user's %s role settings", 
                            $this->text_domain), ucfirst($role_id)) . ')</i>';
@@ -63,7 +66,7 @@ class USI_Settings_Solutions_Capabilities {
                         $this->disable_save = false;
                      }
                      if ($user->has_cap($capability_name)) {
-                        USI_Settings_Solutions::$options[$prefix]['capabilities'][$field_id] = true;
+                        $this->options['capabilities'][$field_id] = true;
                      }
                   }
                   unset($attributes);
@@ -74,7 +77,7 @@ class USI_Settings_Solutions_Capabilities {
       } else if ('administrator' == $this->role_id) {
 
          foreach ($settings as $field_id => & $attributes) {
-            USI_Settings_Solutions::$options[$prefix]['capabilities'][$field_id] = true;
+            $this->options['capabilities'][$field_id] = true;
             $attributes['readonly'] = true;
             $attributes['notes'] = ' <i>(Default setting for Administrator)</i>';
          }
@@ -86,7 +89,7 @@ class USI_Settings_Solutions_Capabilities {
 
          foreach ($settings as $field_id => $attributes) {
             $capability_name = $this->name . '-' . $field_id;
-            USI_Settings_Solutions::$options[$prefix]['capabilities'][$field_id] = $role->has_cap($capability_name);
+            $this->options['capabilities'][$field_id] = $role->has_cap($capability_name);
          }
 
       }
@@ -156,7 +159,7 @@ class USI_Settings_Solutions_Capabilities {
       echo PHP_EOL . 
          '<script>' . PHP_EOL .
          'jQuery(document).ready(function($) {' . PHP_EOL .
-         "   var url = 'options-general.php?page=" . USI_Settings_Solutions_Admin::page_slug($this->prefix) . "&tab=capabilities&role_id='" . PHP_EOL .
+         "   var url = 'options-general.php?page=" . USI_Settings_Solutions_Settings::page_slug($this->prefix) . "&tab=capabilities&role_id='" . PHP_EOL .
          "   $('#{$this->prefix}-role-select').change(function(){window.location.href = url + $(this).val() + '&user_id={$this->user_id}';});" . PHP_EOL .
          "   $('#{$this->prefix}-user-select').change(function(){window.location.href = url + '{$this->role_id}' + '&user_id=' + $(this).val();});" . PHP_EOL .
          '});' . PHP_EOL .

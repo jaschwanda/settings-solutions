@@ -2,7 +2,7 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-require_once(plugin_dir_path(dirname(__FILE__)) . 'usi-settings-solutions/usi-settings-solutions-versions.php');
+require_once('usi-settings-solutions-versions.php');
 
 class USI_Settings_Solutions_Settings {
 

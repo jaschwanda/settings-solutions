@@ -20,8 +20,6 @@ final class USI_Settings_Solutions {
    const PREFIX     = 'usi-settings';
    const TEXTDOMAIN = 'usi-settings-solutions';
 
-   public static $options = array();
-
    function __construct() {
       add_filter('plugin_row_meta', array($this, 'filter_plugin_row_meta'), 10, 2);
    } // __construct();
@@ -46,7 +44,7 @@ final class USI_Settings_Solutions {
 new USI_Settings_Solutions();
 
 if (is_admin() && !defined('WP_UNINSTALL_PLUGIN')) {
-   require_once('usi-settings-solutions-admin.php');
+   require_once('usi-settings-solutions-settings.php');
 }
 
 if (!function_exists('usi_log')) {
