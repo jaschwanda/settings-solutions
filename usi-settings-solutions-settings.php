@@ -27,7 +27,7 @@ class USI_Settings_Solutions_Settings {
 
    protected $options = null;
 
-   function __construct($name, $prefix, $text_domain, $add_settings_link = true, $options = null) {
+   function __construct($name, $prefix, $text_domain, $options, $add_settings_link = true) {
 
       $this->name = $name;
       $this->option_name = $prefix . '-options';
@@ -91,13 +91,9 @@ class USI_Settings_Solutions_Settings {
          if (!empty($section['settings'])) {
             foreach ($section['settings'] as $option_id => $attributes) {
                $option_name  = $this->option_name . '[' . $section_id . ']['  . $option_id . ']';
-//               $option_value = (!empty(USI_Settings_Solutions::$options[$prefix][$section_id][$option_id]) ?
-//                  USI_Settings_Solutions::$options[$prefix][$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null));
                $option_value = (!empty($this->options[$section_id][$option_id]) ?
                   $this->options[$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null));
 
-//               if (self::DEBUG_INIT & self::$debug) USI_Debug::message(__METHOD__.':option_name=' . $option_name . 
-//                  ' USI_Settings_Solutions::$options[' . $prefix . '][' . $section_id . '][' . $option_id . ']=' . $option_value);
                if (self::DEBUG_INIT & self::$debug) USI_Debug::message(__METHOD__.':option_name=' . $option_name . 
                   ' $options[' . $prefix . '][' . $section_id . '][' . $option_id . ']=' . $option_value);
 
