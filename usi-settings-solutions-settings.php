@@ -11,10 +11,10 @@ class USI_Settings_Solutions_Settings {
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
 
-   public static $debug = 0;
-
    protected $active_tab = null;
+   protected $debug = 0;
    protected $is_tabbed = false;
+   protected $log = null;
    protected $name = null;
    protected $option_name = null;
    protected $page_slug = null;
@@ -29,12 +29,12 @@ class USI_Settings_Solutions_Settings {
 
    function __construct($name, $prefix, $text_domain, $options, $add_settings_link = true) {
 
-      $this->name = $name;
+      $this->name        = $name;
       $this->option_name = $prefix . '-options';
+      $this->options     = $options;
       $this->page_slug   = self::page_slug($prefix);
-      $this->prefix = $prefix;
+      $this->prefix      = $prefix;
       $this->text_domain = $text_domain;
-      $this->options = $options;
 
       if ($this->is_tabbed) {
          $prefix_tab = $this->prefix . '-tab';
@@ -94,8 +94,7 @@ class USI_Settings_Solutions_Settings {
                $option_value = (!empty($this->options[$section_id][$option_id]) ?
                   $this->options[$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null));
 
-               if (self::DEBUG_INIT & self::$debug) USI_Debug::message(__METHOD__.':option_name=' . $option_name . 
-                  ' $options[' . $prefix . '][' . $section_id . '][' . $option_id . ']=' . $option_value);
+               if (self::DEBUG_INIT & $this->debug) call_user_func($this->log, __METHOD__.':$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
 
                add_settings_field(
                   $option_id, // Option name;
@@ -133,9 +132,16 @@ class USI_Settings_Solutions_Settings {
       );
    } // action_admin_menu();
 
-   static function fields_render($args) {
+   function debug($debug, $log) {
+      if (is_callable($log)) {
+         $this->debug = $debug;
+         $this->log   = $log;
+      }
+   } // debug();
 
-      if (self::DEBUG_RENDER & self::$debug) USI_Debug::print_r(__METHOD__.':args=', $args);
+   function fields_render($args) {
+
+      if (self::DEBUG_INIT & $this->debug) call_user_func($this->log, __METHOD__.':args=' . print_r($args, true));
 
       $notes    = !empty($args['notes']) ? $args['notes'] : null;
       $type     = !empty($args['type'])  ? $args['type']  : 'text';
