@@ -2,6 +2,18 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
+if (!function_exists('usi_log')) {
+   function usi_log($action) {
+      global $wpdb;
+      $wpdb->insert($wpdb->prefix . 'USI_log', 
+         array(
+            'action' => $action,
+            'user_id' => get_current_user_id(), 
+         )
+      );
+   } // usi_log();
+} // ENDIF function_exists('usi_log');
+
 require_once('usi-settings-solutions-versions.php');
 
 class USI_Settings_Solutions_Settings {
@@ -14,9 +26,10 @@ class USI_Settings_Solutions_Settings {
    protected $active_tab = null;
    protected $debug = 0;
    protected $is_tabbed = false;
-   protected $log = null;
+   protected $logger = null;
    protected $name = null;
    protected $option_name = null;
+   protected $options = null;
    protected $page_slug = null;
    protected $prefix = null;
    protected $section_callback_offset = 0;
@@ -24,8 +37,6 @@ class USI_Settings_Solutions_Settings {
    protected $section_ids = array();
    protected $sections = null;
    protected $text_domain = null;
-
-   protected $options = null;
 
    function __construct($name, $prefix, $text_domain, $options, $add_settings_link = true) {
 
@@ -56,6 +67,29 @@ class USI_Settings_Solutions_Settings {
 
       if ($add_settings_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
 
+      add_filter( 'custom_menu_order' , '__return_true');
+
+         add_filter('menu_order', function($menu_order) {
+            global $submenu;
+            $keys = array();
+            $names = array();
+            $options = array();
+            if (!empty($submenu['options-general.php'])) {
+               foreach ($submenu['options-general.php'] as $key => $option) {
+                  if (!empty($option[2]) && preg_match('/^usi\-\w+-settings/', $option[2])) {
+                     $keys[] = $key;
+                     $names[] = $option[0];
+                     $options[] = $option;
+                     unset($submenu['options-general.php'][$key]);
+                  }
+               }
+            }
+            asort($names);
+            foreach ($names as $index => $value) {
+               $submenu['options-general.php'][$keys[$index]] = $options[$index];
+            }
+            return($menu_order);
+         });
    } // __construct();
 
    function action_admin_head() {
@@ -94,7 +128,7 @@ class USI_Settings_Solutions_Settings {
                $option_value = (!empty($this->options[$section_id][$option_id]) ?
                   $this->options[$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null));
 
-               if (self::DEBUG_INIT & $this->debug) call_user_func($this->log, __METHOD__.':$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
+               if (self::DEBUG_INIT & $this->debug) call_user_func($this->logger, __METHOD__.':$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
 
                add_settings_field(
                   $option_id, // Option name;
@@ -132,16 +166,16 @@ class USI_Settings_Solutions_Settings {
       );
    } // action_admin_menu();
 
-   function debug($debug, $log) {
-      if (is_callable($log)) {
-         $this->debug = $debug;
-         $this->log   = $log;
+   function debug($logger, $debug = 0xFF) {
+      if (is_callable($logger)) {
+         $this->debug  = $debug;
+         $this->logger = $logger;
       }
    } // debug();
 
    function fields_render($args) {
 
-      if (self::DEBUG_INIT & $this->debug) call_user_func($this->log, __METHOD__.':args=' . print_r($args, true));
+      if (self::DEBUG_INIT & $this->debug) call_user_func($this->logger, __METHOD__.':args=' . print_r($args, true));
 
       $notes    = !empty($args['notes']) ? $args['notes'] : null;
       $type     = !empty($args['type'])  ? $args['type']  : 'text';
@@ -175,7 +209,7 @@ class USI_Settings_Solutions_Settings {
          break;
 
       case 'checkbox':
-         // Not sure why we have to conver 'true' to true, but checked() sometimes wouldn't check otherwise;
+         // Not sure why we have to convert 'true' to true, but checked() sometimes wouldn't check otherwise;
          echo '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />';
          break;
 
@@ -210,6 +244,7 @@ class USI_Settings_Solutions_Settings {
    } // fields_sanitize();
 
    function filter_plugin_action_links($links, $file) {
+usi_log(__METHOD__.':file=' . $file . ' text=' . $this->text_domain);
       if (false !== strpos($file, $this->text_domain)) {
          $links[] = '<a href="' . get_bloginfo('wpurl') . '/wp-admin/options-general.php?page=' . 
             $this->page_slug . '">' . __('Settings', $this->text_domain) . '</a>';
@@ -272,7 +307,7 @@ class USI_Settings_Solutions_Settings {
       } else {
 
          // Call the first footer callback function found for submit button HTML;
-         foreach ($this->sections as $section_id => $section) {
+         if ($this->sections) foreach ($this->sections as $section_id => $section) {
             if (!empty($section['footer_callback'])) {
                $object = $section['footer_callback'][0];
                $method = $section['footer_callback'][1];
@@ -322,38 +357,5 @@ class USI_Settings_Solutions_Settings {
    } // section_render();
 
 } // Class USI_Settings_Solutions_Settings;
-
-if (!class_exists('USI_Sort_Solutions_Settings')) {
-   final class USI_Sort_Solutions_Settings {
-      const VERSION = '1.0.0 (2017-10-29)';
-      function __construct() {
-         add_filter('custom_menu_order', function() { 
-            return(true); 
-         });
-         add_filter('menu_order', function($menu_order) {
-            global $submenu;
-            $keys = array();
-            $names = array();
-            $options = array();
-            if (!empty($submenu['options-general.php'])) {
-               foreach ($submenu['options-general.php'] as $key => $option) {
-                  if (!empty($option[2]) && preg_match('/^usi\-\w+-settings/', $option[2])) {
-                     $keys[] = $key;
-                     $names[] = $option[0];
-                     $options[] = $option;
-                     unset($submenu['options-general.php'][$key]);
-                  }
-               }
-            }
-            asort($names);
-            foreach ($names as $index => $value) {
-               $submenu['options-general.php'][$keys[$index]] = $options[$index];
-            }
-            return($menu_order);
-         });
-      } // __construct();
-   } // Class USI_Sort_Solutions_Settings;
-   new USI_Sort_Solutions_Settings();
-} // ENDIF USI_Sort_Solutions_Settings exists;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>
