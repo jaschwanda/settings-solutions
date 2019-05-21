@@ -244,7 +244,6 @@ class USI_Settings_Solutions_Settings {
    } // fields_sanitize();
 
    function filter_plugin_action_links($links, $file) {
-usi_log(__METHOD__.':file=' . $file . ' text=' . $this->text_domain);
       if (false !== strpos($file, $this->text_domain)) {
          $links[] = '<a href="' . get_bloginfo('wpurl') . '/wp-admin/options-general.php?page=' . 
             $this->page_slug . '">' . __('Settings', $this->text_domain) . '</a>';

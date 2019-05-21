@@ -9,56 +9,47 @@ class USI_Settings_Solutions_Settings_Settings extends USI_Settings_Solutions_Se
 
    const VERSION = '1.0.8 (2018-01-10)';
 
-   protected $is_tabbed = true;
-
    function __construct() {
 
       $this->sections = array(
 
          'preferences' => array(
-            'header_callback' => array($this, 'config_section_header_preferences'),
-            'label' => 'Preferences',
+            'header_callback' => array($this, 'config_section_header'),
+            'footer_callback' => array($this, 'config_section_footer'),
+            //'label' => 'Preferences',
             'settings' => array(
-               'variable-prefix' => array(
-                  'class' => 'regular-text', 
-                  'type' => 'text', 
-                  'label' => 'Variable prefix',
-                  'notes' => 'Enter lower case text.',
-               ),
-               'file-location' => array(
+               'menu-sort' => array(
                   'type' => 'radio', 
-                  'label' => 'Location of variables.php file',
+                  'label' => 'Settings menu sort option',
                   'choices' => array(
                      array(
-                        'value' => 'plugin', 
+                        'value' => 'none', 
                         'label' => true, 
-                        'notes' => __('Plugin folder', USI_Settings_Solutions::TEXTDOMAIN), 
+                        'notes' => __('No sorting', USI_Settings_Solutions::TEXTDOMAIN), 
                         'suffix' => ' &nbsp; &nbsp; &nbsp; ',
                      ),
                      array(
-                        'value' => 'root', 
+                        'value' => 'custom', 
                         'label' => true, 
-                        'notes' => __('WordPress wp-config.php folder', USI_Settings_Solutions::TEXTDOMAIN), 
+                        'notes' => __('Custom sorting selection', USI_Settings_Solutions::TEXTDOMAIN), 
+                        'suffix' => ' &nbsp; &nbsp; &nbsp; ',
+                     ),
+                     array(
+                        'value' => 'usi', 
+                        'label' => true, 
+                        'notes' => __('Sort Universal Solutions settings and move to end of menu', USI_Settings_Solutions::TEXTDOMAIN), 
                      ),
                   ),
-                  'notes' => 'Defaults to <b>Plugin folder</b>.',
-               ), // file-location;
-            ),
-         ), // preferences;
-
-         'publish' => array(
-         // 'footer_callback' => array($this, 'config_section_footer'), // Only to test no tabbing;
-            'label' => 'Publish',
-            'settings' => array(
-               'explaination' => array(
+                  'notes' => 'Defaults to <b>No sorting</b>.',
+               ), // menu-sort;
+               'regexp' => array(
                   'class' => 'regular-text', 
-                  'type' => 'textarea', 
-                  'label' => 'Explaination',
-                  'notes' => __('Enter up to 255 printable characters.', USI_Settings_Solutions::TEXTDOMAIN), 
+                  'type' => 'text', 
+                  'label' => 'Selection regular expression',
+                  'notes' => 'Enter regular expression to select and sort settings menu items.',
                ),
             ),
-            'submit' => __('Publish Variables', USI_Settings_Solutions::TEXTDOMAIN),
-         ), // publish;
+         ), // preferences;
 
       );
 
@@ -83,19 +74,25 @@ class USI_Settings_Solutions_Settings_Settings extends USI_Settings_Solutions_Se
 
    } // __construct();
 
-   /* This function is here only to test the no tabbing settings option;
    function config_section_footer() {
-      submit_button(__('Single Save', USI_Settings_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
+      submit_button(__('Save Changes', USI_Settings_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
       return(null);
    } // config_section_footer();
-   */
 
-   function config_section_header_preferences() {
-      echo '<p>' . __('Changing these settings after the system is in use may cause referencing errors. Make sure that you also change the <b>[ID attribute="value"]</b> shortcodes in your content and the <b>defined(variable, "value")</b> statments in your PHP files to match the settings you enter here.', USI_Settings_Solutions::TEXTDOMAIN) . '</p>' . PHP_EOL;
-   } // config_section_header_preferences();
+   function config_section_header() {
+      echo '<p>' . __('The Settings-Solutions plugin is used by many Universal Solutions plugins and themes to simplify the ' .
+         'implementation and use of WordPress settings. It can sort the settings pages of all Universal Solutions plugins ' .
+         'and place them at the end of the Settings menu, or you can create a custom subset of settings pages that are placed ' .
+         'at the end of the Settings menu or you can disable sorting completely.', USI_Settings_Solutions::TEXTDOMAIN) . '</p>' . PHP_EOL;
+   } // config_section_header();
 
    function fields_sanitize($input) {
       usi_log(__METHOD__.':input=' . print_r($input, true));
+      if ('usi' == $input['preferences']['menu-sort']) {
+         $input['preferences']['regexp'] = '/^usi\-\w+-settings/';
+      } else if ('none' == $input['preferences']['menu-sort']) {
+         $input['preferences']['regexp'] = '';
+      }
       return($input);
    } // fields_sanitize();
 

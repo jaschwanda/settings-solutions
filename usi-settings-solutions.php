@@ -23,6 +23,11 @@ final class USI_Settings_Solutions {
    public static $options = array();
 
    function __construct() {
+      if (empty(USI_Settings_Solutions::$options)) {
+         $defaults['preferences']['menu-sort'] = 'no';
+         $defaults['preferences']['regexp'] = 'prefix';
+         USI_Settings_Solutions::$options = get_option(self::PREFIX . '-options', $defaults);
+      }
    } // __construct();
 
 } // Class USI_Settings_Solutions;
