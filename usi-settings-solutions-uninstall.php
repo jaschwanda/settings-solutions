@@ -19,8 +19,8 @@ final class USI_Settings_Solutions_Uninstall {
    private function __construct() {
    } // __construct();
 
-   static function uninstall() {
-usi_log(__METHOD__.':'.__LINE__.':');
+   static function uninstall($prefix) {
+usi_log(__METHOD__.':'.__LINE__.':prefix=' . $prefix);
 
       if (!defined('WP_UNINSTALL_PLUGIN')) exit;
 
@@ -33,7 +33,5 @@ usi_log(__METHOD__.':'.__LINE__.':');
    } // uninstall();
 
 } // Class USI_Settings_Solutions_Uninstall;
-
-USI_Settings_Solutions_Uninstall::uninstall();
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>
