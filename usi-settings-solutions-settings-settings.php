@@ -87,7 +87,6 @@ class USI_Settings_Solutions_Settings_Settings extends USI_Settings_Solutions_Se
    } // config_section_header();
 
    function fields_sanitize($input) {
-      usi_log(__METHOD__.':input=' . print_r($input, true));
       if ('usi' == $input['preferences']['menu-sort']) {
          $input['preferences']['regexp'] = '/^usi\-\w+-settings/';
       } else if ('none' == $input['preferences']['menu-sort']) {

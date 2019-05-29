@@ -2,18 +2,6 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-if (!function_exists('usi_log')) {
-   function usi_log($action) {
-      global $wpdb;
-      $wpdb->insert($wpdb->prefix . 'USI_log', 
-         array(
-            'action' => $action,
-            'user_id' => get_current_user_id(), 
-         )
-      );
-   } // usi_log();
-} // ENDIF function_exists('usi_log');
-
 require_once('usi-settings-solutions-versions.php');
 
 class USI_Settings_Solutions_Settings {
