@@ -162,8 +162,11 @@ class USI_Settings_Solutions_Settings {
    } // debug();
 
    function fields_render($args) {
-
       if (self::DEBUG_INIT & $this->debug) call_user_func($this->logger, __METHOD__.':args=' . print_r($args, true));
+      self::fields_render_static($args);
+   }
+
+   static function fields_render_static($args) {
 
       $notes    = !empty($args['notes']) ? $args['notes'] : null;
       $type     = !empty($args['type'])  ? $args['type']  : 'text';
