@@ -26,36 +26,53 @@ class USI_Settings_Solutions_Settings {
    protected $sections = null;
    protected $text_domain = null;
 
-   function __construct($name, $prefix, $text_domain, $options, $add_settings_link = true) {
+   function __construct($name, $prefix, $text_domain, & $options, $add_settings_link = true) {
 
       $this->name        = $name;
       $this->option_name = $prefix . '-options';
-      $this->options     = $options;
+      $this->options     = & $options;
       $this->page_slug   = self::page_slug($prefix);
       $this->prefix      = $prefix;
       $this->text_domain = $text_domain;
 
-      if ($this->is_tabbed) {
-         $prefix_tab = $this->prefix . '-tab';
-         $active_tab = !empty($_POST[$prefix_tab]) ? $_POST[$prefix_tab] : (!empty($_GET['tab']) ? $_GET['tab'] : null);
-         $default_tab = null;
-         if ($this->sections) foreach ($this->sections as $section_id => $section) {
-            if (!$default_tab) $default_tab = $section_id;
-            if ($section_id == $active_tab) {
-               $this->active_tab = $active_tab;
-               break;
+      $script = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1);
+
+      if ('plugins.php' == $script) {
+
+         if ($add_settings_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
+
+         add_filter('plugin_row_meta', array($this, 'filter_plugin_row_meta'), 10, 2);
+
+      } else if (
+         (('options-general.php' == $script) && !empty($_GET['page']) && ($_GET['page'] == $this->page_slug)) ||
+         (('options.php' == $script) && !empty($_POST['option_page']) && ($_POST['option_page'] == $this->page_slug)) 
+         ) {
+
+         $this->sections = $this->sections();
+
+         if ($this->is_tabbed) {
+            $prefix_tab  = $this->prefix . '-tab';
+            $active_tab  = !empty($_POST[$prefix_tab]) ? $_POST[$prefix_tab] : (!empty($_GET['tab']) ? $_GET['tab'] : null);
+            $default_tab = null;
+            if ($this->sections) foreach ($this->sections as $section_id => $section) {
+               if (!$default_tab) $default_tab = $section_id;
+               if ($section_id == $active_tab) {
+                  $this->active_tab = $active_tab;
+                  break;
+               }
             }
+            if (!$this->active_tab) $this->active_tab = $default_tab;
          }
-         if (!$this->active_tab) $this->active_tab = $default_tab;
+
+         add_action('admin_head', array($this, 'action_admin_head'));
+
+         add_action('admin_init', array($this, 'action_admin_init'));
+
       }
 
-      add_action('admin_head', array($this, 'action_admin_head'));
-      add_action('admin_init', array($this, 'action_admin_init'));
       add_action('admin_menu', array($this, 'action_admin_menu'));
 
-      if ($add_settings_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
-
-      add_filter( 'custom_menu_order' , '__return_true');
+      add_filter('custom_menu_order' , '__return_true');
 
          add_filter('menu_order', function($menu_order) {
             global $submenu;
@@ -78,6 +95,7 @@ class USI_Settings_Solutions_Settings {
             }
             return($menu_order);
          });
+
    } // __construct();
 
    function action_admin_head() {
@@ -229,7 +247,7 @@ class USI_Settings_Solutions_Settings {
             if (method_exists($object, $method)) $input = $object->$method($input);
          }
       }
-
+usi_log(__METHOD__.':input=' . print_r($input, true));
       return($input);
 
    } // fields_sanitize();
@@ -345,6 +363,10 @@ class USI_Settings_Solutions_Settings {
       $this->section_callback_offset++;
 
    } // section_render();
+
+   function sections() {
+      return(null);
+   } // sections();
 
 } // Class USI_Settings_Solutions_Settings;
 

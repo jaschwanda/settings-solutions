@@ -19,13 +19,13 @@ class USI_Settings_Solutions_Capabilities {
 
    protected $options = null;
 
-   private function __construct($name, $prefix, $text_domain, $capabilities, $options = null) {
+   private function __construct($name, $prefix, $text_domain, $capabilities, & $options) {
       $this->capabilities = $capabilities;
-      $this->name = $name;
-      $this->prefix = $prefix;
-      $this->text_domain = $text_domain;
+      $this->name         = $name;
+      $this->options      = & $options;
+      $this->prefix       = $prefix;
       $this->prefix_select_user = $this->prefix . '-select-user';
-      $this->options = $options;
+      $this->text_domain  = $text_domain;
    } // __construct();
 
    function after_add_settings_section($settings) {
@@ -50,7 +50,6 @@ class USI_Settings_Solutions_Capabilities {
       if ($this->user_id != $option_user_id) update_user_option($current_user_id, $prefix . '-options-user-id', $this->user_id);
 
       if ($this->prefix_select_user == $this->role_id) {
-
          if ($this->user = new WP_User($this->user_id)) {
             $user = $this->user;
             if (!empty($user->roles) && is_array($user->roles)) {
@@ -177,9 +176,9 @@ class USI_Settings_Solutions_Capabilities {
       return(null);
    } // section_footer();
 
-   public static function section($name, $prefix, $text_domain, $capabilities) {
+   public static function section($name, $prefix, $text_domain, $capabilities, & $options) {
 
-      $that = new USI_Settings_Solutions_Capabilities($name, $prefix, $text_domain, $capabilities);
+      $that = new USI_Settings_Solutions_Capabilities($name, $prefix, $text_domain, $capabilities, $options);
 
       $section = array(
          'after_add_settings_section' => array($that, 'after_add_settings_section'),
