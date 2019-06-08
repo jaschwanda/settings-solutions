@@ -184,6 +184,7 @@ class USI_Settings_Solutions_Settings {
       self::fields_render_static($args);
    }
 
+   // Statis version so that other classes can use this rendering function;
    static function fields_render_static($args) {
 
       $notes    = !empty($args['notes']) ? $args['notes'] : null;
@@ -234,7 +235,7 @@ class USI_Settings_Solutions_Settings {
 
       }
 
-      echo $notes . PHP_EOL;
+      if ($notes) echo $notes . PHP_EOL;
 
    } // fields_render();
 
