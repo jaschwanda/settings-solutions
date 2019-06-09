@@ -1,8 +1,8 @@
 <?php // ------------------------------------------------------------------------------------------------------------------------ //
 
-final class USI_Settings_Solutions_Uninstall {
+final class USI_WordPress_Solutions_Uninstall {
 
-   const VERSION = '2.0.0 (2019-04-13)';
+   const VERSION = '2.1.0 (2019-06-08)';
 
    private function __construct() {
    } // __construct();
@@ -26,6 +26,6 @@ final class USI_Settings_Solutions_Uninstall {
 
    } // uninstall();
 
-} // Class USI_Settings_Solutions_Uninstall;
+} // Class USI_WordPress_Solutions_Uninstall;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

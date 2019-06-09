@@ -2,11 +2,11 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-require_once('usi-settings-solutions-versions.php');
+require_once('usi-wordpress-solutions-versions.php');
 
-class USI_Settings_Solutions_Settings {
+class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.0.0 (2019-04-13)';
+   const VERSION = '2.1.0 (2019-06-08)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -369,6 +369,6 @@ usi_log(__METHOD__.':input=' . print_r($input, true));
       return(null);
    } // sections();
 
-} // Class USI_Settings_Solutions_Settings;
+} // Class USI_WordPress_Solutions_Settings;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

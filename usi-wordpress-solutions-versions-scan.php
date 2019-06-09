@@ -1,8 +1,8 @@
 <?php // ------------------------------------------------------------------------------------------------------------------------ //
 
-final class USI_Settings_Solutions_Versions_Scan {
+final class USI_WordPress_Solutions_Versions_Scan {
 
-   const VERSION = '2.0.0 (2019-04-13)';
+   const VERSION = '2.1.0 (2019-06-08)';
 
    private function __construct() {
    } // __construct();
@@ -28,8 +28,8 @@ final class USI_Settings_Solutions_Versions_Scan {
       die('<table>' . self::scan(urldecode($_SERVER['QUERY_STRING'])) . '</table>');
    } // versions();
 
-} // Class USI_Settings_Solutions_Versions_Scan;
+} // Class USI_WordPress_Solutions_Versions_Scan;
 
-USI_Settings_Solutions_Versions_Scan::versions();
+USI_WordPress_Solutions_Versions_Scan::versions();
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

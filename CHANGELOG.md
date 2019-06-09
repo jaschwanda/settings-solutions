@@ -1,9 +1,12 @@
 # Change Log #
 
-usi-settings-solutions helper class changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
+usi-wordpress-solutions helper class changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
+
+## 2.1.0 (2019-06-08) ##
+* Changed the name to 'WordPress-Solutions', updated all versions to same versions.
 
 ## 2.0.0 (2019-04-13) ##
-* Removed classes from sub-folder under parent plugin and made a stand alone class, changed the name to 'Settinds-Solutions'.
+* Removed classes from sub-folder under parent plugin and made a stand alone class, changed the name to 'Settings-Solutions'.
 
 ## 1.2.0 (2018-01-13) ##
 * Added debugging options to class USI_Settings_Admin and updated all versions to same version.

@@ -2,9 +2,9 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-class USI_Settings_Solutions_Versions {
+class USI_WordPress_Solutions_Versions {
 
-   const VERSION = '2.0.0 (2019-04-13)';
+   const VERSION = '2.1.0 (2019-06-08)';
 
    private function __construct() {
       // Enqueues the default ThickBox js and css;
@@ -13,9 +13,9 @@ class USI_Settings_Solutions_Versions {
 
    public static function link($link_text, $title, $version, $text_domain, $file) {
 
-      $id = 'usi-settings-versions-' . $title;
+      $id = 'usi-wordpress-versions-' . $title;
 
-      $ajax = plugins_url(null, __FILE__) . '/usi-settings-solutions-versions-scan.php';
+      $ajax = plugins_url(null, __FILE__) . '/usi-wordpress-solutions-versions-scan.php';
 
       return(
          '<a id="' . $id . '-link" class="thickbox" href="">' . $link_text . '</a>' . 
@@ -49,6 +49,6 @@ class USI_Settings_Solutions_Versions {
          '</script>');
    } //link();
 
-} // Class USI_Settings_Solutions_Versions;
+} // Class USI_WordPress_Solutions_Versions;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

@@ -2,9 +2,9 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-final class USI_Settings_Solutions_Install {
+final class USI_WordPress_Solutions_Install {
 
-   const VERSION = '2.0.0 (2019-04-13)';
+   const VERSION = '2.1.0 (2019-06-08)';
    const VERSION_DATA = '1.0';
 
    private function __construct() {
@@ -50,8 +50,8 @@ final class USI_Settings_Solutions_Install {
 
    } // hook_deactivation();
 
-} // Class USI_Settings_Solutions_Install;
+} // Class USI_WordPress_Solutions_Install;
 
-USI_Settings_Solutions_Install::init();
+USI_WordPress_Solutions_Install::init();
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

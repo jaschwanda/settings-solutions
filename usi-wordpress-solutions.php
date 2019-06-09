@@ -3,40 +3,40 @@
 defined('ABSPATH') or die('Accesss not allowed.');
 
 /*
-Plugin Name: Settings-Solutions
-Plugin URI: https://github.com/jaschwanda/settings-solutions
-Description: The Settings-Solutions plugin provides WordPress settings functionality for themes and plugins. The Settings-Solutions plugin is developed and maintained by Universal Solutions.
+Plugin Name: WordPress-Solutions
+Plugin URI: https://github.com/jaschwanda/wordpress-solutions
+Description: The WordPress-Solutions plugin provides WordPress settings functionality for themes and plugins. The WordPress-Solutions plugin is developed and maintained by Universal Solutions.
 Version: 2.0.0 (2019-04-13)
 Author: Jim Schwanda
 Author URI: http://www.usi2solve.com/leader
-Text Domain: usi-settings-solutions
+Text Domain: usi-wordpress-solutions
 */
 
-final class USI_Settings_Solutions {
+final class USI_WordPress_Solutions {
 
-   const VERSION = '2.0.0 (2019-04-13)';
+   const VERSION = '2.1.0 (2019-06-08)';
 
-   const NAME       = 'Settings-Solutions';
-   const PREFIX     = 'usi-settings';
-   const TEXTDOMAIN = 'usi-settings-solutions';
+   const NAME       = 'WordPress-Solutions';
+   const PREFIX     = 'usi-wordpress';
+   const TEXTDOMAIN = 'usi-wordpress-solutions';
 
    public static $options = array();
 
    function __construct() {
-      if (empty(USI_Settings_Solutions::$options)) {
+      if (empty(USI_WordPress_Solutions::$options)) {
          $defaults['preferences']['menu-sort'] = 'no';
          $defaults['preferences']['regexp'] = 'prefix';
-         USI_Settings_Solutions::$options = get_option(self::PREFIX . '-options', $defaults);
+         USI_WordPress_Solutions::$options = get_option(self::PREFIX . '-options', $defaults);
       }
    } // __construct();
 
-} // Class USI_Settings_Solutions;
+} // Class USI_WordPress_Solutions;
 
-new USI_Settings_Solutions();
+new USI_WordPress_Solutions();
 
 if (is_admin() && !defined('WP_UNINSTALL_PLUGIN')) {
-   require_once('usi-settings-solutions-install.php');
-   require_once('usi-settings-solutions-settings-settings.php');
+   require_once('usi-wordpress-solutions-install.php');
+   require_once('usi-wordpress-solutions-settings-settings.php');
 }
 
 if (!function_exists('usi_log')) {

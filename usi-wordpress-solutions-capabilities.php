@@ -2,9 +2,9 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
-class USI_Settings_Solutions_Capabilities {
+class USI_WordPress_Solutions_Capabilities {
 
-   const VERSION = '2.0.0 (2019-04-13)';
+   const VERSION = '2.1.0 (2019-06-08)';
 
    private $capabilities = null;
    private $disable_save = true;
@@ -78,7 +78,7 @@ class USI_Settings_Solutions_Capabilities {
          foreach ($settings as $field_id => & $attributes) {
             $this->options['capabilities'][$field_id] = true;
             $attributes['readonly'] = true;
-            $attributes['notes'] = ' <i>(Default setting for Administrator)</i>';
+            $attributes['notes'] = ' <i>(' . __('Default setting for Administrator', $this->text_domain) . ')</i>';
          }
          unset($attributes);
 
@@ -114,7 +114,11 @@ class USI_Settings_Solutions_Capabilities {
             } else {
                foreach ($this->capabilities as $name => $capability) {
                   $capability_name = $this->name . '-' . $name;
-                  !empty($input['capabilities'][$name]) ? $role->add_cap($capability_name) : $role->remove_cap($capability_name);
+                  if (!empty($input['capabilities'][$name])) { 
+                     $role->add_cap($capability_name);
+                  } else { 
+                     $role->remove_cap($capability_name); 
+                  }
                }
             }
 
@@ -123,7 +127,11 @@ class USI_Settings_Solutions_Capabilities {
             $user = $this->user;
             foreach ($this->capabilities as $name => $capability) {
                $capability_name = $this->name . '-' . $name;
-               !empty($input['capabilities'][$name]) ? $user->add_cap($capability_name) : $user->remove_cap($capability_name);
+               if (!empty($input['capabilities'][$name])) { 
+                  $role->add_cap($capability_name);
+               } else { 
+                  $role->remove_cap($capability_name); 
+               }
             }
 
          }
@@ -131,6 +139,7 @@ class USI_Settings_Solutions_Capabilities {
       }
 
       return($input);
+
    } // fields_sanitize();
 
    function render_section() {
@@ -158,7 +167,7 @@ class USI_Settings_Solutions_Capabilities {
       echo PHP_EOL . 
          '<script>' . PHP_EOL .
          'jQuery(document).ready(function($) {' . PHP_EOL .
-         "   var url = 'options-general.php?page=" . USI_Settings_Solutions_Settings::page_slug($this->prefix) . "&tab=capabilities&role_id='" . PHP_EOL .
+         "   var url = 'options-general.php?page=" . USI_WordPress_Solutions_Settings::page_slug($this->prefix) . "&tab=capabilities&role_id='" . PHP_EOL .
          "   $('#{$this->prefix}-role-select').change(function(){window.location.href = url + $(this).val() + '&user_id={$this->user_id}';});" . PHP_EOL .
          "   $('#{$this->prefix}-user-select').change(function(){window.location.href = url + '{$this->role_id}' + '&user_id=' + $(this).val();});" . PHP_EOL .
          '});' . PHP_EOL .
@@ -178,7 +187,7 @@ class USI_Settings_Solutions_Capabilities {
 
    public static function section($name, $prefix, $text_domain, $capabilities, & $options) {
 
-      $that = new USI_Settings_Solutions_Capabilities($name, $prefix, $text_domain, $capabilities, $options);
+      $that = new USI_WordPress_Solutions_Capabilities($name, $prefix, $text_domain, $capabilities, $options);
 
       $section = array(
          'after_add_settings_section' => array($that, 'after_add_settings_section'),
@@ -202,6 +211,6 @@ class USI_Settings_Solutions_Capabilities {
 
    } // section();
 
-} // Class USI_Settings_Solutions_Capabilities;
+} // Class USI_WordPress_Solutions_Capabilities;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>
