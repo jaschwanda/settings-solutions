@@ -6,7 +6,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 Plugin Name: WordPress-Solutions
 Plugin URI: https://github.com/jaschwanda/wordpress-solutions
 Description: The WordPress-Solutions plugin provides WordPress settings functionality for themes and plugins. The WordPress-Solutions plugin is developed and maintained by Universal Solutions.
-Version: 2.0.0 (2019-04-13)
+Version: 2.1.0 (2019-06-08)
 Author: Jim Schwanda
 Author URI: http://www.usi2solve.com/leader
 Text Domain: usi-wordpress-solutions
@@ -25,7 +25,6 @@ final class USI_WordPress_Solutions {
    function __construct() {
       if (empty(USI_WordPress_Solutions::$options)) {
          $defaults['preferences']['menu-sort'] = 'no';
-         $defaults['preferences']['regexp'] = 'prefix';
          USI_WordPress_Solutions::$options = get_option(self::PREFIX . '-options', $defaults);
       }
    } // __construct();

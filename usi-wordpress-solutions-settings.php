@@ -2,6 +2,7 @@
 
 defined('ABSPATH') or die('Accesss not allowed.');
 
+require_once('usi-wordpress-solutions.php');
 require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
@@ -72,31 +73,41 @@ class USI_WordPress_Solutions_Settings {
 
       add_action('admin_menu', array($this, 'action_admin_menu'));
 
-      add_filter('custom_menu_order' , '__return_true');
-
-         add_filter('menu_order', function($menu_order) {
-            global $submenu;
-            $keys = array();
-            $names = array();
-            $options = array();
-            if (!empty($submenu['options-general.php'])) {
-               foreach ($submenu['options-general.php'] as $key => $option) {
-                  if (!empty($option[2]) && preg_match('/^usi\-\w+-settings/', $option[2])) {
-                     $keys[] = $key;
-                     $names[] = $option[0];
-                     $options[] = $option;
-                     unset($submenu['options-general.php'][$key]);
-                  }
-               }
-            }
-            asort($names);
-            foreach ($names as $index => $value) {
-               $submenu['options-general.php'][$keys[$index]] = $options[$index];
-            }
-            return($menu_order);
-         });
+      switch (USI_WordPress_Solutions::$options['preferences']['menu-sort']) {
+      case 'alpha':
+      case 'usi':
+         add_filter('custom_menu_order' , '__return_true');
+         add_filter('menu_order' , array($this, 'filter_menu_order'));
+         break;
+      }
 
    } // __construct();
+
+   function filter_menu_order($menu_order) {
+      global $submenu;
+      $keys = array();
+      $names = array();
+      $options = array();
+      if (!empty($submenu['options-general.php'])) {
+         switch (USI_WordPress_Solutions::$options['preferences']['menu-sort']) {
+         case 'alpha': $match = '/./'; break;
+         case 'usi':   $match = '/^usi\-\w+-settings/'; break;
+         }
+         foreach ($submenu['options-general.php'] as $key => $option) {
+            if (!empty($option[2]) && preg_match($match, $option[2])) {
+               $keys[] = $key;
+               $names[] = $option[0];
+               $options[] = $option;
+               unset($submenu['options-general.php'][$key]);
+            }
+         }
+      }
+      asort($names);
+      foreach ($names as $index => $value) {
+         $submenu['options-general.php'][$keys[$index]] = $options[$index];
+      }
+      return($menu_order);
+   } // filter_menu_order();
 
    function action_admin_head() {
       if ($this->page_slug != ((!empty($_GET['page'])) ? esc_attr($_GET['page']) : '')) return;
@@ -248,7 +259,6 @@ class USI_WordPress_Solutions_Settings {
             if (method_exists($object, $method)) $input = $object->$method($input);
          }
       }
-usi_log(__METHOD__.':input=' . print_r($input, true));
       return($input);
 
    } // fields_sanitize();

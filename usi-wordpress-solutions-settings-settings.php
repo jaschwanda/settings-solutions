@@ -29,19 +29,10 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
    function config_section_header() {
       echo '<p>' . __('The WordPress-Solutions plugin is used by many Universal Solutions plugins and themes to simplify the ' .
-         'implementation and use of WordPress settings. It can sort the settings pages of all Universal Solutions plugins ' .
-         'and place them at the end of the Settings menu, or you can create a custom subset of settings pages that are placed ' .
-         'at the end of the Settings menu or you can disable sorting completely.', USI_WordPress_Solutions::TEXTDOMAIN) . '</p>' . PHP_EOL;
+         'implementation of WordPress functionality. Additionally, you can place all of the Universal Solutions settings pages ' .
+         'at the end of the Settings sub-menu, or you can sort the Settings sub-menu alphabetically or not at all.', 
+          USI_WordPress_Solutions::TEXTDOMAIN) . '</p>' . PHP_EOL;
    } // config_section_header();
-
-   function fields_sanitize($input) {
-      if ('usi' == $input['preferences']['menu-sort']) {
-         $input['preferences']['regexp'] = '/^usi\-\w+-settings/';
-      } else if ('none' == $input['preferences']['menu-sort']) {
-         $input['preferences']['regexp'] = '';
-      }
-      return($input);
-   } // fields_sanitize();
 
    function filter_plugin_row_meta($links, $file) {
       if (false !== strpos($file, USI_WordPress_Solutions::TEXTDOMAIN)) {
@@ -75,13 +66,13 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                         'value' => 'none', 
                         'label' => true, 
                         'notes' => __('No sorting', USI_WordPress_Solutions::TEXTDOMAIN), 
-                        'suffix' => ' &nbsp; &nbsp; &nbsp; ',
+                        'suffix' => '<br/>',
                      ),
                      array(
-                        'value' => 'custom', 
+                        'value' => 'alpha', 
                         'label' => true, 
-                        'notes' => __('Custom sorting selection', USI_WordPress_Solutions::TEXTDOMAIN), 
-                        'suffix' => ' &nbsp; &nbsp; &nbsp; ',
+                        'notes' => __('Alphabetical sorting selection', USI_WordPress_Solutions::TEXTDOMAIN), 
+                        'suffix' => '<br/>',
                      ),
                      array(
                         'value' => 'usi', 
@@ -91,12 +82,6 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                   ),
                   'notes' => 'Defaults to <b>No sorting</b>.',
                ), // menu-sort;
-               'regexp' => array(
-                  'class' => 'regular-text', 
-                  'type' => 'text', 
-                  'label' => 'Selection regular expression',
-                  'notes' => 'Enter regular expression to select and sort settings menu items.',
-               ),
             ),
          ), // preferences;
 
@@ -104,8 +89,9 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
       foreach ($sections as $name => & $section) {
          foreach ($section['settings'] as $name => & $setting) {
-            if (!empty($setting['notes']))
-               $setting['notes'] = '<p class="description">' . __($setting['notes'], USI_WordPress_Solutions::TEXTDOMAIN) . '</p>';
+            if (!empty($setting['label'])) $setting['label'] = __($setting['label'], USI_WordPress_Solutions::TEXTDOMAIN);
+            if (!empty($setting['notes'])) $setting['notes'] = '<p class="description">' . 
+               __($setting['notes'], USI_WordPress_Solutions::TEXTDOMAIN) . '</p>';
          }
       }
       unset($setting);
