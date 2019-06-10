@@ -83,32 +83,6 @@ class USI_WordPress_Solutions_Settings {
 
    } // __construct();
 
-   function filter_menu_order($menu_order) {
-      global $submenu;
-      $keys = array();
-      $names = array();
-      $options = array();
-      if (!empty($submenu['options-general.php'])) {
-         switch (USI_WordPress_Solutions::$options['preferences']['menu-sort']) {
-         case 'alpha': $match = '/./'; break;
-         case 'usi':   $match = '/^usi\-\w+-settings/'; break;
-         }
-         foreach ($submenu['options-general.php'] as $key => $option) {
-            if (!empty($option[2]) && preg_match($match, $option[2])) {
-               $keys[] = $key;
-               $names[] = $option[0];
-               $options[] = $option;
-               unset($submenu['options-general.php'][$key]);
-            }
-         }
-      }
-      asort($names);
-      foreach ($names as $index => $value) {
-         $submenu['options-general.php'][$keys[$index]] = $options[$index];
-      }
-      return($menu_order);
-   } // filter_menu_order();
-
    function action_admin_head() {
       if ($this->page_slug != ((!empty($_GET['page'])) ? esc_attr($_GET['page']) : '')) return;
       echo '<style>' . PHP_EOL .
@@ -263,6 +237,32 @@ class USI_WordPress_Solutions_Settings {
 
    } // fields_sanitize();
 
+   function filter_menu_order($menu_order) {
+      global $submenu;
+      $keys = array();
+      $names = array();
+      $options = array();
+      if (!empty($submenu['options-general.php'])) {
+         switch (USI_WordPress_Solutions::$options['preferences']['menu-sort']) {
+         case 'alpha': $match = '/./'; break;
+         case 'usi':   $match = '/^usi\-\w+-settings/'; break;
+         }
+         foreach ($submenu['options-general.php'] as $key => $option) {
+            if (!empty($option[2]) && preg_match($match, $option[2])) {
+               $keys[] = $key;
+               $names[] = $option[0];
+               $options[] = $option;
+               unset($submenu['options-general.php'][$key]);
+            }
+         }
+      }
+      asort($names);
+      foreach ($names as $index => $value) {
+         $submenu['options-general.php'][$keys[$index]] = $options[$index];
+      }
+      return($menu_order);
+   } // filter_menu_order();
+
    function filter_plugin_action_links($links, $file) {
       if (false !== strpos($file, $this->text_domain)) {
          $links[] = '<a href="' . get_bloginfo('wpurl') . '/wp-admin/options-general.php?page=' . 
@@ -375,7 +375,7 @@ class USI_WordPress_Solutions_Settings {
 
    } // section_render();
 
-   function sections() {
+   function sections() { // Should be over ridden by extending class;
       return(null);
    } // sections();
 

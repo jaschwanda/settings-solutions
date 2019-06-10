@@ -56,7 +56,6 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
          'preferences' => array(
             'header_callback' => array($this, 'config_section_header'),
             'footer_callback' => array($this, 'config_section_footer'),
-            //'label' => 'Preferences',
             'settings' => array(
                'menu-sort' => array(
                   'type' => 'radio', 
