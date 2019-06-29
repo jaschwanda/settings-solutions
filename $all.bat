@@ -1,1 +1,0 @@
-call $ka-lehigh.bat
