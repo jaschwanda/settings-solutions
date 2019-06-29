@@ -7,7 +7,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.1.0 (2019-06-08)';
+   const VERSION = '2.1.1 (2019-06-29)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -27,10 +27,10 @@ class USI_WordPress_Solutions_Settings {
    protected $sections = null;
    protected $text_domain = null;
 
-   function __construct($name, $prefix, $text_domain, & $options, $add_settings_link = true) {
+   function __construct($name, $prefix, $text_domain, & $options, $add_settings_link = true, $add_row_meta = true, $suffix = null) {
 
       $this->name        = $name;
-      $this->option_name = $prefix . '-options';
+      $this->option_name = $prefix . '-options' . $suffix;
       $this->options     = & $options;
       $this->page_slug   = self::page_slug($prefix);
       $this->prefix      = $prefix;
@@ -42,7 +42,7 @@ class USI_WordPress_Solutions_Settings {
 
          if ($add_settings_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
 
-         add_filter('plugin_row_meta', array($this, 'filter_plugin_row_meta'), 10, 2);
+         if ($add_row_meta) add_filter('plugin_row_meta', array($this, 'filter_plugin_row_meta'), 10, 2);
 
       } else if (
          (('options-general.php' == $script) && !empty($_GET['page']) && ($_GET['page'] == $this->page_slug)) ||
@@ -86,8 +86,11 @@ class USI_WordPress_Solutions_Settings {
    function action_admin_head() {
       if ($this->page_slug != ((!empty($_GET['page'])) ? esc_attr($_GET['page']) : '')) return;
       echo '<style>' . PHP_EOL .
-          '.form-table td{padding-bottom:12px; padding-top:2px;} /* 25px; */' . PHP_EOL .
+          // '.form-table td{padding-bottom:12px; padding-top:2px;} /* 25px; */' . PHP_EOL .
+          // '.form-table th{padding-bottom:7px; padding-top:7px;} /* 20px; */' . PHP_EOL .
+          '.form-table td{padding-bottom:2px; padding-top:2px;} /* 15px; */' . PHP_EOL .
           '.form-table th{padding-bottom:7px; padding-top:7px;} /* 20px; */' . PHP_EOL .
+          'h2{margin-bottom:0.1em; margin-top:2em;} /* 1em; */' . PHP_EOL .
           '</style>' . PHP_EOL;
    } // action_admin_head();
 
@@ -120,20 +123,21 @@ class USI_WordPress_Solutions_Settings {
                   $this->options[$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null));
 
                if (self::DEBUG_INIT & $this->debug) call_user_func($this->logger, __METHOD__.':$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
-
-               add_settings_field(
-                  $option_id, // Option name;
-                  !empty($attributes['label']) ? $attributes['label'] : null, // Field title; 
-                  array($this, 'fields_render'), // Render field callback;
-                  $this->page_slug, // Settings page menu slug;
-                  $section_id, // Section id;
-                  array_merge($attributes, 
-                    array(
-                        'name'  => $option_name,
-                        'value' => $option_value
+               if (empty($attributes['skip'])) {
+                  add_settings_field(
+                     $option_id, // Option name;
+                     !empty($attributes['label']) ? $attributes['label'] : null, // Field title; 
+                     array($this, 'fields_render'), // Render field callback;
+                     $this->page_slug, // Settings page menu slug;
+                     $section_id, // Section id;
+                     array_merge($attributes, 
+                        array(
+                           'name'  => $option_name,
+                           'value' => $option_value
+                        )
                      )
-                  )
-               );
+                  );
+               }
             }
          }
 
