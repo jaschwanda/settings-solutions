@@ -2,6 +2,9 @@
 
 usi-wordpress-solutions helper class changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.1.1 (2019-06-29) ##
+* Added a 'skip' option for a field to exclue it from rendering based on latter logic condition.
+
 ## 2.1.0 (2019-06-08) ##
 * Changed the name to 'WordPress-Solutions', updated all versions to same versions.
 
