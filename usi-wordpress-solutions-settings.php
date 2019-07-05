@@ -7,7 +7,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.1.1 (2019-06-29)';
+   const VERSION = '2.1.2 (2019-07-05)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -152,13 +152,19 @@ class USI_WordPress_Solutions_Settings {
    } // action_admin_init();
 
    function action_admin_menu() { 
-      add_options_page(
+
+      $slug = add_options_page(
          __($this->name . ' Settings', $this->text_domain), // Page <title/> text;
          __($this->name, $this->text_domain), // Sidebar menu text; 
          'manage_options', // Capability required to enable page;
          $this->page_slug, // Menu page slug name;
          array($this, 'page_render') // Render page callback;
       );
+
+      $action_load_help_tab = array($this, 'action_load_help_tab');
+
+      if (is_callable($action_load_help_tab)) add_action('load-'. $slug, $action_load_help_tab);
+
    } // action_admin_menu();
 
    function debug($logger, $debug = 0xFF) {
@@ -186,6 +192,8 @@ class USI_WordPress_Solutions_Settings {
       $min      = isset($args['min'])    ? ' min="'   . $args['min']   . '"' : null;
       $max      = isset($args['max'])    ? ' max="'   . $args['max']   . '"' : null;
 
+      $prefix   = isset($args['prefix']) ? $args['prefix'] : '';
+
       $rows     = isset($args['rows'])   ? ' rows="'  . $args['rows']  . '"' : null;
 
       $readonly = !empty($args['readonly']) ? ('checkbox' == $type ? ' disabled' : ' readonly') : null;
@@ -200,7 +208,7 @@ class USI_WordPress_Solutions_Settings {
       case 'radio':
          foreach ($args['choices'] as $choice) {
             $label = !empty($choice['label']);
-            echo (!empty($choice['prefix']) ? $choice['prefix'] : '') .
+            echo $prefix . (!empty($choice['prefix']) ? $choice['prefix'] : '') .
                ($label ? '<label>' : '') . '<input type="radio"' . $attributes . ' value="' . esc_attr($choice['value']) . '"' . 
                checked($choice['value'], $value, false) . ' />' . $choice['notes'] . ($label ? '</label>' : '') .
                (!empty($choice['suffix']) ? $choice['suffix'] : '');
@@ -209,17 +217,17 @@ class USI_WordPress_Solutions_Settings {
 
       case 'checkbox':
          // Not sure why we have to convert 'true' to true, but checked() sometimes wouldn't check otherwise;
-         echo '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />';
+         echo $prefix . '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />';
          break;
 
       case 'hidden':
       case 'number':
       case 'text':
-         echo '<input type="' . $type . '"' . $attributes . ' value="' . $value . '" />';
+         echo $prefix . '<input type="' . $type . '"' . $attributes . ' value="' . $value . '" />';
          break;
 
       case 'textarea':
-         echo '<textarea' . $attributes . '>' . $value . '</textarea>';
+         echo $prefix . '<textarea' . $attributes . '>' . $value . '</textarea>';
          break;
 
       }
@@ -234,7 +242,7 @@ class USI_WordPress_Solutions_Settings {
          if (!empty($section['fields_sanitize'])) {
             $object = $section['fields_sanitize'][0];
             $method = $section['fields_sanitize'][1];
-            if (method_exists($object, $method)) $input = $object->$method($input);
+            if (method_exists($object, $method)) $input = $object->$method($input, $section_id);
          }
       }
       return($input);
