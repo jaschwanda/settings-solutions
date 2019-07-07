@@ -2,7 +2,7 @@
 
 final class USI_WordPress_Solutions_Versions_Scan {
 
-   const VERSION = '2.1.0 (2019-06-08)';
+   const VERSION = '2.1.1 (2019-07-06)';
 
    private function __construct() {
    } // __construct();
@@ -17,8 +17,8 @@ final class USI_WordPress_Solutions_Versions_Scan {
             $html .= self::scan($full_path);
          } else {
             $contents = file_get_contents($full_path);
-            $status   = preg_match('/VERSION\s*=\s*\'([(0-9\.\s\-\)]*)/', $contents, $matches);
-            if (!empty($matches[1])) $html .= '<tr><td>' . $file . ' &nbsp; &nbsp; </td><td>' . $matches[1] . '</td></tr>';
+            $status   = preg_match('/(V|v)(E|e)(R|r)(S|s)(I|i)(O|o)(N|n)\s*(=|:)\s*(\')?([(0-9\.\s\-\)]*)/', $contents, $matches);
+            if (!empty($matches[10])) $html .= '<tr><td>' . $file . ' &nbsp; &nbsp; </td><td>' . $matches[10] . '</td></tr>';
          }
       }
       return($html);

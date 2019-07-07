@@ -4,11 +4,9 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 class USI_WordPress_Solutions_Versions {
 
-   const VERSION = '2.1.0 (2019-06-08)';
+   const VERSION = '2.1.1 (2019-07-06)';
 
    private function __construct() {
-      // Enqueues the default ThickBox js and css;
-      add_action('init', 'add_thickbox');
    } // __construct();
 
    public static function link($link_text, $title, $version, $text_domain, $file) {
