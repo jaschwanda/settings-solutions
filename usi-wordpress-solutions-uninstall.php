@@ -2,7 +2,7 @@
 
 final class USI_WordPress_Solutions_Uninstall {
 
-   const VERSION = '2.1.0 (2019-06-08)';
+   const VERSION = '2.1.3 (2019-07-07)';
 
    private function __construct() {
    } // __construct();

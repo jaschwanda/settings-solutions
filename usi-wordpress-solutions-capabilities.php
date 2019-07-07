@@ -4,7 +4,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 class USI_WordPress_Solutions_Capabilities {
 
-   const VERSION = '2.1.0 (2019-06-08)';
+   const VERSION = '2.1.3 (2019-07-07)';
 
    private $capabilities = null;
    private $disable_save = true;

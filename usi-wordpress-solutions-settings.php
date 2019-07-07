@@ -7,7 +7,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.1.2 (2019-07-05)';
+   const VERSION = '2.1.3 (2019-07-07)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -224,6 +224,10 @@ class USI_WordPress_Solutions_Settings {
       case 'number':
       case 'text':
          echo $prefix . '<input type="' . $type . '"' . $attributes . ' value="' . $value . '" />';
+         break;
+
+      case 'html':
+         echo $args['html'];
          break;
 
       case 'textarea':

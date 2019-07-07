@@ -7,7 +7,7 @@ require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-s
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.1.0 (2019-06-08)';
+   const VERSION = '2.1.3 (2019-07-07)';
 
    function __construct() {
 
