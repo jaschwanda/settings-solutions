@@ -11,7 +11,7 @@ class USI_WordPress_Solutions_Versions {
 
    public static function link($link_text, $title, $version, $text_domain, $file) {
 
-      $id = 'usi-wordpress-versions-' . $title;
+      $id = 'usi-wordpress-versions-' . sanitize_title($title);
 
       $ajax = plugins_url(null, __FILE__) . '/usi-wordpress-solutions-versions-scan.php';
 
