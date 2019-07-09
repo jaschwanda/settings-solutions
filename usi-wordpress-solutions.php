@@ -34,6 +34,7 @@ final class USI_WordPress_Solutions {
 new USI_WordPress_Solutions();
 
 if (is_admin() && !defined('WP_UNINSTALL_PLUGIN')) {
+   add_action('init', 'add_thickbox');
    require_once('usi-wordpress-solutions-install.php');
    require_once('usi-wordpress-solutions-settings-settings.php');
 }
