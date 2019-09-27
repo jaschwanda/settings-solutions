@@ -7,7 +7,7 @@ require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-s
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.1.3 (2019-07-07)';
+   const VERSION = '2.1.4 (2019-09-26)';
 
    function __construct() {
 
@@ -56,6 +56,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
          'preferences' => array(
             'header_callback' => array($this, 'config_section_header'),
             'footer_callback' => array($this, 'config_section_footer'),
+            'label' => __('Sidebar Menu Sorting', USI_WordPress_Solutions::TEXTDOMAIN), 
             'settings' => array(
                'menu-sort' => array(
                   'type' => 'radio', 
@@ -83,6 +84,17 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                ), // menu-sort;
             ),
          ), // preferences;
+
+         'admin-options' => array(
+            'label' => __('Administrator Options', USI_WordPress_Solutions::TEXTDOMAIN),
+            'settings' => array(
+               'impersonate' => array(
+                  'type' => 'checkbox', 
+                  'label' => 'Enable user switching',
+                  'notes' => 'Enables administrators to impersonate another WordPress user.',
+               ),
+            ),
+         ), // admin-options;
 
       );
 

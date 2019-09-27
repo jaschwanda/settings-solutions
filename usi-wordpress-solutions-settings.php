@@ -7,7 +7,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.1.3 (2019-07-07)';
+   const VERSION = '2.1.4 (2019-09-26)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -29,6 +29,7 @@ class USI_WordPress_Solutions_Settings {
 
    function __construct($name, $prefix, $text_domain, & $options, $add_settings_link = true, $add_row_meta = true, $suffix = null) {
 
+      $this->impersonate = !empty(USI_WordPress_Solutions::$options['admin-options']['impersonate']);
       $this->name        = $name;
       $this->option_name = $prefix . '-options' . $suffix;
       $this->options     = & $options;
@@ -72,6 +73,11 @@ class USI_WordPress_Solutions_Settings {
       }
 
       add_action('admin_menu', array($this, 'action_admin_menu'));
+
+      if ($this->impersonate) {
+         add_action('init', array( $this, 'action_init'));
+         add_filter('user_row_actions', array($this, 'filter_user_row_actions'), 10, 2);
+      }
 
       switch (USI_WordPress_Solutions::$options['preferences']['menu-sort']) {
       case 'alpha':
@@ -166,6 +172,19 @@ class USI_WordPress_Solutions_Settings {
       if (is_callable($action_load_help_tab)) add_action('load-'. $slug, $action_load_help_tab);
 
    } // action_admin_menu();
+
+   function action_init() { 
+      if ($this->impersonate && !empty($_REQUEST['action']) && !empty( $_REQUEST['user_id']) && ('impersonate' == $_REQUEST['action'])) {
+         if ($user = get_userdata($user_id = $_REQUEST['user_id'])) {
+            if (wp_verify_nonce($_REQUEST['_wpnonce'], "impersonate_$user_id")) {
+               wp_clear_auth_cookie();
+               wp_set_current_user($user_id, $user->user_login);
+               wp_set_auth_cookie($user_id);
+               do_action('wp_login', $user->user_login, $user);
+            }
+         }
+      }
+   } // action_init();
 
    function debug($logger, $debug = 0xFF) {
       if (is_callable($logger)) {
@@ -286,6 +305,35 @@ class USI_WordPress_Solutions_Settings {
       }
       return($links);
    } // filter_plugin_action_links();
+
+   function filter_user_row_actions(array $actions, WP_User $user) {
+      $current_user = wp_get_current_user();
+      if ($current_user && $current_user->roles) {
+         for ($ith = 0; $ith < count($current_user->roles); $ith++) {
+            if ('administrator' == $current_user->roles[$ith]) {
+               if ($user->ID == $current_user->ID) return($actions);
+               $actions['impersonate'] = sprintf(
+                  '<a href="%s">%s</a>',
+                  esc_url(
+                     wp_nonce_url( 
+                        add_query_arg( 
+                           array(
+                              'action'  => 'impersonate',
+                              'user_id' => $user->ID,
+                           ), 
+                           get_admin_url() . 'user-edit.php?user_id=' . $user->ID
+                        ), 
+                        'impersonate_' . $user->ID
+                     )
+                  ),
+                  esc_html__('Impersonate', 'user-switching')
+               );
+               return($actions); 
+            }
+         }
+      }
+      return($actions);
+   } // filter_user_row_actions();
 
    // To include more options on this page, override this function and call parent::page_render($options);
    function page_render($options = null) {
