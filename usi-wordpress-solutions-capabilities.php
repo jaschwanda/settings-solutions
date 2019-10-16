@@ -37,7 +37,6 @@ class USI_WordPress_Solutions_Capabilities {
       // Get the role and selected user, if none given then get the last ones modified by the user;
 
       $current_user_id = get_current_user_id();
-usi_log('current_user_id=' . $current_user_id);
 
       $role_id_option_name = $this->prefix . '-options-role-id';
       $user_id_option_name = $this->prefix . '-options-user-id';
