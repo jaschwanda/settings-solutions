@@ -4,7 +4,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 class USI_WordPress_Solutions_Capabilities {
 
-   const VERSION = '2.1.3 (2019-07-07)';
+   const VERSION = '2.1.5 (2019-10-15)';
 
    private $capabilities = null;
    private $disable_save = true;
@@ -19,79 +19,90 @@ class USI_WordPress_Solutions_Capabilities {
 
    protected $options = null;
 
-   private function __construct($name, $prefix, $text_domain, $capabilities, & $options) {
+   private function __construct($name, $prefix, $text_domain, $capabilities, & $options, $translate = true) {
+
+      if ($translate) foreach ($capabilities as $key => $value) $capabilities[$key] = __($value, $text_domain);
+
       $this->capabilities = $capabilities;
       $this->name         = $name;
       $this->options      = & $options;
       $this->prefix       = $prefix;
       $this->prefix_select_user = $this->prefix . '-select-user';
       $this->text_domain  = $text_domain;
+
    } // __construct();
 
    function after_add_settings_section($settings) {
 
-      $prefix = $this->prefix;
+      // Get the role and selected user, if none given then get the last ones modified by the user;
 
       $current_user_id = get_current_user_id();
+usi_log('current_user_id=' . $current_user_id);
 
-      // Get current role, default to administrator if none given;
-      $role_id_option_name = $prefix . '-options-role-id';
+      $role_id_option_name = $this->prefix . '-options-role-id';
+      $user_id_option_name = $this->prefix . '-options-user-id';
+
       $option_role_id = get_user_option($role_id_option_name, $current_user_id);
+      $option_user_id = get_user_option($user_id_option_name, $current_user_id);
+
       if (empty($option_role_id)) $option_role_id = 'administrator';
-      $this->role_id = (!empty($_GET['role_id']) ? $_GET['role_id'] : $option_role_id);
-      $this->role = get_role($this->role_id);
+      if (empty($option_user_id)) $option_user_id = $current_user_id;
 
-      // Get selected user, default to current user if none selected;
-      $option_user_id = (int)get_user_option($prefix . '-options-user-id', $current_user_id);
-      if (0 == $option_user_id) $option_user_id = $current_user_id;
-      $this->user_id = (int)(!empty($_GET['user_id']) && (0 < $_GET['user_id']) ? $_GET['user_id'] : $option_user_id);
+      $this->role_id = (!empty($_REQUEST['role_id']) ? $_REQUEST['role_id'] : $option_role_id);
+      $this->user_id = (!empty($_REQUEST['user_id']) ? $_REQUEST['user_id'] : $option_user_id);
 
-      if ($this->role_id != $option_role_id) update_user_option($current_user_id, $role_id_option_name, $this->role_id);
-      if ($this->user_id != $option_user_id) update_user_option($current_user_id, $prefix . '-options-user-id', $this->user_id);
+      $this->disable_save = true;
 
-      if ($this->prefix_select_user == $this->role_id) {
-         if ($this->user = new WP_User($this->user_id)) {
-            $user = $this->user;
-            if (!empty($user->roles) && is_array($user->roles)) {
-               foreach ($user->roles as $role_id) {
-                  $role = get_role($role_id);
-                  foreach ($settings as $field_id => & $attributes) {
-                     $capability_name = $this->name . '-' . $field_id;
-                     if ($this->options['capabilities'][$field_id] = $role->has_cap($capability_name)) {
-                        $attributes['readonly'] = true;
-                        $attributes['notes'] = ' <i>(' . sprintf(__("Set by user's %s role settings", 
-                           $this->text_domain), ucfirst($role_id)) . ')</i>';
-                     } else {
-                        $this->disable_save = false;
-                     }
-                     if ($user->has_cap($capability_name)) {
-                        $this->options['capabilities'][$field_id] = true;
-                     }
-                  }
-                  unset($attributes);
+      $this->role = get_role($role_id = $this->role_id);
+
+      if ($this->prefix_select_user != $this->role_id) {
+         $select_user = false;
+      } else {
+         $select_user = true;
+         $this->user = new WP_User($this->user_id);
+         // if user deleted;
+         if (empty($this->user->roles)) $this->user = new WP_User($this->user_id = $current_user_id);
+         if (!empty($this->user->roles) && is_array($this->user->roles)) {
+            foreach ($this->user->roles as $role_id) {
+               switch ($role_id) {
+               case 'subscriber':
+               case 'contributor':
+               case 'author':
+               case 'editor':
+               case 'administrator': $this->role = get_role($role_id); break 2;
                }
             }
          }
-
-      } else if ('administrator' == $this->role_id) {
-
-         foreach ($settings as $field_id => & $attributes) {
-            $this->options['capabilities'][$field_id] = true;
-            $attributes['readonly'] = true;
-            $attributes['notes'] = ' <i>(' . __('Default setting for Administrator', $this->text_domain) . ')</i>';
-         }
-         unset($attributes);
-
-      } else if ($role = $this->role) {
-
-         $this->disable_save = false;
-
-         foreach ($settings as $field_id => $attributes) {
-            $capability_name = $this->name . '-' . $field_id;
-            $this->options['capabilities'][$field_id] = $role->has_cap($capability_name);
-         }
-
       }
+
+      // FOREACH of the capabilities;
+      foreach ($settings as $field_id => & $attributes) {
+         $capability_name = $this->name . '-' . $field_id;
+         // IF capability is inherited by role;
+         if ($this->role->has_cap($capability_name)) {
+            $this->options['capabilities'][$field_id] = true;
+            if ($select_user) {
+               $attributes['readonly'] = true;
+               $attributes['notes'] = ' <i>(' . 
+                  sprintf(__("Set by user's %s role settings", $this->text_domain), ucfirst($role_id)) . 
+               ')</i>';
+            } else if ('administrator' == $this->role_id) {
+               $attributes['readonly'] = true;
+               $attributes['notes'] = ' <i>(' . __('Default setting for Administrator', $this->text_domain) . ')</i>';
+            }
+         // ELSEIF capability set by user;
+         } else if ($select_user && $this->user->has_cap($capability_name)) {
+            $this->options['capabilities'][$field_id] = true;
+            $this->disable_save = false;
+         } else { // ELSE role/user does not have capability;
+            $this->options['capabilities'][$field_id] = false;
+            $this->disable_save = false;
+         } // ENDIF capability is inherited by role;
+      } // ENDFOREACH of the capabilities;
+      unset($attributes);
+
+      if ($this->role_id != $option_role_id) update_user_option($current_user_id, $role_id_option_name, $this->role_id);
+      if ($this->user_id != $option_user_id) update_user_option($current_user_id, $user_id_option_name, $this->user_id);
 
       return($settings);
 
@@ -103,37 +114,21 @@ class USI_WordPress_Solutions_Capabilities {
 
       if (!empty($_POST[$prefix_role_id])) {
 
-         if ($this->prefix_select_user != $_POST[$prefix_role_id]) {
-
-            if (!($role = $this->role)) {
-            } else if ('administrator' == $_POST[$prefix_role_id]) {
-               foreach ($this->capabilities as $name => $capability) {
-                  $capability_name = $this->name . '-' . $name;
-                  $role->add_cap($capability_name);
-               }
-            } else {
-               foreach ($this->capabilities as $name => $capability) {
-                  $capability_name = $this->name . '-' . $name;
-                  if (!empty($input['capabilities'][$name])) { 
-                     $role->add_cap($capability_name);
-                  } else { 
-                     $role->remove_cap($capability_name); 
-                  }
-               }
-            }
-
-         } else if (0 < $_POST[$this->prefix . '-user_id']) {
-
-            $user = $this->user;
+         if ($this->prefix_select_user == $_POST[$prefix_role_id]) {
             foreach ($this->capabilities as $name => $capability) {
                $capability_name = $this->name . '-' . $name;
-               if (!empty($input['capabilities'][$name])) { 
-                  $role->add_cap($capability_name);
-               } else { 
-                  $role->remove_cap($capability_name); 
+               // IF capability not set of it can be inherited by the user's role;
+               if (empty($input['capabilities'][$name]) || $this->role->has_cap($capability_name)) {
+                  $this->user->remove_cap($capability_name);
+               } else { // ELSE the capability has been set;
+                  $this->user->add_cap($capability_name);
                }
             }
-
+         } else {
+            foreach ($this->capabilities as $name => $capability) {
+               $capability_name = $this->name . '-' . $name;
+               !empty($input['capabilities'][$name]) ? $this->role->add_cap($capability_name) : $this->role->remove_cap($capability_name);
+            }
          }
 
       }

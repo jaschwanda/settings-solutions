@@ -14,7 +14,7 @@ Text Domain: usi-wordpress-solutions
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.1.3 (2019-07-07)';
+   const VERSION = '2.1.5 (2019-10-15)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
