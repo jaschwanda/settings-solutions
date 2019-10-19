@@ -4,7 +4,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 class USI_WordPress_Solutions_Capabilities {
 
-   const VERSION = '2.1.5 (2019-10-15)';
+   const VERSION = '2.1.6 (2019-10-18)';
 
    private $capabilities = null;
    private $disable_save = true;
@@ -59,8 +59,8 @@ class USI_WordPress_Solutions_Capabilities {
       } else {
          $select_user = true;
          $this->user = new WP_User($this->user_id);
-         // if user deleted;
-         if (empty($this->user->roles)) $this->user = new WP_User($this->user_id = $current_user_id);
+         // IF last user selected has been removed then use current user;
+         if (empty($this->user)) $this->user = new WP_User($this->user_id = $current_user_id);
          if (!empty($this->user->roles) && is_array($this->user->roles)) {
             foreach ($this->user->roles as $role_id) {
                switch ($role_id) {
@@ -78,7 +78,7 @@ class USI_WordPress_Solutions_Capabilities {
       foreach ($settings as $field_id => & $attributes) {
          $capability_name = $this->name . '-' . $field_id;
          // IF capability is inherited by role;
-         if ($this->role->has_cap($capability_name)) {
+         if (!empty($this->role) && $this->role->has_cap($capability_name)) {
             $this->options['capabilities'][$field_id] = true;
             if ($select_user) {
                $attributes['readonly'] = true;
@@ -117,7 +117,7 @@ class USI_WordPress_Solutions_Capabilities {
             foreach ($this->capabilities as $name => $capability) {
                $capability_name = $this->name . '-' . $name;
                // IF capability not set of it can be inherited by the user's role;
-               if (empty($input['capabilities'][$name]) || $this->role->has_cap($capability_name)) {
+               if (empty($input['capabilities'][$name]) || (!empty($this->role) && $this->role->has_cap($capability_name))) {
                   $this->user->remove_cap($capability_name);
                } else { // ELSE the capability has been set;
                   $this->user->add_cap($capability_name);
@@ -156,6 +156,8 @@ class USI_WordPress_Solutions_Capabilities {
                   $comma = ', ';
                }
                echo ')';
+            } else {
+               echo ' (No role for this site)';
             }
          }
       echo PHP_EOL . 
@@ -192,10 +194,10 @@ class USI_WordPress_Solutions_Capabilities {
          'settings' => array(),
       );
 
-      foreach ($that->capabilities as $name => $label) {
+      foreach ($that->capabilities as $name => $capability) {
          $section['settings'][$name] = array(
             'readonly' => false, 
-            'label' => $label, 
+            'label' => $capability, 
             'notes' => null, 
             'type' => 'checkbox'
          );
