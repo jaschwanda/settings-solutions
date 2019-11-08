@@ -2,14 +2,21 @@
 
 final class USI_WordPress_Solutions_Uninstall {
 
-   const VERSION = '2.1.3 (2019-07-07)';
+   const VERSION = '2.1.5 (2019-11-07)';
 
    private function __construct() {
    } // __construct();
 
-   static function uninstall($prefix) {
+   static function uninstall($prefix, $post_type = null) {
 
       if (!defined('WP_UNINSTALL_PLUGIN')) exit;
+
+      if ($post_type) {
+         $posts = get_posts(array('post_type' => $post_type, 'numberposts' => -1));
+         foreach ($posts as $post) {
+            wp_delete_post($post->ID, true);
+         }
+      }
 
       global $wpdb;
       $results = $wpdb->get_results('SELECT option_name FROM ' . $wpdb->prefix . 
