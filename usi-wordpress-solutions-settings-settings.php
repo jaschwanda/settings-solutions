@@ -7,7 +7,7 @@ require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-s
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.1.4 (2019-09-26)';
+   const VERSION = '2.2.0 (2019-12-11)';
 
    function __construct() {
 
@@ -50,6 +50,9 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
    } // filter_plugin_row_meta();
 
    function sections() {
+
+      // https://codex.wordpress.org/Javascript_Reference/ThickBox
+      // http://codylindley.com/thickbox/
 
       $sections = array(
 
@@ -95,6 +98,18 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                ),
             ),
          ), // admin-options;
+
+         'diagnostics' => array(
+            'label' => __('diagnostics', USI_WordPress_Solutions::TEXTDOMAIN),
+            'settings' => array(
+               'phpinfo' => array(
+                  'type' => 'html', 
+                  'html' => '<a class="thickbox" href="' . plugins_url(null, __FILE__) . '/usi-wordpress-solutions-phpinfo-scan.php' .
+                    '#?TB_iframe=true&height=600&width=950" title="phpinfo()">phpinfo()</a>',
+                  'label' => 'Information',
+               ),
+            ),
+         ), // diagnostics;
 
       );
 

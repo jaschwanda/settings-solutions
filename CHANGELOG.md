@@ -2,6 +2,9 @@
 
 usi-wordpress-solutions helper class changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.2.0 (2019-12-11) ##
+* Added phpinfo(), reworked thickbox and updated all versions to same versions.
+
 ## 2.1.3 (2019-07-07) ##
 * Added 'html' option to settings fields, improved version scanning to include themes, updated all versions to same versions.
 

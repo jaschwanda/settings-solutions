@@ -6,7 +6,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 class USI_WordPress_Solutions_Capabilities {
 
-   const VERSION = '2.2.0 (2019-11-07)';
+   const VERSION = '2.2.0 (2019-12-11)';
 
    private $capabilities = null;
    private $custom_role  = false;

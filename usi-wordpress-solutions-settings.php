@@ -7,7 +7,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.1.4 (2019-09-26)';
+   const VERSION = '2.2.0 (2019-12-11)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
