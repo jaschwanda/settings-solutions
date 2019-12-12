@@ -2,7 +2,7 @@
 
 final class USI_WordPress_Solutions_Versions_Scan {
 
-   const VERSION = '2.1.3 (2019-07-07)';
+   const VERSION = '2.2.0 (2019-12-11)';
 
    private function __construct() {
    } // __construct();
@@ -25,7 +25,7 @@ final class USI_WordPress_Solutions_Versions_Scan {
    } // scan();
 
    public static function versions() {
-      die('<table>' . self::scan(urldecode($_SERVER['QUERY_STRING'])) . '</table>');
+      die('<table>' . self::scan(explode('&', urldecode($_SERVER['QUERY_STRING']))[0]) . '</table>');
    } // versions();
 
 } // Class USI_WordPress_Solutions_Versions_Scan;
