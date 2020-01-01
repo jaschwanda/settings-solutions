@@ -4,7 +4,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 class USI_WordPress_Solutions_Versions {
 
-   const VERSION = '2.2.0 (2019-12-11)';
+   const VERSION = '2.3.1 (2020-01-01)';
 
    private function __construct() {
    } // __construct();

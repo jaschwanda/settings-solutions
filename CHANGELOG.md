@@ -2,6 +2,9 @@
 
 usi-wordpress-solutions helper class changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.3.1 (2020-01-01) ##
+* Added usi-wordpress-solutions-updates.php to facilitate the addition of an 'Updates' tab in the settings page.
+
 ## 2.3.0 (2019-12-12) ##
 * Added usi-wordpress-solutions-update.php for downloading directly from GIT.
 

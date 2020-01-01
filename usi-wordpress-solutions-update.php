@@ -27,8 +27,8 @@ final class USI_WordPress_Solutions_Update {
       add_action('admin_init', array($this, 'action_admin_init'));
 
       add_filter('plugins_api', array($this, 'filter_plugins_api'), 10, 3);
-      add_filter('pre_set_site_transient_update_plugins', array($this, 'filter_pre_set_site_transient_update_plugins'), 10, 1); // modify_transient
-      add_filter('upgrader_post_install', array($this, 'filter_upgrader_post_installs'), 10, 3); // after_install
+      add_filter('pre_set_site_transient_update_plugins', array($this, 'filter_pre_set_site_transient_update_plugins'), 10, 1);
+      add_filter('upgrader_post_install', array($this, 'filter_upgrader_post_installs'), 10, 3);
 
    } // __construct();
 
@@ -47,21 +47,20 @@ final class USI_WordPress_Solutions_Update {
          $this->get_repository_info();
 
          $plugin = array(
-            'name'              => $this->plugin["Name"],
+            'name'              => $this->plugin['Name'],
             'slug'              => $this->basename,
-            'version'           => $this->github_response['tag_name'],
-            'author'            => $this->plugin["AuthorName"],
-            'author_profile'    => $this->plugin["AuthorURI"],
+            'version'           => $this->github_response['name'],
+            'author'            => $this->plugin['AuthorName'],
+            'author_profile'    => $this->plugin['AuthorURI'],
             'last_updated'      => $this->github_response['published_at'],
-            'homepage'          => $this->plugin["PluginURI"],
-            'short_description' => $this->plugin["Description"],
+            'homepage'          => $this->plugin['PluginURI'],
+            'short_description' => $this->plugin['Description'],
             'sections'          => array( 
-               'Description'    => $this->plugin["Description"],
+               'Description'    => $this->plugin['Description'],
                'Updates'        => $this->github_response['body'],
             ),
             'download_link'     => $this->github_response['zipball_url']
          );
-      usi_log(__METHOD__.':'.__LINE__.':plugin=' . print_r($plugin, true));
 
          return((object)$plugin);
 
@@ -72,42 +71,46 @@ final class USI_WordPress_Solutions_Update {
    } // filter_plugins_api();
 
    public function filter_pre_set_site_transient_update_plugins($transient) {
-      if (isset($transient->checked))if ($checked = $transient->checked) { // Did Wordpress check for updates?
 
-         $this->get_repository_info(); // Get the repo info
+      if (isset($transient->checked) && ($checked = $transient->checked)) {
 
-         $out_of_date = version_compare($this->github_response['tag_name'], $checked[ $this->basename ]); // Check if we're out of date
+         $this->get_repository_info();
+
+         $out_of_date = version_compare($this->github_response['name'], $checked[$this->basename]);
 
          if ($out_of_date) {
 
-            $new_files = $this->github_response['zipball_url']; // Get the ZIP
+            $new_files = $this->github_response['zipball_url'];
 
-            $plugin = array(// setup our plugin info
-               'url' => $this->plugin["PluginURI"],
+            $plugin = array(
+               'url' => $this->plugin['PluginURI'],
                'slug' => $this->basename,
                'package' => $new_files,
                'new_version' => $this->github_response['tag_name']
             );
 
-            $transient->response[$this->basename] = (object) $plugin; // Return it in response
+            $transient->response[$this->basename] = (object)$plugin;
+
          }
+
       }
 
-      return $transient; // Return filtered transient
+      return($transient);
+
    } // filter_pre_set_site_transient_update_plugins();
 
    public function filter_upgrader_post_installs($response, $hook_extra, $result) {
+
       global $wp_filesystem;
 
-      $install_directory = plugin_dir_path($this->file); // Our plugin directory 
-      $wp_filesystem->move($result['destination'], $install_directory); // Move files to the plugin dir
-      $result['destination'] = $install_directory; // Set the destination for the rest of the stack
+      $install_directory = plugin_dir_path($this->file);
+      $wp_filesystem->move($result['destination'], $install_directory);
+      $result['destination'] = $install_directory;
 
-      if ($this->active) { // If it was active
-         activate_plugin($this->basename); // Reactivate
-      }
+      if ($this->active) activate_plugin($this->basename);
 
-      return $result;
+      return($result);
+
    } // filter_upgrader_post_installs();
 
    private function get_repository_info() {
@@ -116,20 +119,18 @@ final class USI_WordPress_Solutions_Update {
 
          $request_uri = sprintf('https://api.github.com/repos/%s/%s/releases', $this->username, $this->repository);
 
-         if ($this->authorize_token) {
-            $request_uri = sprintf('%s?access_token=%s', $request_uri, $this->authorize_token);
-         }
+         if ($this->authorize_token) $request_uri = sprintf('%s?access_token=%s', $request_uri, $this->authorize_token);
 
          $response = json_decode(wp_remote_retrieve_body(wp_remote_get($request_uri)), true);
 
          if (is_array($response)) $response = current($response);
-         usi_log(__METHOD__.':'.__LINE__.':response=' . print_r($response, true));
 
-         if ($this->authorize_token) {
-             $response['zipball_url'] = sprintf('%s?access_token=%s', $response['zipball_url'], $this->authorize_token); // Update our zip url with token
-         }
+         if ($this->authorize_token) $response['zipball_url'] = sprintf('%s?access_token=%s', $response['zipball_url'], $this->authorize_token);
+
          $this->github_response = $response;
+
       }
+
    } // get_repository_info();
 
 } // Class USI_WordPress_Solutions_Update;

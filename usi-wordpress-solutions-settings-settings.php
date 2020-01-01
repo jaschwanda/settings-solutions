@@ -100,7 +100,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
          ), // admin-options;
 
          'diagnostics' => array(
-            'label' => __('diagnostics', USI_WordPress_Solutions::TEXTDOMAIN),
+            'label' => __('Diagnostics', USI_WordPress_Solutions::TEXTDOMAIN),
             'settings' => array(
                'phpinfo' => array(
                   'type' => 'html', 
