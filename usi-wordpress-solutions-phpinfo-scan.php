@@ -1,8 +1,21 @@
 <?php // ------------------------------------------------------------------------------------------------------------------------ //
 
+/*
+WordPress-Solutions is free software: you can redistribute it and/or modify it under the terms of the GNU General Public 
+License as published by the Free Software Foundation, either version 3 of the License, or any later version.
+ 
+WordPress-Solutions is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied 
+warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+ 
+You should have received a copy of the GNU General Public License along with WordPress-Solutions. If not, see 
+https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
+
+Copyright (c) 2020 by Jim Schwanda.
+*/
+
 final class USI_WordPress_Solutions_Phpinfo_Scan {
 
-   const VERSION = '2.3.1 (2020-01-01)';
+   const VERSION = '2.3.2 (2020-01-08)';
 
    private function __construct() {
    } // __construct();
