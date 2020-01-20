@@ -20,12 +20,13 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.3.2 (2020-01-08)';
+   const VERSION = '2.3.3 (2020-01-20)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
 
    protected $active_tab = null;
+   protected $config = null;
    protected $debug = 0;
    protected $is_tabbed = false;
    protected $logger = null;
@@ -59,7 +60,7 @@ class USI_WordPress_Solutions_Settings {
          if ($add_row_meta) add_filter('plugin_row_meta', array($this, 'filter_plugin_row_meta'), 10, 2);
 
       } else if (
-         (('options-general.php' == $script) && !empty($_GET['page']) && ($_GET['page'] == $this->page_slug)) ||
+         ((('admin.php' == $script) || ('options-general.php' == $script)) && !empty($_GET['page']) && ($_GET['page'] == $this->page_slug)) ||
          (('options.php' == $script) && !empty($_POST['option_page']) && ($_POST['option_page'] == $this->page_slug)) 
          ) {
 
@@ -172,17 +173,37 @@ class USI_WordPress_Solutions_Settings {
 
    function action_admin_menu() { 
 
-      $slug = add_options_page(
-         __($this->name . ' Settings', $this->text_domain), // Page <title/> text;
-         __($this->name, $this->text_domain), // Sidebar menu text; 
-         'manage_options', // Capability required to enable page;
-         $this->page_slug, // Menu page slug name;
-         array($this, 'page_render') // Render page callback;
-      );
+      if (!empty($this->config['page']) && ('menu' == $this->config['page'])) {
+         $slug = add_menu_page(
+            __($this->name . ' Settings', $this->text_domain), // Page <title/> text;
+            __($this->name, $this->text_domain), // Sidebar menu text; 
+            'manage_options', // Capability required to enable page;
+            $this->page_slug, // Menu page slug name;
+            array($this, 'page_render') // Render page callback;
+         );
+      } else {
+         $slug = add_options_page(
+            __($this->name . ' Settings', $this->text_domain), // Page <title/> text;
+            __($this->name, $this->text_domain), // Sidebar menu text; 
+            'manage_options', // Capability required to enable page;
+            $this->page_slug, // Menu page slug name;
+            array($this, 'page_render') // Render page callback;
+         );
+      }
 
       $action_load_help_tab = array($this, 'action_load_help_tab');
 
       if (is_callable($action_load_help_tab)) add_action('load-'. $slug, $action_load_help_tab);
+
+      if (!empty($this->config['hide'])) {
+         global $menu;
+         foreach ($menu as $key => $values) {
+            if ($values[2] == $this->page_slug) {
+               unset($menu[$key]);
+               break;
+            }
+         }
+      }
 
    } // action_admin_menu();
 
@@ -273,7 +294,6 @@ class USI_WordPress_Solutions_Settings {
    } // fields_render();
 
    function fields_sanitize($input) {
-
       foreach ($this->sections as $section_id => $section) {
          if (!empty($section['fields_sanitize'])) {
             $object = $section['fields_sanitize'][0];
