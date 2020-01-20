@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.3.3 (2020-01-20) ##
+* Add functionality to use settings functions for non-settings sub pages.
+
 ## 2.3.2 (2020-01-08) ##
 * Added license and copyright notice.
 
