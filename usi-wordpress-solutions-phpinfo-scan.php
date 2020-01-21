@@ -15,24 +15,26 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_Phpinfo_Scan {
 
-   const VERSION = '2.3.2 (2020-01-08)';
+   const VERSION = '2.3.4 (2020-01-21)';
 
    private function __construct() {
    } // __construct();
 
    public static function info() {
-      foreach ($_COOKIE as $key => $value) if (substr($key, 0, 20) == 'wordpress_logged_in_') {
-         // https://www.securitysift.com/understanding-wordpress-auth-cookies/
-         //echo '<pre>';
-         //echo "key=$key value=$value" . PHP_EOL;
-         //$crumbs = explode('|', $value);
-         //print_r($crumbs);
-         //require_once('../../../wp-config.php');
-         //$hash_key = AUTH_KEY . AUTH_SALT;
-         //echo "hash_key=$hash_key" . PHP_EOL;
-         //echo '</pre>';
-         phpinfo();
-         die();
+      foreach ($_COOKIE as $key => $value) {
+         if (substr($key, 0, 20) == 'wordpress_logged_in_') {
+            // https://www.securitysift.com/understanding-wordpress-auth-cookies/
+            //echo '<pre>';
+            //echo "key=$key value=$value" . PHP_EOL;
+            //$crumbs = explode('|', $value);
+            //print_r($crumbs);
+            //require_once('../../../wp-config.php');
+            //$hash_key = AUTH_KEY . AUTH_SALT;
+            //echo "hash_key=$hash_key" . PHP_EOL;
+            //echo '</pre>';
+            phpinfo();
+            die();
+         }
       }
       die('Accesss not allowed.');
    } // info();
