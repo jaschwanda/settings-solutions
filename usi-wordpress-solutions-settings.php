@@ -26,14 +26,17 @@ class USI_WordPress_Solutions_Settings {
    const DEBUG_RENDER = 0x02;
 
    protected $active_tab = null;
-   protected $config = null;
    protected $debug = 0;
+   protected $hide = null;
+   protected $icon_url = null;
    protected $is_tabbed = false;
    protected $logger = null;
    protected $name = null;
    protected $option_name = null;
    protected $options = null;
+   protected $page = null;
    protected $page_slug = null;
+   protected $position = null;
    protected $prefix = null;
    protected $section_callback_offset = 0;
    protected $section_callbacks = array();
@@ -41,15 +44,38 @@ class USI_WordPress_Solutions_Settings {
    protected $sections = null;
    protected $text_domain = null;
 
-   function __construct($name, $prefix, $text_domain, & $options, $add_settings_link = true, $add_row_meta = true, $suffix = null) {
+   function __construct($config, $prefix = null, $text_domain = null, & $options = null, $add_settings_link = true, $add_row_meta = true, $suffix = null) {
 
       $this->impersonate = !empty(USI_WordPress_Solutions::$options['admin-options']['impersonate']);
-      $this->name        = $name;
-      $this->option_name = $prefix . '-options' . $suffix;
-      $this->options     = & $options;
-      $this->page_slug   = self::page_slug($prefix);
-      $this->prefix      = $prefix;
-      $this->text_domain = $text_domain;
+
+      if (is_array($config)) {
+
+         $this->name        = $config['name'];
+         $this->options     = & $config['options'];
+         $this->prefix      = $config['prefix'];
+         $this->text_domain = $config['text_domain'];
+
+         $this->option_name = $this->prefix . '-options' . (!empty($config['suffix']) ? $config['suffix'] : '');
+         $this->page_slug   = self::page_slug($this->prefix);
+
+         $add_settings_link = empty($config['no_settings_link']);
+         
+         if (!empty($config['debug']))    $this->debug($config['debug']);
+         if (!empty($config['hide']))     $this->hide     = $config['hide'];
+         if (!empty($config['icon_url'])) $this->icon_url = $config['icon_url'];
+         if (!empty($config['page']))     $this->page     = $config['page'];
+         if (!empty($config['position'])) $this->position = $config['position'];
+
+      } else {
+
+         $this->name        = $config;
+         $this->option_name = $prefix . '-options' . $suffix;
+         $this->options     = & $options;
+         $this->page_slug   = self::page_slug($prefix);
+         $this->prefix      = $prefix;
+         $this->text_domain = $text_domain;
+
+      }
 
       $script = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1);
 
@@ -57,7 +83,9 @@ class USI_WordPress_Solutions_Settings {
 
          if ($add_settings_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
 
-         if ($add_row_meta) add_filter('plugin_row_meta', array($this, 'filter_plugin_row_meta'), 10, 2);
+         $filter_plugin_row_meta = array($this, 'filter_plugin_row_meta');
+
+         if (is_callable($filter_plugin_row_meta)) add_filter('plugin_row_meta', $filter_plugin_row_meta, 10, 2);
 
       } else if (
          ((('admin.php' == $script) || ('options-general.php' == $script)) && !empty($_GET['page']) && ($_GET['page'] == $this->page_slug)) ||
@@ -173,13 +201,15 @@ class USI_WordPress_Solutions_Settings {
 
    function action_admin_menu() { 
 
-      if (!empty($this->config['page']) && ('menu' == $this->config['page'])) {
+      if ('menu' == $this->page) {
          $slug = add_menu_page(
             __($this->name . ' Settings', $this->text_domain), // Page <title/> text;
             __($this->name, $this->text_domain), // Sidebar menu text; 
             'manage_options', // Capability required to enable page;
             $this->page_slug, // Menu page slug name;
-            array($this, 'page_render') // Render page callback;
+            array($this, 'page_render'), // Render page callback;
+            $this->icon_url, // URL of icon for menu item;
+            $this->position // Position in menu order;
          );
       } else {
          $slug = add_options_page(
@@ -195,7 +225,7 @@ class USI_WordPress_Solutions_Settings {
 
       if (is_callable($action_load_help_tab)) add_action('load-'. $slug, $action_load_help_tab);
 
-      if (!empty($this->config['hide'])) {
+      if ($this->hide) {
          global $menu;
          foreach ($menu as $key => $values) {
             if ($values[2] == $this->page_slug) {
