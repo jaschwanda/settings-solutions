@@ -33,7 +33,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.3.4 (2020-01-21)';
+   const VERSION = '2.3.4 (2020-01-24)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';

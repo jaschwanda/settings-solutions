@@ -20,7 +20,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.3.3 (2020-01-20)';
+   const VERSION = '2.3.4 (2020-01-24)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -116,6 +116,8 @@ class USI_WordPress_Solutions_Settings {
 
       add_action('admin_menu', array($this, 'action_admin_menu'));
 
+      add_action('admin_notices', array($this, 'action_admin_notices'));
+
       if ($this->impersonate) {
          add_action('init', array( $this, 'action_init'));
          add_filter('user_row_actions', array($this, 'filter_user_row_actions'), 10, 2);
@@ -131,11 +133,13 @@ class USI_WordPress_Solutions_Settings {
 
    } // __construct();
 
+   function action_admin_notices() {
+      settings_errors($this->page_slug);
+   } // action_admin_notices();
+
    function action_admin_head() {
       if ($this->page_slug != ((!empty($_GET['page'])) ? esc_attr($_GET['page']) : '')) return;
       echo '<style>' . PHP_EOL .
-          // '.form-table td{padding-bottom:12px; padding-top:2px;} /* 25px; */' . PHP_EOL .
-          // '.form-table th{padding-bottom:7px; padding-top:7px;} /* 20px; */' . PHP_EOL .
           '.form-table td{padding-bottom:2px; padding-top:2px;} /* 15px; */' . PHP_EOL .
           '.form-table th{padding-bottom:7px; padding-top:7px;} /* 20px; */' . PHP_EOL .
           'h2{margin-bottom:0.1em; margin-top:2em;} /* 1em; */' . PHP_EOL .
@@ -313,6 +317,14 @@ class USI_WordPress_Solutions_Settings {
          echo $args['html'];
          break;
 
+      case 'select':
+         echo $prefix . '<select' . $attributes . '>';
+         foreach ($args['options'] as $row) {
+            echo '<option ' . ($row[0] == $value ? 'selected ' : '') . 'value="' . $row[0] . '">' . $row[1] . '</option>';
+         }
+         echo '</select>';
+         break;
+
       case 'textarea':
          echo $prefix . '<textarea' . $attributes . '>' . $value . '</textarea>';
          break;
@@ -321,9 +333,16 @@ class USI_WordPress_Solutions_Settings {
 
       if ($notes) echo $notes . PHP_EOL;
 
+      if (!empty($args['more'])) {
+         foreach ($args['more'] as $more) {
+            self::fields_render_static($more);
+         }
+      }
+
    } // fields_render();
 
    function fields_sanitize($input) {
+
       foreach ($this->sections as $section_id => $section) {
          if (!empty($section['fields_sanitize'])) {
             $object = $section['fields_sanitize'][0];
@@ -407,7 +426,7 @@ class USI_WordPress_Solutions_Settings {
       $trailing_code = !empty($options['trailing_code']) ? $options['trailing_code'] : null;
       $wrap_submit   = !empty($options['wrap_submit']);
 
-      $submit_text = null;
+      $submit_text   = null;
 
       echo PHP_EOL .
          '<div class="wrap">' . PHP_EOL .
