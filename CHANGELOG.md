@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.3.4 (2020-01-24) ##
+* Added drop down select fields to settings page and ability to string multiple fields on the same line.
+
 ## 2.3.3 (2020-01-20) ##
 * Add functionality to use settings functions for non-settings sub pages.
 
