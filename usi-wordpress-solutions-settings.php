@@ -20,7 +20,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.3.4 (2020-01-24)';
+   const VERSION = '2.3.5 (2020-01-25)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -34,6 +34,9 @@ class USI_WordPress_Solutions_Settings {
    protected $name = null;
    protected $option_name = null;
    protected $options = null;
+   protected $override_do_settings_fields = false;
+   protected static $override_do_settings_one_per_line = false;
+   protected $override_do_settings_sections = false;
    protected $page = null;
    protected $page_slug = null;
    protected $position = null;
@@ -192,7 +195,6 @@ class USI_WordPress_Solutions_Settings {
                }
             }
          }
-
       }
 
       register_setting(
@@ -261,6 +263,53 @@ class USI_WordPress_Solutions_Settings {
       }
    } // debug();
 
+   // This function riped from wp-admin/includes/template.php;
+   function do_settings_sections($page) {
+      global $wp_settings_sections, $wp_settings_fields;
+      if (!isset($wp_settings_sections[$page])) return;
+
+      foreach ((array)$wp_settings_sections[$page] as $section) {
+         if ($section['title']) echo "<h2>{$section['title']}</h2>\n";
+         if ($section['callback']) call_user_func( $section['callback'], $section );
+         if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) continue;
+         echo '<table class="form-table" role="presentation">';
+         if ($this->override_do_settings_sections) {
+            $this->do_settings_fields($page, $section['id']);
+         } else {
+            do_settings_fields($page, $section['id']);
+         }
+         echo '</table>';
+      }
+   } // do_settings_sections();
+
+   // This function riped from wp-admin/includes/template.php;
+   function do_settings_fields($page, $section) {
+      global $wp_settings_fields;
+
+      if (!isset($wp_settings_fields[$page][$section])) return;
+
+      foreach ((array)$wp_settings_fields[$page][$section] as $field) {
+         $class = '';
+
+         if (!empty($field['args']['class'])) $class = ' class="' . esc_attr( $field['args']['class'] ) . '"';
+
+         if (!self::$override_do_settings_one_per_line) {
+            echo "<tr{$class}>";
+            if (!empty($field['args']['label_for'])) {
+               echo '<th scope="row"><label for="' . esc_attr( $field['args']['label_for'] ) . '">' . $field['title'] . '</label></th>';
+            } else {
+               echo '<th scope="row">' . $field['title'] . '</th>';
+            }
+            echo '<td>';
+         }
+         call_user_func($field['callback'], $field['args']);
+         if (!self::$override_do_settings_one_per_line) {
+            echo '</td>';
+            echo '</tr>';
+         }
+      }
+   } // do_settings_fields();
+
    function fields_render($args) {
       if (self::DEBUG_INIT & $this->debug) call_user_func($this->logger, __METHOD__.':args=' . print_r($args, true));
       self::fields_render_static($args);
@@ -269,19 +318,21 @@ class USI_WordPress_Solutions_Settings {
    // Statis version so that other classes can use this rendering function;
    static function fields_render_static($args) {
 
-      $notes    = !empty($args['notes']) ? $args['notes'] : null;
-      $type     = !empty($args['type'])  ? $args['type']  : 'text';
+      if (isset($args['one_per_line'])) self::$override_do_settings_one_per_line = empty($args['one_per_line']);
 
-      $id       = !empty($args['id'])    ? ' id="'    . $args['id']    . '"' : null;
-      $class    = !empty($args['class']) ? ' class="' . $args['class'] . '"' : null;
-      $name     = !empty($args['name'])  ? ' name="'  . $args['name']  . '"' : null;
+      $notes    = !empty($args['notes'])   ? $args['notes'] : null;
+      $type     = !empty($args['type'])    ? $args['type']  : 'text';
 
-      $min      = isset($args['min'])    ? ' min="'   . $args['min']   . '"' : null;
-      $max      = isset($args['max'])    ? ' max="'   . $args['max']   . '"' : null;
+      $id       = !empty($args['id'])      ? ' id="'    . $args['id']      . '"' : null;
+      $class    = !empty($args['f-class']) ? ' class="' . $args['f-class'] . '"' : null;
+      $name     = !empty($args['name'])    ? ' name="'  . $args['name']    . '"' : null;
 
-      $prefix   = isset($args['prefix']) ? $args['prefix'] : '';
+      $min      = isset($args['min'])      ? ' min="'   . $args['min']     . '"' : null;
+      $max      = isset($args['max'])      ? ' max="'   . $args['max']     . '"' : null;
 
-      $rows     = isset($args['rows'])   ? ' rows="'  . $args['rows']  . '"' : null;
+      $prefix   = isset($args['prefix'])   ? $args['prefix'] : '';
+
+      $rows     = isset($args['rows'])     ? ' rows="'  . $args['rows']  . '"' : null;
 
       $readonly = !empty($args['readonly']) ? ('checkbox' == $type ? ' disabled' : ' readonly') : null;
       $value    = !empty($args['value']) ? esc_attr($args['value']) : ('number' == $type ? 0 : null);
@@ -307,6 +358,8 @@ class USI_WordPress_Solutions_Settings {
          echo $prefix . '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />';
          break;
 
+      case 'null-number':
+         $type = 'number';
       case 'hidden':
       case 'number':
       case 'text':
@@ -452,7 +505,11 @@ class USI_WordPress_Solutions_Settings {
       }
 
       settings_fields($this->page_slug);
-      do_settings_sections($this->page_slug);
+      if ($this->override_do_settings_sections) {
+         $this->do_settings_sections($this->page_slug);
+      } else {
+         do_settings_sections($this->page_slug);
+      }
 
       if ($this->is_tabbed) {
 
