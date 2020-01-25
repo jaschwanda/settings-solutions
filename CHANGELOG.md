@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.3.5 (2020-01-25) ##
+* Improved ability to string multiple fields on the same line by enabling a conditional over ride of WordPress settings API functions.
+
 ## 2.3.4 (2020-01-24) ##
 * Added drop down select fields to settings page and ability to string multiple fields on the same line.
 
