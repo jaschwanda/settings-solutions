@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.3.6 (2020-01-30 ##
+* Fix some null access bugs and started to add support for GitLab updates.
+
 ## 2.3.5 (2020-01-25) ##
 * Improved ability to string multiple fields on the same line by enabling a conditional over ride of WordPress settings API functions.
 
