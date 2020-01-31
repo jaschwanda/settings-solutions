@@ -16,10 +16,12 @@ Copyright (c) 2020 by Jim Schwanda.
 */
 
 // https://www.smashingmagazine.com/2015/08/deploy-wordpress-plugins-with-github-using-transients/
+// Update Failed: Download failed. A valid URL was not provided.
+// fails in download_package in class-wp-upgrader.php
 
-final class USI_WordPress_Solutions_Update {
+class USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.3.6 (2020-01-30)';
+   const VERSION = '2.3.7 (2020-01-31)';
 
    private $active;
    private $basename;
@@ -156,7 +158,7 @@ final class USI_WordPress_Solutions_Update {
 
 } // Class USI_WordPress_Solutions_Update;
 
-final class USI_WordPress_Solutions_Update_GitLab {
+class USI_WordPress_Solutions_Update_GitLab {
 
    const VERSION = '2.3.6 (2020-01-30)';
 
@@ -309,6 +311,8 @@ $this->debug .= __METHOD__.':'.__LINE__.':$data=' . print_r($data, true) . PHP_E
 
          if (is_array($data)) $data = current($data);
 $this->debug .= __METHOD__.':'.__LINE__.':$data=' . print_r($data, true) . PHP_EOL;
+
+         if (!is_object($data)) return;
 
          $latest_version = property_exists($data, 'name') ? $data->name : '0';
 
