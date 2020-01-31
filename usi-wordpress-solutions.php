@@ -15,7 +15,7 @@ Requires at least: 5.0
 Requires PHP:      5.6.25
 Tested up to:      5.3.2
 Text Domain:       usi-wordpress-solutions
-Version:           2.3.6
+Version:           2.3.7
 */
 
 /*
@@ -33,7 +33,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.3.6 (2020-01-30)';
+   const VERSION = '2.3.7 (2020-01-31)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
