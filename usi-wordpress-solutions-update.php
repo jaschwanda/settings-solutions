@@ -21,7 +21,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.3.7 (2020-01-31)';
+   const VERSION = '2.3.8 (2020-02-01)';
 
    private $active;
    private $basename;
@@ -157,6 +157,14 @@ class USI_WordPress_Solutions_Update {
    } // get_repository_info();
 
 } // Class USI_WordPress_Solutions_Update;
+
+class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Update {
+
+   function __construct($file, $username, $reponame, $access_token = null) {
+      parent::__construct($file, $username, $reponame, $access_token);
+   } // __construct();
+
+} // Class USI_WordPress_Solutions_Update_GitHub;
 
 class USI_WordPress_Solutions_Update_GitLab {
 
