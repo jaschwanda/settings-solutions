@@ -21,7 +21,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.3.8 (2020-02-01)';
+   const VERSION = '2.3.8 (2020-02-02)';
 
    private $active;
    private $basename;
@@ -97,7 +97,7 @@ class USI_WordPress_Solutions_Update {
 
          if ($this->repository) {
 
-            $out_of_date = version_compare($this->repository['tag_name'], $checked[$this->basename]);
+            $out_of_date = version_compare($this->repository['tag_name'], $checked[$this->basename], 'gt');
 
             if ($out_of_date) {
 
@@ -250,7 +250,7 @@ class USI_WordPress_Solutions_Update_GitLab {
 
          if ($this->repository) {
 
-            $out_of_date = version_compare($this->repository['tag_name'], $checked[$this->basename]);
+            $out_of_date = version_compare($this->repository['tag_name'], $checked[$this->basename], 'gt');
 
             if ($out_of_date) {
 
