@@ -57,7 +57,7 @@ if (is_admin() && !defined('WP_UNINSTALL_PLUGIN')) {
    require_once('usi-wordpress-solutions-install.php');
    require_once('usi-wordpress-solutions-settings-settings.php');
    require_once('usi-wordpress-solutions-update.php');
-   new USI_WordPress_Solutions_Update(__FILE__, 'jaschwanda', 'wordpress-solutions');
+   new USI_WordPress_Solutions_Update_GitHub(__FILE__, 'jaschwanda', 'wordpress-solutions');
 }
 
 if (!function_exists('usi_log')) {
