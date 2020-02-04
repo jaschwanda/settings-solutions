@@ -23,14 +23,14 @@ class USI_WordPress_Solutions_Update {
 
    const VERSION = '2.4.0 (2020-02-04)';
 
-   protected $access_token;
-   protected $active;
-   protected $base_name;
+   protected $access_token = null;
+   protected $active = null;
+   protected $base_name = null;
    protected $debug = null;
-   protected $file;
-   protected $plugin;
-   protected $repo_name;
-   protected $repository;
+   protected $file = null;
+   protected $plugin = null;
+   protected $repo_name = null;
+   protected $repository = null;
 
    function __construct($file) {
 
@@ -98,11 +98,9 @@ class USI_WordPress_Solutions_Update {
 
             if ($out_of_date) {
 
-               $download_link = $this->repository['download_link'];
-
                $plugin = array(
                   'new_version' => $this->repository['tag_name'],
-                  'package'     => $download_link,
+                  'package'     => $this->repository['download_link'],
                   'slug'        => $this->base_name,
                   'url'         => $this->plugin['PluginURI'],
                );
@@ -164,8 +162,9 @@ class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Upda
 
       parent::__construct($file);
 
-      $this->repo_name = $repo_name;
-      $this->user_name = $user_name;
+      $this->repo_name    = $repo_name;
+      $this->user_name    = $user_name;
+      $this->access_token = $access_token;
 
    } // __construct();
 
@@ -181,9 +180,14 @@ class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Upda
 
          if (is_array($data)) $data = current($data);
 
-         if ($this->access_token) $data['download_link'] .= '?access_token=' . $this->access_token;
+         if ($this->access_token) $data['zipball_url'] .= '?access_token=' . $this->access_token;
 
-         $this->repository = $data;
+         $this->repository  = array(
+            'body'          => $data['body'],
+            'download_link' => $data['zipball_url'],
+            'published_at'  => $data['published_at'],
+            'tag_name'      => $data['tag_name'],
+         );
 
       }
 
@@ -209,7 +213,7 @@ class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Upda
 
    protected function get_repository_info() {
 
-      if (is_null($this->repository)) {
+      if (!$this->repository) {
 
          $request_uri = $this->service . '/api/v4/projects/' . $this->repo_name . '/repository/tags/';
 
@@ -219,22 +223,16 @@ class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Upda
 
          if (is_array($data)) $data = current($data);
 
-         if (!is_object($data)) return;
-
-         $tag_name = property_exists($data, 'name') ? $data->name : '0';
-
-         $message  = property_exists($data, 'message') ? $data->message : '0';
-
-         $date     = property_exists($data, 'commit') ? $data->commit->created_at : date('Y-m-d');
+         $tag_name      = $data['name'];
 
          $download_link = $this->service . '/api/v4/projects/' . $this->repo_name . '/repository/archive.zip?sha=' . $tag_name;
 
          if ($this->access_token) $download_link .= '&private_token=' . $this->access_token;
 
          $this->repository  = array(
-            'body'          => $message,
+            'body'          => !empty($data['message']) ? $data['message'] : null,
             'download_link' => $download_link,
-            'published_at'  => $date,
+            'published_at'  => !empty($data['commit']['created_at']) ? $data['commit']['created_at'] : date('Y-m-d'),
             'tag_name'      => $tag_name,
          );
 
