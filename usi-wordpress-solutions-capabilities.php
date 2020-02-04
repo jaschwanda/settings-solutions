@@ -19,7 +19,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Capabilities {
 
-   const VERSION = '2.3.2 (2020-01-08)';
+   const VERSION = '2.4.0 (2020-02-04)';
 
    private $capabilities = null;
    private $custom_role  = false;
