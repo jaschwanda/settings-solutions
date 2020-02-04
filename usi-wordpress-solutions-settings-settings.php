@@ -20,7 +20,7 @@ require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-s
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.3.2 (2020-01-08)';
+   const VERSION = '2.4.0 (2020-02-04)';
 
    function __construct() {
 
@@ -108,6 +108,11 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                   'type' => 'checkbox', 
                   'label' => 'Enable user switching',
                   'notes' => 'Enables administrators to impersonate another WordPress user.',
+               ),
+               'git-update' => array(
+                  'type' => 'checkbox', 
+                  'label' => 'Enable Git updates',
+                  'notes' => 'Checks GitHub/GitLab for updates and notifies the administrator when updates are avaiable for download and installation.',
                ),
             ),
          ), // admin-options;
