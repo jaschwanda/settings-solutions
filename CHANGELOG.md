@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.4.0 (2020-02-04) ##
+* Improved update handling.
+
 ## 2.3.8 (2020-02-02) ##
 * Refractored code to handle multiple repository sources for updates.
 
