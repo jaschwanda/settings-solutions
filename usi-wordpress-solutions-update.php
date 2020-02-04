@@ -19,9 +19,9 @@ Copyright (c) 2020 by Jim Schwanda.
 // Update Failed: Download failed. A valid URL was not provided.
 // fails in download_package in class-wp-upgrader.php
 
-class USI_WordPress_Solutions_Update_Base {
+class USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.3.8 (2020-02-02)';
+   const VERSION = '2.4.0 (2020-02-04)';
 
    protected $access_token;
    protected $active;
@@ -43,10 +43,6 @@ class USI_WordPress_Solutions_Update_Base {
       add_filter('upgrader_post_install', array($this, 'filter_upgrader_post_installs'), 10, 3);
 
    } // __construct();
-
-   function __destruct() {
-      if ($this->debug) usi_log($this->debug);
-   } // __destruct();
 
    public function action_admin_init() {
 
@@ -77,7 +73,7 @@ class USI_WordPress_Solutions_Update_Base {
                   'Description'    => $this->plugin['Description'],
                   'Updates'        => $this->repository['body'],
                ),
-               'download_link'     => $this->repository['zipball_url']
+               'download_link'     => $this->repository['download_link']
             );
 
             return((object)$plugin);
@@ -97,19 +93,18 @@ class USI_WordPress_Solutions_Update_Base {
          $this->get_repository_info();
 
          if ($this->repository) {
-$this->debug .= __METHOD__.':'.__LINE__.':$this->repository=' . print_r($this->repository, true) . PHP_EOL;
 
             $out_of_date = version_compare($this->repository['tag_name'], $checked[$this->base_name], 'gt');
 
             if ($out_of_date) {
 
-               $new_files = $this->repository['zipball_url'];
+               $download_link = $this->repository['download_link'];
 
                $plugin = array(
-                  'url' => $this->plugin['PluginURI'],
-                  'slug' => $this->base_name,
-                  'package' => $new_files,
-                  'new_version' => $this->repository['tag_name']
+                  'new_version' => $this->repository['tag_name'],
+                  'package'     => $download_link,
+                  'slug'        => $this->base_name,
+                  'url'         => $this->plugin['PluginURI'],
                );
 
                $transient->response[$this->base_name] = (object)$plugin;
@@ -140,46 +135,37 @@ $this->debug .= __METHOD__.':'.__LINE__.':$this->repository=' . print_r($this->r
 
    protected function get_response($request_uri) {
 
-      $data = null;
-$this->debug .= __METHOD__.':'.__LINE__.':$request_uri=' . $request_uri . PHP_EOL;
-//      $data = json_decode(wp_remote_retrieve_body(wp_remote_get($request_uri)), true);
-
-      $response = wp_remote_get($request_uri);
-
-$this->debug .= __METHOD__.':'.__LINE__.':$response=' . print_r($response, true) . PHP_EOL;
+      $response      = wp_remote_get($request_uri);
 
       $response_code = wp_remote_retrieve_response_code($response);
 
-$this->debug .= __METHOD__.':'.__LINE__.':$response_code=' . $response_code . PHP_EOL;
-      if (is_wp_error($response) || (200 !== $response_code)) {
-$this->debug .= __METHOD__.':'.__LINE__.':error' . PHP_EOL;
-      } else {
+      if (!is_wp_error($response) && (200 === $response_code)) {
          $response_body = wp_remote_retrieve_body($response);
-         if (empty($response_body)) {
-         } else {
-$this->debug .= __METHOD__.':'.__LINE__.':$response_body=' . print_r($response_body, true) . PHP_EOL;
-            $data = json_decode($response_body);
+         if (!empty($response_body)) {
+            return(json_decode($response_body, true));
          }
       }
-      return($data);
+
+      return(null);
+
    } // get_response();
 
-} // Class USI_WordPress_Solutions_Update_Base;
+} // Class USI_WordPress_Solutions_Update;
 
-class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Update_Base {
+class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Update {
 
 // https://developer.github.com/v3/#rate-limiting
 
-   const VERSION = '2.3.8 (2020-02-02)';
+   const VERSION = '2.3.8 (2020-02-03)';
 
-   private $username;
+   private $user_name;
 
-   function __construct($file, $username, $repo_name, $access_token = null) {
+   function __construct($file, $user_name, $repo_name, $access_token = null) {
 
       parent::__construct($file);
 
       $this->repo_name = $repo_name;
-      $this->username = $username;
+      $this->user_name = $user_name;
 
    } // __construct();
 
@@ -187,20 +173,15 @@ class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Upda
 
       if (!$this->repository) {
 
-         $request_uri = 'https://api.github.com/repos/' . $this->username. '/' . $this->repo_name . '/releases';
+         $request_uri = 'https://api.github.com/repos/' . $this->user_name. '/' . $this->repo_name . '/releases';
 
          if ($this->access_token) $request_uri .= '?access_token=' . $this->access_token;
 
-$this->debug .= __METHOD__.':'.__LINE__.':$request_uri=' . $request_uri . PHP_EOL;
-
-         $data = json_decode(wp_remote_retrieve_body(wp_remote_get($request_uri)), true);
-$this->debug .= __METHOD__.':'.__LINE__.':$data=' . print_r($data, true) . PHP_EOL;
-// $data1 = $data;
-//         $data2 = $this->get_response($request_uri);
+         $data = $this->get_response($request_uri);
 
          if (is_array($data)) $data = current($data);
 
-         if ($this->access_token) $data['zipball_url'] .= '?access_token=' . $this->access_token;
+         if ($this->access_token) $data['download_link'] .= '?access_token=' . $this->access_token;
 
          $this->repository = $data;
 
@@ -210,9 +191,9 @@ $this->debug .= __METHOD__.':'.__LINE__.':$data=' . print_r($data, true) . PHP_E
 
 } // Class USI_WordPress_Solutions_Update_GitHub;
 
-class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Update_Base {
+class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.3.6 (2020-01-30)';
+   const VERSION = '2.3.8 (2020-02-03)';
 
    private $service;
 
@@ -237,27 +218,25 @@ class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Upda
          $data = $this->get_response($request_uri);
 
          if (is_array($data)) $data = current($data);
-$this->debug .= __METHOD__.':'.__LINE__.':$data=' . print_r($data, true) . PHP_EOL;
 
          if (!is_object($data)) return;
 
-         $latest_version = property_exists($data, 'name') ? $data->name : '0';
+         $tag_name = property_exists($data, 'name') ? $data->name : '0';
 
-         $message = property_exists($data, 'message') ? $data->message : '0';
+         $message  = property_exists($data, 'message') ? $data->message : '0';
 
-         $date = property_exists($data, 'commit') ? $data->commit->created_at : date('Y-m-d');
+         $date     = property_exists($data, 'commit') ? $data->commit->created_at : date('Y-m-d');
 
-         $plugin_package = $this->service . '/api/v4/projects/' . $this->repo_name . '/repository/archive.zip?sha=' . $latest_version;
+         $download_link = $this->service . '/api/v4/projects/' . $this->repo_name . '/repository/archive.zip?sha=' . $tag_name;
 
-         if ($this->access_token) $plugin_package .= '&private_token=' . $this->access_token;
+         if ($this->access_token) $download_link .= '&private_token=' . $this->access_token;
 
-         $this->repository = array(
-            'tag_name'     => $latest_version,
-            'published_at' => $date,
-            'body'         => $message,
-            'zipball_url'  => $plugin_package,
+         $this->repository  = array(
+            'body'          => $message,
+            'download_link' => $download_link,
+            'published_at'  => $date,
+            'tag_name'      => $tag_name,
          );
-$this->debug .= __METHOD__.':'.__LINE__.':$this->repository=' . print_r($this->repository, true) . PHP_EOL;
 
       }
 

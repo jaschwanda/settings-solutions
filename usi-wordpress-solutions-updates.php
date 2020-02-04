@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Updates {
 
-   const VERSION = '2.3.2 (2020-01-08)';
+   const VERSION = '2.4.0 (2020-02-04)';
 
    private $text_domain = null;
 
@@ -26,7 +26,7 @@ class USI_WordPress_Solutions_Updates {
    } // __construct();
 
    public function section_header() {
-      echo '<p>' . __('GitHub is a code hosting platform for version control and collaboration. It is used to publish updates for this WordPress plugin.', $this->text_domain) . '</p>' . PHP_EOL;
+      echo '<p>' . __('GitHub and GitLab are code hosting platforms for version control and collaboration. Thay are used to publish updates for this WordPress plugin.', $this->text_domain) . '</p>' . PHP_EOL;
    } // section_header();
 
    public static function section($text_domain) {
@@ -40,8 +40,8 @@ class USI_WordPress_Solutions_Updates {
             'settings' => array(
                'git-update' => array(
                   'type' => 'checkbox', 
-                  'label' => 'Enable GitHub updates',
-                  'notes' => 'Checks GitHub for updates and notifies the user when updates are avaiable for download and installation.',
+                  'label' => 'Enable Git updates',
+                  'notes' => 'Checks GitHub/GitLab for updates and notifies the administrator when updates are avaiable for download and installation.',
                ),
             ),
          )
