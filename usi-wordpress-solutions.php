@@ -15,7 +15,7 @@ Requires at least: 5.0
 Requires PHP:      5.6.25
 Tested up to:      5.3.2
 Text Domain:       usi-wordpress-solutions
-Version:           2.3.8
+Version:           2.4.0
 */
 
 /*
@@ -33,7 +33,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.3.8 (2020-02-02)';
+   const VERSION = '2.4.0 (2020-02-04)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
@@ -56,19 +56,16 @@ if (is_admin() && !defined('WP_UNINSTALL_PLUGIN')) {
    add_action('init', 'add_thickbox');
    require_once('usi-wordpress-solutions-install.php');
    require_once('usi-wordpress-solutions-settings-settings.php');
-   require_once('usi-wordpress-solutions-update.php');
-   new USI_WordPress_Solutions_Update_GitHub(__FILE__, 'jaschwanda', 'wordpress-solutions');
+   if (!empty(USI_WordPress_Solutions::$options['admin-options']['git-update'])) {
+      require_once('usi-wordpress-solutions-update.php');
+      new USI_WordPress_Solutions_Update_GitHub(__FILE__, 'jaschwanda', 'wordpress-solutions');
+   }
 }
 
 if (!function_exists('usi_log')) {
    function usi_log($action) {
       global $wpdb;
-      $wpdb->insert($wpdb->prefix . 'USI_log', 
-         array(
-            'action' => $action,
-            'user_id' => get_current_user_id(), 
-         )
-      );
+      $wpdb->insert($wpdb->prefix . 'USI_log', array('action' => $action, 'user_id' => get_current_user_id()));
    } // usi_log();
 } // ENDIF function_exists('usi_log');
 
