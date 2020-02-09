@@ -20,7 +20,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.0 (2020-02-04)';
+   const VERSION = '2.4.1 (2020-02-09)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -95,22 +95,6 @@ class USI_WordPress_Solutions_Settings {
          (('options.php' == $script) && !empty($_POST['option_page']) && ($_POST['option_page'] == $this->page_slug)) 
          ) {
 
-         $this->sections = $this->sections();
-
-         if ($this->is_tabbed) {
-            $prefix_tab  = $this->prefix . '-tab';
-            $active_tab  = !empty($_POST[$prefix_tab]) ? $_POST[$prefix_tab] : (!empty($_GET['tab']) ? $_GET['tab'] : null);
-            $default_tab = null;
-            if ($this->sections) foreach ($this->sections as $section_id => $section) {
-               if (!$default_tab) $default_tab = $section_id;
-               if ($section_id == $active_tab) {
-                  $this->active_tab = $active_tab;
-                  break;
-               }
-            }
-            if (!$this->active_tab) $this->active_tab = $default_tab;
-         }
-
          add_action('admin_head', array($this, 'action_admin_head'));
 
          add_action('admin_init', array($this, 'action_admin_init'));
@@ -136,6 +120,26 @@ class USI_WordPress_Solutions_Settings {
 
    } // __construct();
 
+   function sections_load() {
+
+       $this->sections = $this->sections();
+
+      if ($this->is_tabbed) {
+         $prefix_tab  = $this->prefix . '-tab';
+         $active_tab  = !empty($_POST[$prefix_tab]) ? $_POST[$prefix_tab] : (!empty($_GET['tab']) ? $_GET['tab'] : null);
+         $default_tab = null;
+         if ($this->sections) foreach ($this->sections as $section_id => $section) {
+            if (!$default_tab) $default_tab = $section_id;
+            if ($section_id == $active_tab) {
+               $this->active_tab = $active_tab;
+               break;
+            }
+         }
+         if (!$this->active_tab) $this->active_tab = $default_tab;
+      }
+
+   } // sections_load();
+
    function action_admin_notices() {
       settings_errors($this->page_slug);
    } // action_admin_notices();
@@ -152,6 +156,8 @@ class USI_WordPress_Solutions_Settings {
    function action_admin_init() {
 
       $prefix = $this->prefix;
+
+      $this->sections_load();
 
       if ($this->sections) foreach ($this->sections as $section_id => $section) {
 
