@@ -20,12 +20,13 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.2 (2020-02-10)';
+   const VERSION = '2.4.3 (2020-02-11)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
 
    protected $active_tab = null;
+   protected $capability = 'manage_options';
    protected $debug = 0;
    protected $hide = null;
    protected $icon_url = null;
@@ -62,12 +63,13 @@ class USI_WordPress_Solutions_Settings {
          $this->page_slug   = self::page_slug($this->prefix);
 
          $add_settings_link = empty($config['no_settings_link']);
-         
-         if (!empty($config['debug']))    $this->debug($config['debug']);
-         if (!empty($config['hide']))     $this->hide     = $config['hide'];
-         if (!empty($config['icon_url'])) $this->icon_url = $config['icon_url'];
-         if (!empty($config['page']))     $this->page     = $config['page'];
-         if (!empty($config['position'])) $this->position = $config['position'];
+
+         if (!empty($config['debug']))      $this->debug($config['debug']);
+         if (!empty($config['capability'])) $this->capability = $config['capability'];
+         if (!empty($config['hide']))       $this->hide       = $config['hide'];
+         if (!empty($config['icon_url']))   $this->icon_url   = $config['icon_url'];
+         if (!empty($config['page']))       $this->page       = $config['page'];
+         if (!empty($config['position']))   $this->position   = $config['position'];
 
       } else {
 
@@ -217,7 +219,7 @@ class USI_WordPress_Solutions_Settings {
          $slug = add_menu_page(
             __($this->name . ' Settings', $this->text_domain), // Page <title/> text;
             __($this->name, $this->text_domain), // Sidebar menu text; 
-            'manage_options', // Capability required to enable page;
+            $this->capability, // Capability required to enable page;
             $this->page_slug, // Menu page slug name;
             array($this, 'page_render'), // Render page callback;
             $this->icon_url, // URL of icon for menu item;
@@ -227,7 +229,7 @@ class USI_WordPress_Solutions_Settings {
          $slug = add_options_page(
             __($this->name . ' Settings', $this->text_domain), // Page <title/> text;
             __($this->name, $this->text_domain), // Sidebar menu text; 
-            'manage_options', // Capability required to enable page;
+            $this->capability, // Capability required to enable page;
             $this->page_slug, // Menu page slug name;
             array($this, 'page_render') // Render page callback;
          );
