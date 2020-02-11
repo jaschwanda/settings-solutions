@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.4.2 (2020-02-10) ##
+* Added fields_render_select() function to settings.
+
 ## 2.4.1 (2020-02-09) ##
 * Moved settings load sections code to the action_admin_init() function.
 

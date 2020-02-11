@@ -20,7 +20,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.1 (2020-02-09)';
+   const VERSION = '2.4.2 (2020-02-10)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -322,7 +322,7 @@ class USI_WordPress_Solutions_Settings {
    }
 
    // Statis version so that other classes can use this rendering function;
-   static function fields_render_static($args) {
+   public static function fields_render_static($args) {
 
       if (isset($args['one_per_line'])) self::$override_do_settings_one_per_line = empty($args['one_per_line']);
 
@@ -377,11 +377,7 @@ class USI_WordPress_Solutions_Settings {
          break;
 
       case 'select':
-         echo $prefix . '<select' . $attributes . '>';
-         foreach ($args['options'] as $row) {
-            echo '<option ' . ($row[0] == $value ? 'selected ' : '') . 'value="' . $row[0] . '">' . $row[1] . '</option>';
-         }
-         echo '</select>';
+         echo $prefix . self::fields_render_select($attributes, $args['options'], $value);
          break;
 
       case 'textarea':
@@ -399,6 +395,14 @@ class USI_WordPress_Solutions_Settings {
       }
 
    } // fields_render();
+
+   public static function fields_render_select($attributes, $rows, $value = null) {
+      $html = '<select' . $attributes . '>';
+      foreach ($rows as $row) {
+         $html .= '<option ' . ($row[0] == $value ? 'selected ' : '') . 'value="' . $row[0] . '">' . $row[1] . '</option>';
+      }
+      return($html . '</select>');
+   } // fields_render_select();
 
    function fields_sanitize($input) {
 
