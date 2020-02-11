@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.4.3 (2020-02-11) ##
+* Added capability option to settings page menu item creation.
+
 ## 2.4.2 (2020-02-10) ##
 * Added fields_render_select() function to settings.
 
