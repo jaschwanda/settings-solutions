@@ -17,37 +17,33 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Updates {
 
-   const VERSION = '2.4.0 (2020-02-04)';
+   const VERSION = '2.4.3 (2020-02-11)';
+
+   public $section = null;
 
    private $text_domain = null;
 
-   private function __construct($text_domain) {
-      $this->text_domain = $text_domain;
-   } // __construct();
+   function __construct($parent) {
 
-   public function section_header() {
-      echo '<p>' . __('GitHub and GitLab are code hosting platforms for version control and collaboration. Thay are used to publish updates for this WordPress plugin.', $this->text_domain) . '</p>' . PHP_EOL;
-   } // section_header();
+      $this->text_domain = $parent->text_domain();
 
-   public static function section($text_domain) {
-
-      $that = new USI_WordPress_Solutions_Updates($text_domain);
-
-      return(
-         array(
-            'header_callback' => array($that, 'section_header'),
-            'label' => 'Updates',
-            'settings' => array(
-               'git-update' => array(
-                  'type' => 'checkbox', 
-                  'label' => 'Enable Git updates',
-                  'notes' => 'Checks GitHub/GitLab for updates and notifies the administrator when updates are avaiable for download and installation.',
-               ),
+      $this->section      = array(
+         'header_callback' => array($this, 'section_header'),
+         'label' => 'Updates',
+         'settings' => array(
+            'git-update' => array(
+               'type' => 'checkbox', 
+               'label' => 'Enable Git updates',
+               'notes' => 'Checks GitHub/GitLab for updates and notifies the administrator when updates are avaiable for download and installation.',
             ),
-         )
+         ),
       );
 
-   } // section();
+   } // __construct();
+
+   function section_header() {
+      echo '<p>' . __('GitHub and GitLab are code hosting platforms for version control and collaboration. Thay are used to publish updates for this WordPress plugin.', $this->text_domain) . '</p>' . PHP_EOL;
+   } // section_header();
 
 } // Class USI_WordPress_Solutions_Updates;
 

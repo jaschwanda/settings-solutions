@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Custom_Post {
 
-   const VERSION = '2.4.0 (2020-02-04)';
+   const VERSION = '2.4.4 (2020-02-19)';
 
    const POST    = 'custom-post';
 

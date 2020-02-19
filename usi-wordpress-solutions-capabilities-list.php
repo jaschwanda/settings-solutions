@@ -1,7 +1,5 @@
 <?php // ------------------------------------------------------------------------------------------------------------------------ //
 
-defined('ABSPATH') or die('Accesss not allowed.');
-
 /*
 WordPress-Solutions is free software: you can redistribute it and/or modify it under the terms of the GNU General Public 
 License as published by the Free Software Foundation, either version 3 of the License, or any later version.
@@ -15,21 +13,25 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
-class USI_WordPress_Solutions_Versions {
+final class USI_WordPress_Solutions_Capabilities_List {
 
    const VERSION = '2.4.4 (2020-02-19)';
 
    private function __construct() {
    } // __construct();
 
-   public static function link($link_text, $title, $version, $text_domain, $file) {
+   public static function list() {
+      foreach ($_COOKIE as $key => $value) {
+         if (substr($key, 0, 20) == 'wordpress_logged_in_') {
+            $query = $_SERVER['QUERY_STRING'];
+            die('<table>' . '<tr><td>' . $query . '</td></tr>' . '</table>');
+         }
+      }
+      die('Accesss not allowed.');
+   } // versions();
 
-      return('<a class="thickbox" href="' . plugins_url(null, __FILE__) . '/usi-wordpress-solutions-versions-scan.php' .
-         '?' . urlencode($file) . '" title="' . 
-         $title . ' &nbsp; &nbsp; Version ' . $version . '">' . $link_text . '</a>');
+} // Class USI_WordPress_Solutions_Capabilities_List;
 
-   } //link();
-
-} // Class USI_WordPress_Solutions_Versions;
+USI_WordPress_Solutions_Capabilities_List::list();
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

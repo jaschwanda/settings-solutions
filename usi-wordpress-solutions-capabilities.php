@@ -19,10 +19,13 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Capabilities {
 
-   const VERSION = '2.4.0 (2020-02-04)';
+   const VERSION = '2.4.3 (2020-02-11)';
+
+   public $section = null;
+
+   protected $roles = null;
 
    private $capabilities = null;
-   private $custom_role  = false;
    private $disable_save = true;
    private $name = null;
    private $prefix = null;
@@ -31,31 +34,29 @@ class USI_WordPress_Solutions_Capabilities {
    private $prefix_select_user = null;
    private $text_domain = null;
    private $user = null;
+   private $user_roles = array();
    private $user_id = null;
 
-   protected $options = null;
-   protected $roles   = null;
+   function __construct($parent) {
 
-   private function __construct($name, $prefix, $text_domain, $capabilities, & $options, $roles = null, $translate = true) {
+      $this->capabilities = $parent->capabilities();
+      $this->name         = $parent->name();
+      $this->options      = $parent->options();
+      $this->prefix       = $parent->prefix();
+      $this->roles        = $parent->roles();
+      $this->text_domain  = $parent->text_domain();
 
-      if (!empty($capabilities) && $translate) foreach ($capabilities as $key => $value) $capabilities[$key] = __($value, $text_domain);
-
-      $this->capabilities = $capabilities;
-      $this->name         = $name;
-      $this->options      = & $options;
-      $this->prefix       = $prefix;
-      $this->prefix_select_user = $this->prefix . '-select-user';
-      $this->roles        = $roles;
-      $this->text_domain  = $text_domain;
-
-      add_filter('editable_roles', array($this, 'filter_editable_roles'));
-
-
-   } // __construct();
-
-   function after_add_settings_section($settings) {
+      $this->section      = array(
+         'fields_sanitize' => array($this, 'fields_sanitize'),
+         'footer_callback' => array($this, 'section_footer'),
+         'header_callback' => array($this, 'render_section'),
+         'label' => __('Capabilities', $this->text_domain),
+         'settings' => array(),
+      );
 
       // Get the role and selected user, if none given then get the last ones modified by the user;
+
+      $this->prefix_select_user = $this->prefix . '-select-user';
 
       $current_user_id = get_current_user_id();
 
@@ -71,119 +72,107 @@ class USI_WordPress_Solutions_Capabilities {
       $this->role_id = (!empty($_REQUEST['role_id']) ? $_REQUEST['role_id'] : $option_role_id);
       $this->user_id = (!empty($_REQUEST['user_id']) ? $_REQUEST['user_id'] : $option_user_id);
 
-      $this->disable_save = true;
-
-      $this->role = get_role($role_id = $this->role_id);
-
-      if ($this->prefix_select_user != $this->role_id) {
-         $select_user = false;
-         if (!empty($this->roles)) foreach ($this->roles as $id => $role) {
-            if ($id == $this->role_id) {
-               $this->custom_role  = true;
-               $this->disable_save = false;
-               $settings = array();
-               foreach ($role['capabilities'] as $capability => $status) {
-                  if ('usi_hide_from_dropdown' == $capability) continue;
-                  $settings[$capability] = array('label' => $capability, 'type' => 'checkbox');
-               }
-            }
-         }
-      } else {
-         $select_user = true;
-         $this->user = new WP_User($this->user_id);
-         // IF last user selected has been removed then use current user;
-         if (empty($this->user)) $this->user = new WP_User($this->user_id = $current_user_id);
-         if (!empty($this->user->roles) && is_array($this->user->roles)) {
-            foreach ($this->user->roles as $role_id) {
-               switch ($role_id) {
-               case 'subscriber':
-               case 'contributor':
-               case 'author':
-               case 'editor':
-               case 'administrator': $this->role = get_role($role_id); break 2;
-               }
-            }
-         }
-      }
-
-      // FOREACH of the capabilities;
-      foreach ($settings as $field_id => & $attributes) {
-         $capability_name = $this->name . '-' . $field_id;
-         // IF capability is inherited by role;
-         if ($this->custom_role) {
-            if ($this->role->has_cap($field_id)) {
-               $this->options['capabilities'][$field_id] = true;
-            }
-         } else if (!empty($this->role) && $this->role->has_cap($capability_name)) {
-            $this->options['capabilities'][$field_id] = true;
-            if ($select_user) {
-               $attributes['readonly'] = true;
-               $attributes['notes'] = ' <i>(' . 
-                  sprintf(__("Set by user's %s role settings", $this->text_domain), ucfirst($role_id)) . 
-               ')</i>';
-            } else if ('administrator' == $this->role_id) {
-               $attributes['readonly'] = true;
-               $attributes['notes'] = ' <i>(' . __('Default setting for Administrator', $this->text_domain) . ')</i>';
-            }
-         // ELSEIF capability set by user;
-         } else if ($select_user && $this->user->has_cap($capability_name)) {
-            $this->options['capabilities'][$field_id] = true;
-            $this->disable_save = false;
-         } else { // ELSE role/user does not have capability;
-            $this->options['capabilities'][$field_id] = false;
-            $this->disable_save = false;
-         } // ENDIF capability is inherited by role;
-      } // ENDFOREACH of the capabilities;
-      unset($attributes);
-
       if ($this->role_id != $option_role_id) update_user_option($current_user_id, $role_id_option_name, $this->role_id);
       if ($this->user_id != $option_user_id) update_user_option($current_user_id, $user_id_option_name, $this->user_id);
 
-      return($settings);
+      $this->role = get_role($this->role_id);
+      $this->user = new WP_User($this->user_id);
+      $this->user_roles = array();
+      if (!empty($this->user->roles) && is_array($this->user->roles)) {
+         foreach ($this->user->roles as $role_id) {
+            $this->user_roles[] = get_role($role_id);
+         }
+      }
 
-   } // after_add_settings_section();
+      if (!empty($this->capabilities)) {
+         foreach ($this->capabilities as $name => $capability) {
+            $has_cap  = false;
+            $notes    = null;
+            $readonly = false;
+            $slug     = self::capability_slug($this->prefix, $name);
+            // IF setting capabilities for a role;
+            if ($this->role) { 
+               $has_cap = $this->role->has_cap($slug);
+               $this->disable_save = false;
+            // ELSEIF setting capabilities for a user;
+            } else if ($this->prefix_select_user == $this->role_id) {
+               foreach ($this->user_roles as $user_role) {
+                  $has_cap = $user_role->has_cap($slug);
+                  if ($has_cap) {
+                     $notes    = sprintf(__("Set by user's %s role settings", $this->text_domain), ucfirst($user_role->name));
+                     $readonly = true;
+                     break;
+                  }
+                  $this->disable_save = false;
+               }
+               // IF capability not set by role, check if set for user;
+               if (!$has_cap) $has_cap = $this->user->has_cap($slug);
+            } // ENDIF setting capabilities for a user;
+            $parent->set_options('capabilities', $name, $has_cap);
+            $this->section['settings'][$name] = array(
+               'readonly' => $readonly, 
+               'label' => explode('|', $capability)[0], 
+               'notes' => $notes, 
+               'type' => 'checkbox'
+            );
+         }
+      }
+
+   } // __construct();
+
+   public static function capability_slug($prefix, $capability) {
+      return(strtolower(str_replace('-', '_', $prefix . '_' . $capability)));
+   } // capability_slug();
 
    function fields_sanitize($input) {
 
-      $prefix_role_id = $this->prefix . '-role_id';
-
-      if (!empty($_POST[$prefix_role_id])) {
-
-         if (empty($this->capabilities)) {
-         } else if ($this->prefix_select_user == $_POST[$prefix_role_id]) {
-            foreach ($this->capabilities as $name => $capability) {
-               $capability_name = $this->name . '-' . $name;
-               // IF capability not set of it can be inherited by the user's role;
-               if (empty($input['capabilities'][$name]) || (!empty($this->role) && $this->role->has_cap($capability_name))) {
-                  $this->user->remove_cap($capability_name);
-               } else { // ELSE the capability has been set;
-                  $this->user->add_cap($capability_name);
+      if (!empty($this->capabilities)) {
+         foreach ($this->capabilities as $name => $capability) {
+            $slug = self::capability_slug($this->prefix, $name);
+            // IF setting capabilities for a role;
+            if ($this->role) { 
+               if (empty($input['capabilities'][$name])) {
+                  $this->role->remove_cap($slug);
+               } else {
+                  $this->role->add_cap($slug);
                }
-            }
-         } else {
-            foreach ($this->capabilities as $name => $capability) {
-               $capability_name = $this->name . '-' . $name;
-               !empty($input['capabilities'][$name]) ? $this->role->add_cap($capability_name) : $this->role->remove_cap($capability_name);
-            }
+            // ELSEIF setting capabilities for a user;
+            } else if ($this->user && ($this->prefix_select_user == $this->role_id)) {
+               foreach ($this->user_roles as $user_role) {
+                  if ($user_role->has_cap($slug)) break 1;
+               }
+               // Capability not set by role, check if set for user;
+               if (empty($input['capabilities'][$name])) {
+                  $this->user->remove_cap($slug);
+               } else {
+                  $this->user->add_cap($slug);
+               }
+            } // ENDIF setting capabilities for a user;
          }
-
       }
 
       return($input);
 
    } // fields_sanitize();
 
-   function filter_editable_roles($roles) {
-      foreach ($roles as $id => $role) {
-         $role = get_role($id);
-         if ($role->has_cap('usi_hide_from_dropdown')) {
-            unset($roles[$id]);
+   public static function init($prefix, $capabilities) {
+      $roles = wp_roles();
+      foreach ($capabilities as $capability_name => $capability) {
+         $slug     = self::capability_slug($prefix, $capability_name);
+         $defaults = explode('|', $capability);
+         foreach ($roles->role_objects as $role_name => $role) {
+            if (in_array($role_name, $defaults)) {
+               $role->add_cap($slug);
+            } else {
+               $role->remove_cap($slug); // Remove capabilties from previous uses, if any;
+            }
          }
       }
-      return($roles);
-   } // filter_editable_roles();
+      $roles = get_editable_roles();
+   } // init();
 
    function render_section() {
+
       echo 
          '    <p>' . sprintf(__('The %s plugin enables you to set the role capabilites system wide or for a specific user on a user-by-user basis. Select the role or specific user you would like to edit and then check or uncheck the desired capabilites for that role or user.', $this->text_domain), $this->name) . '</p>' . PHP_EOL .
          '    <label>' . __('Capabilities for', $this->text_domain) . ' : </label>' . PHP_EOL .
@@ -192,22 +181,25 @@ class USI_WordPress_Solutions_Capabilities {
          '    <select id="' . $this->prefix . '-role-select">' . PHP_EOL . 
          '      <option value="' . $this->prefix . '-select-user">' . __('Select User', $this->text_domain) . '</option>';
       wp_dropdown_roles($this->role_id);
-      echo PHP_EOL . 
-         '    </select>' . PHP_EOL;
-         if ($this->prefix_select_user == $this->role_id) {
-            wp_dropdown_users(array('id' => $this->prefix . '-user-select', 'selected' => $this->user_id));
-            if (!empty($this->user->roles) && is_array($this->user->roles)) {
-               global $wp_roles;
-               $comma = ' (';
-               foreach ($this->user->roles as $role) {
-                  echo $comma . $wp_roles->roles[$role]['name'];
-                  $comma = ', ';
-               }
-               echo ')';
-            } else {
-               echo ' (No role for this site)';
+      echo PHP_EOL . '    </select>' . PHP_EOL;
+      if ($this->prefix_select_user == $this->role_id) {
+         wp_dropdown_users(array('id' => $this->prefix . '-user-select', 'selected' => $this->user_id));
+         $this->user = new WP_User($this->user_id);
+         if (!empty($this->user->roles) && is_array($this->user->roles)) {
+            global $wp_roles;
+            $comma = ' (';
+            foreach ($this->user->roles as $role) {
+               echo $comma . $wp_roles->roles[$role]['name'];
+               $comma = ', ';
             }
+            echo ')';
+         } else {
+            echo ' (No role for this site)';
          }
+      } else {
+      //   echo '<a class="thickbox" href="' . plugins_url(null, __FILE__) . '/usi-wordpress-solutions-capabilities-list.php' .
+      //   '?role=administrator" title="Administrator Capabilities">(Administrator)</a>';
+      }
       echo PHP_EOL . 
          '<script>' . PHP_EOL .
          'jQuery(document).ready(function($) {' . PHP_EOL .
@@ -218,66 +210,16 @@ class USI_WordPress_Solutions_Capabilities {
          '</script>' . PHP_EOL;
    } // render_section();
 
-   public static function roles_add($roles, $text_domain) {
-      foreach ($roles as $id => $role) {
-         $id   = str_replace('-', '_', sanitize_title($id));
-         // Remove role, in case it exists, to ensure no hold-over capabilities;
-         remove_role($id);
-         $name = __($role['name'], $text_domain);
-         $capabilities = array();
-         foreach ($role['capabilities'] as $capability => $status) {
-            if ($status) {
-               $capability = str_replace('-', '_', sanitize_title($capability));
-               $capabilities[$capability] = true;
-            }
-         }
-         add_role($id, $name, $capabilities);
-      }
-   } // roles_add();
-
-   public static function roles_remove($roles) {
-      foreach ($roles as $id => $role) {
-         $id = str_replace('-', '_', sanitize_title($id));
-         remove_role($id);
-      }
-   } // roles_remove();
-
    function section_footer() {
       submit_button(
          __('Save Capabilities', $this->text_domain),
-        'primary', 
-        'submit', 
-        true, 
-        $this->disable_save ? 'disabled' : null
+         'primary', 
+         'submit', 
+         true, 
+         $this->disable_save ? 'disabled' : null
       ); 
       return(null);
    } // section_footer();
-
-   public static function section($name, $prefix, $text_domain, $capabilities, & $options, $roles = null) {
-
-      $that = new USI_WordPress_Solutions_Capabilities($name, $prefix, $text_domain, $capabilities, $options, $roles);
-
-      $section = array(
-         'after_add_settings_section' => array($that, 'after_add_settings_section'),
-         'fields_sanitize' => array($that, 'fields_sanitize'),
-         'footer_callback' => array($that, 'section_footer'),
-         'header_callback' => array($that, 'render_section'),
-         'label' => __('Capabilities', $that->text_domain),
-         'settings' => array(),
-      );
-
-      if (!empty($that->capabilities)) foreach ($that->capabilities as $name => $capability) {
-         $section['settings'][$name] = array(
-            'readonly' => false, 
-            'label' => $capability, 
-            'notes' => null, 
-            'type' => 'checkbox'
-         );
-      }
-
-      return($section);
-
-   } // section();
 
 } // Class USI_WordPress_Solutions_Capabilities;
 

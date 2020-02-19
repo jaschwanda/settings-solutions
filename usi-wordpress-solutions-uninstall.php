@@ -15,33 +15,48 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_Uninstall {
 
-   const VERSION = '2.4.0 (2020-02-04)';
+   const VERSION = '2.4.4 (2020-02-19)';
 
    private function __construct() {
    } // __construct();
 
-   static function uninstall($prefix, $post_type = null) {
+   static function uninstall($config) {
+
+      global $wpdb;
 
       if (!defined('WP_UNINSTALL_PLUGIN')) exit;
 
+      $capabilities = !empty($config['capabilities']) ? $config['capabilities'] : null;
+      $post_type    = !empty($config['post_type'])    ? $config['post_type']    : null;
+      $prefix       = !empty($config['prefix'])       ? $config['prefix']       : null;
+
+      if ($capabilities) {
+
+      }
+
       if ($post_type) {
+
          $posts = get_posts(array('post_type' => $post_type, 'numberposts' => -1));
          foreach ($posts as $post) {
             wp_delete_post($post->ID, true);
          }
+
       }
 
-      global $wpdb;
-      $results = $wpdb->get_results('SELECT option_name FROM ' . $wpdb->prefix . 
-         'options WHERE (option_name LIKE "' . $prefix . '-options%")');
-      foreach ($results as $result) {
-         delete_option($result->option_name);
-      }
+      if ($prefix) {
 
-      $results = $wpdb->get_results('SELECT DISTINCT meta_key FROM ' . $wpdb->prefix . 
-         'usermeta WHERE (meta_key LIKE "' . $wpdb->prefix . $prefix . '-options%")');
-      foreach ($results as $result) {
-         delete_metadata('user', null, $result->meta_key, null, true);
+         $results = $wpdb->get_results('SELECT option_name FROM ' . $wpdb->prefix . 
+            'options WHERE (option_name LIKE "' . $prefix . '-options%")');
+         foreach ($results as $result) {
+            delete_option($result->option_name);
+         }
+
+         $results = $wpdb->get_results('SELECT DISTINCT meta_key FROM ' . $wpdb->prefix . 
+            'usermeta WHERE (meta_key LIKE "' . $wpdb->prefix . $prefix . '-options%")');
+         foreach ($results as $result) {
+            delete_metadata('user', null, $result->meta_key, null, true);
+         }
+
       }
 
    } // uninstall();

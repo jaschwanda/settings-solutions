@@ -27,6 +27,7 @@ class USI_WordPress_Solutions_Settings {
 
    protected $active_tab = null;
    protected $capability = 'manage_options';
+   protected $capabilities = null;
    protected $debug = 0;
    protected $hide = null;
    protected $icon_url = null;
@@ -42,6 +43,7 @@ class USI_WordPress_Solutions_Settings {
    protected $page_slug = null;
    protected $position = null;
    protected $prefix = null;
+   protected $roles = null;
    protected $section_callback_offset = 0;
    protected $section_callbacks = array();
    protected $section_ids = array();
@@ -66,10 +68,12 @@ class USI_WordPress_Solutions_Settings {
 
          if (!empty($config['debug']))      $this->debug($config['debug']);
          if (!empty($config['capability'])) $this->capability = $config['capability'];
+         if (!empty($config['capabilities'])) $this->capabilities = $config['capabilities'];
          if (!empty($config['hide']))       $this->hide       = $config['hide'];
          if (!empty($config['icon_url']))   $this->icon_url   = $config['icon_url'];
          if (!empty($config['page']))       $this->page       = $config['page'];
          if (!empty($config['position']))   $this->position   = $config['position'];
+         if (!empty($config['roles']))      $this->roles      = $config['roles'];
 
       } else {
 
@@ -120,31 +124,9 @@ class USI_WordPress_Solutions_Settings {
          break;
       }
 
+      if (!empty($config['file'])) register_activation_hook($config['file'], array($this, 'hook_activation'));
+
    } // __construct();
-
-   function sections_load() {
-
-       $this->sections = $this->sections();
-
-      if ($this->is_tabbed) {
-         $prefix_tab  = $this->prefix . '-tab';
-         $active_tab  = !empty($_POST[$prefix_tab]) ? $_POST[$prefix_tab] : (!empty($_GET['tab']) ? $_GET['tab'] : null);
-         $default_tab = null;
-         if ($this->sections) foreach ($this->sections as $section_id => $section) {
-            if (!$default_tab) $default_tab = $section_id;
-            if ($section_id == $active_tab) {
-               $this->active_tab = $active_tab;
-               break;
-            }
-         }
-         if (!$this->active_tab) $this->active_tab = $default_tab;
-      }
-
-   } // sections_load();
-
-   function action_admin_notices() {
-      settings_errors($this->page_slug);
-   } // action_admin_notices();
 
    function action_admin_head() {
       if ($this->page_slug != ((!empty($_GET['page'])) ? esc_attr($_GET['page']) : '')) return;
@@ -183,7 +165,7 @@ class USI_WordPress_Solutions_Settings {
             foreach ($section['settings'] as $option_id => $attributes) {
                $option_name  = $this->option_name . '[' . $section_id . ']['  . $option_id . ']';
                $option_value = (!empty($this->options[$section_id][$option_id]) ?
-                  $this->options[$section_id][$option_id] : ('number' == $attributes['type'] ? 0 : null));
+                  $this->options[$section_id][$option_id] : (('number' == $attributes['type']) ? 0 : null));
 
                if (self::DEBUG_INIT & $this->debug) call_user_func($this->logger, __METHOD__.':$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
                if (empty($attributes['skip'])) {
@@ -251,6 +233,10 @@ class USI_WordPress_Solutions_Settings {
 
    } // action_admin_menu();
 
+   function action_admin_notices() {
+      settings_errors($this->page_slug);
+   } // action_admin_notices();
+
    function action_init() { 
       if ($this->impersonate && !empty($_REQUEST['action']) && !empty( $_REQUEST['user_id']) && ('impersonate' == $_REQUEST['action'])) {
          if ($user = get_userdata($user_id = $_REQUEST['user_id'])) {
@@ -264,31 +250,16 @@ class USI_WordPress_Solutions_Settings {
       }
    } // action_init();
 
+   public function capabilities() { 
+      return($this->capabilities); 
+   } // capabilities();
+
    function debug($logger, $debug = 0xFF) {
       if (is_callable($logger)) {
          $this->debug  = $debug;
          $this->logger = $logger;
       }
    } // debug();
-
-   // This function riped from wp-admin/includes/template.php;
-   function do_settings_sections($page) {
-      global $wp_settings_sections, $wp_settings_fields;
-      if (!isset($wp_settings_sections[$page])) return;
-
-      foreach ((array)$wp_settings_sections[$page] as $section) {
-         if ($section['title']) echo "<h2>{$section['title']}</h2>\n";
-         if ($section['callback']) call_user_func( $section['callback'], $section );
-         if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) continue;
-         echo '<table class="form-table" role="presentation">';
-         if ($this->override_do_settings_sections) {
-            $this->do_settings_fields($page, $section['id']);
-         } else {
-            do_settings_fields($page, $section['id']);
-         }
-         echo '</table>';
-      }
-   } // do_settings_sections();
 
    // This function riped from wp-admin/includes/template.php;
    function do_settings_fields($page, $section) {
@@ -318,6 +289,25 @@ class USI_WordPress_Solutions_Settings {
       }
    } // do_settings_fields();
 
+   // This function riped from wp-admin/includes/template.php;
+   function do_settings_sections($page) {
+      global $wp_settings_sections, $wp_settings_fields;
+      if (!isset($wp_settings_sections[$page])) return;
+
+      foreach ((array)$wp_settings_sections[$page] as $section) {
+         if ($section['title']) echo "<h2>{$section['title']}</h2>\n";
+         if ($section['callback']) call_user_func( $section['callback'], $section );
+         if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) continue;
+         echo '<table class="form-table" role="presentation">';
+         if ($this->override_do_settings_sections) {
+            $this->do_settings_fields($page, $section['id']);
+         } else {
+            do_settings_fields($page, $section['id']);
+         }
+         echo '</table>';
+      }
+   } // do_settings_sections();
+
    function fields_render($args) {
       if (self::DEBUG_INIT & $this->debug) call_user_func($this->logger, __METHOD__.':args=' . print_r($args, true));
       self::fields_render_static($args);
@@ -343,7 +333,7 @@ class USI_WordPress_Solutions_Settings {
       $rows     = isset($args['rows'])     ? ' rows="'  . $args['rows']  . '"' : null;
 
       $readonly = !empty($args['readonly']) ? ('checkbox' == $type ? ' disabled' : ' readonly') : null;
-      $value    = !empty($args['value']) ? esc_attr($args['value']) : ('number' == $type ? 0 : null);
+      $value    = !empty($args['value']) ? esc_attr($args['value']) : (('number' == $type) ? 0 : null);
 
       $maxlen   = !empty($args['maxlength']) ? (is_integer($args['maxlength']) ? ' maxlength="' . $args['maxlength'] . '"' : null) : null;
 
@@ -401,7 +391,7 @@ class USI_WordPress_Solutions_Settings {
    public static function fields_render_select($attributes, $rows, $value = null) {
       $html = '<select' . $attributes . '>';
       foreach ($rows as $row) {
-         $html .= '<option ' . ($row[0] == $value ? 'selected ' : '') . 'value="' . $row[0] . '">' . $row[1] . '</option>';
+         $html .= '<option ' . ($row[0] === $value ? 'selected ' : '') . 'value="' . $row[0] . '">' . $row[1] . '</option>';
       }
       return($html . '</select>');
    } // fields_render_select();
@@ -415,6 +405,7 @@ class USI_WordPress_Solutions_Settings {
             if (method_exists($object, $method)) $input = $object->$method($input, $section_id);
          }
       }
+
       return($input);
 
    } // fields_sanitize();
@@ -481,6 +472,29 @@ class USI_WordPress_Solutions_Settings {
       }
       return($actions);
    } // filter_user_row_actions();
+
+   function hook_activation() {
+
+      if (current_user_can('activate_plugins')) {
+
+         check_admin_referer('activate-plugin_' . (isset($_REQUEST['plugin']) ? $_REQUEST['plugin'] : ''));
+
+         if (!empty($this->capabilities)) {
+            require_once('usi-wordpress-solutions-capabilities.php');
+            USI_WordPress_Solutions_Capabilities::init($this->prefix, $this->capabilities);
+         }
+
+      }
+
+   } // hook_activation();
+
+   public function name() { 
+      return($this->name); 
+   } // name();
+
+   public function options() { 
+      return($this->options); 
+   } // options();
 
    // To include more options on this page, override this function and call parent::page_render($options);
    function page_render($options = null) {
@@ -570,6 +584,71 @@ class USI_WordPress_Solutions_Settings {
    public static function page_slug($prefix) {
       return($prefix . '-settings');
    } // page_slug();
+
+   public function prefix() { 
+      return($this->prefix); 
+   } // prefix();
+
+   public function roles() { 
+      return($this->roles); 
+   } // roles();
+
+   function sections_load() {
+
+      $this->sections = $this->sections();
+
+      // Convert capabilities object to array();
+      if (!empty($this->sections['capabilities']) && is_object($this->sections['capabilities'])) {
+         $this->sections['capabilities'] = $this->sections['capabilities']->section;
+      }
+
+      // Convert updates object to array();
+      if (!empty($this->sections['updates']) && is_object($this->sections['updates'])) {
+         $this->sections['updates'] = $this->sections['updates']->section;
+      }
+
+      $labels = false;
+      $notes  = 0;
+      foreach ($this->sections as $section_id => & $section) {
+         if (isset($section['localize_labels'])) $labels = ('yes' == $section['localize_labels']);
+         if (isset($section['localize_notes']))  $notes  = $section['localize_notes'];
+         foreach ($section['settings'] as $name => & $setting) {
+            if ($labels && !empty($setting['label'])) $setting['label'] = __($setting['label'], $this->text_domain);
+            if ($notes  && !empty($setting['notes'])) {
+               switch ($notes) {
+               case 1: $setting['notes'] =  __($setting['notes'], $this->text_domain); break;
+               case 2: $setting['notes'] = ' &nbsp; <i>' . __($setting['notes'], $this->text_domain) . '</i>'; break;
+               case 3: $setting['notes'] = '<p class="description">' . __($setting['notes'], $this->text_domain) . '</p>';
+               }
+            }
+         }
+         unset($setting);
+      }
+      unset($section);
+
+      if ($this->is_tabbed) {
+         $prefix_tab  = $this->prefix . '-tab';
+         $active_tab  = !empty($_POST[$prefix_tab]) ? $_POST[$prefix_tab] : (!empty($_GET['tab']) ? $_GET['tab'] : null);
+         $default_tab = null;
+         if ($this->sections) foreach ($this->sections as $section_id => $section) {
+            if (!$default_tab) $default_tab = $section_id;
+            if ($section_id == $active_tab) {
+               $this->active_tab = $active_tab;
+               break;
+            }
+         }
+         if (!$this->active_tab) $this->active_tab = $default_tab;
+      }
+
+   } // sections_load();
+
+   public function set_options($section, $name, $value) { 
+      $this->options[$section][$name] = $value;
+   } // set_options();
+
+   public function text_domain() { 
+      return($this->text_domain); 
+   } // text_domain();
 
    function section_render() {
 

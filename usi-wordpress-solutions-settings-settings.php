@@ -20,7 +20,7 @@ require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-s
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.0 (2020-02-04)';
+   const VERSION = '2.4.4 (2020-02-19)';
 
    function __construct() {
 
@@ -113,6 +113,11 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                   'type' => 'checkbox', 
                   'label' => 'Enable Git updates',
                   'notes' => 'Checks GitHub/GitLab for updates and notifies the administrator when updates are avaiable for download and installation.',
+               ),
+               'options_php' => array(
+                  'type' => 'html', 
+                  'html' => '<a href="options.php" title="Semi-secret settings on options.php page">options.php</a>',
+                  'label' => 'Semi-Secret Settings',
                ),
             ),
          ), // admin-options;
