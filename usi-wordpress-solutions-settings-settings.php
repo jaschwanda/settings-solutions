@@ -20,7 +20,7 @@ require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-s
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.4 (2020-02-19)';
+   const VERSION = '2.4.5 (2020-02-26)';
 
    function __construct() {
 
@@ -73,6 +73,8 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             'header_callback' => array($this, 'config_section_header'),
             'footer_callback' => array($this, 'config_section_footer'),
             'label' => __('Sidebar Menu Sorting', USI_WordPress_Solutions::TEXTDOMAIN), 
+            'localize_labels' => 'yes',
+            'localize_notes' => 3, // <p class="description">__()</p>;
             'settings' => array(
                'menu-sort' => array(
                   'type' => 'radio', 
@@ -135,15 +137,6 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
          ), // diagnostics;
 
       );
-
-      foreach ($sections as $name => & $section) {
-         foreach ($section['settings'] as $name => & $setting) {
-            if (!empty($setting['label'])) $setting['label'] = __($setting['label'], USI_WordPress_Solutions::TEXTDOMAIN);
-            if (!empty($setting['notes'])) $setting['notes'] = '<p class="description">' . 
-               __($setting['notes'], USI_WordPress_Solutions::TEXTDOMAIN) . '</p>';
-         }
-      }
-      unset($setting);
 
       return($sections);
 

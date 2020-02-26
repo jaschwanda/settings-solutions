@@ -20,7 +20,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.3 (2020-02-11)';
+   const VERSION = '2.4.5 (2020-02-26)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -616,9 +616,9 @@ class USI_WordPress_Solutions_Settings {
             if ($labels && !empty($setting['label'])) $setting['label'] = __($setting['label'], $this->text_domain);
             if ($notes  && !empty($setting['notes'])) {
                switch ($notes) {
-               case 1: $setting['notes'] =  __($setting['notes'], $this->text_domain); break;
-               case 2: $setting['notes'] = ' &nbsp; <i>' . __($setting['notes'], $this->text_domain) . '</i>'; break;
-               case 3: $setting['notes'] = '<p class="description">' . __($setting['notes'], $this->text_domain) . '</p>';
+               case 1: $setting['notes'] =  __($setting['notes'], $this->text_domain); break;                              // __();
+               case 2: $setting['notes'] = ' &nbsp; <i>' . __($setting['notes'], $this->text_domain) . '</i>'; break;      // &nbsp; <i>__()</i>;
+               case 3: $setting['notes'] = '<p class="description">' . __($setting['notes'], $this->text_domain) . '</p>'; // <p class="description">__()</p>;
                }
             }
          }
