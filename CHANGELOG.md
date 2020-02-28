@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.4.6 (2020-02-27) ##
+* Fixed a foreach loop error.
+
 ## 2.4.5 (2020-02-26) ##
 * Improved settings text localization.
 
