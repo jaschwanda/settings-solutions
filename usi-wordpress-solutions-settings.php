@@ -20,7 +20,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.5 (2020-02-26)';
+   const VERSION = '2.4.6 (2020-02-27)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -609,7 +609,8 @@ class USI_WordPress_Solutions_Settings {
 
       $labels = false;
       $notes  = 0;
-      foreach ($this->sections as $section_id => & $section) {
+
+      if ($this->sections) foreach ($this->sections as $section_id => & $section) {
          if (isset($section['localize_labels'])) $labels = ('yes' == $section['localize_labels']);
          if (isset($section['localize_notes']))  $notes  = $section['localize_notes'];
          foreach ($section['settings'] as $name => & $setting) {
