@@ -20,15 +20,17 @@ require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-s
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.5 (2020-02-26)';
+   const VERSION = '2.4.8 (2020-03-09)';
 
    function __construct() {
 
       parent::__construct(
-         USI_WordPress_Solutions::NAME, 
-         USI_WordPress_Solutions::PREFIX, 
-         USI_WordPress_Solutions::TEXTDOMAIN,
-         USI_WordPress_Solutions::$options
+         array(
+            'name' => USI_WordPress_Solutions::NAME, 
+            'prefix' => USI_WordPress_Solutions::PREFIX, 
+            'text_domain' => USI_WordPress_Solutions::TEXTDOMAIN,
+            'options' => USI_WordPress_Solutions::$options,
+         )
       );
 
       // $this->debug('usi_log');

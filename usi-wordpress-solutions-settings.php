@@ -20,7 +20,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.6 (2020-02-27)';
+   const VERSION = '2.4.7 (2020-02-28)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -29,6 +29,7 @@ class USI_WordPress_Solutions_Settings {
    protected $capability = 'manage_options';
    protected $capabilities = null;
    protected $debug = 0;
+   protected $enctype = null;
    protected $hide = null;
    protected $icon_url = null;
    protected $is_tabbed = false;
@@ -43,6 +44,7 @@ class USI_WordPress_Solutions_Settings {
    protected $page_slug = null;
    protected $position = null;
    protected $prefix = null;
+   protected $query = null;
    protected $roles = null;
    protected $section_callback_offset = 0;
    protected $section_callbacks = array();
@@ -50,41 +52,29 @@ class USI_WordPress_Solutions_Settings {
    protected $sections = null;
    protected $text_domain = null;
 
-   function __construct($config, $prefix = null, $text_domain = null, & $options = null, $add_settings_link = true, $add_row_meta = true, $suffix = null) {
+   function __construct($config) {
 
       $this->impersonate = !empty(USI_WordPress_Solutions::$options['admin-options']['impersonate']);
 
-      if (is_array($config)) {
+      $this->name        = $config['name'];
+      $this->options     = & $config['options'];
+      $this->prefix      = $config['prefix'];
+      $this->text_domain = $config['text_domain'];
 
-         $this->name        = $config['name'];
-         $this->options     = & $config['options'];
-         $this->prefix      = $config['prefix'];
-         $this->text_domain = $config['text_domain'];
+      $this->option_name = $this->prefix . '-options' . (!empty($config['suffix']) ? $config['suffix'] : '');
+      $this->page_slug   = self::page_slug($this->prefix);
 
-         $this->option_name = $this->prefix . '-options' . (!empty($config['suffix']) ? $config['suffix'] : '');
-         $this->page_slug   = self::page_slug($this->prefix);
+      $add_settings_link = empty($config['no_settings_link']);
 
-         $add_settings_link = empty($config['no_settings_link']);
-
-         if (!empty($config['debug']))      $this->debug($config['debug']);
-         if (!empty($config['capability'])) $this->capability = $config['capability'];
-         if (!empty($config['capabilities'])) $this->capabilities = $config['capabilities'];
-         if (!empty($config['hide']))       $this->hide       = $config['hide'];
-         if (!empty($config['icon_url']))   $this->icon_url   = $config['icon_url'];
-         if (!empty($config['page']))       $this->page       = $config['page'];
-         if (!empty($config['position']))   $this->position   = $config['position'];
-         if (!empty($config['roles']))      $this->roles      = $config['roles'];
-
-      } else {
-
-         $this->name        = $config;
-         $this->option_name = $prefix . '-options' . $suffix;
-         $this->options     = & $options;
-         $this->page_slug   = self::page_slug($prefix);
-         $this->prefix      = $prefix;
-         $this->text_domain = $text_domain;
-
-      }
+      if (!empty($config['debug']))      $this->debug($config['debug']);
+      if (!empty($config['capability'])) $this->capability = $config['capability'];
+      if (!empty($config['capabilities'])) $this->capabilities = $config['capabilities'];
+      if (!empty($config['hide']))       $this->hide       = $config['hide'];
+      if (!empty($config['icon_url']))   $this->icon_url   = $config['icon_url'];
+      if (!empty($config['page']))       $this->page       = $config['page'];
+      if (!empty($config['position']))   $this->position   = $config['position'];
+      if (!empty($config['query']))      $this->query      = $config['query'];
+      if (!empty($config['roles']))      $this->roles      = $config['roles'];
 
       $script = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1);
 
@@ -358,6 +348,7 @@ class USI_WordPress_Solutions_Settings {
 
       case 'null-number':
          $type = 'number';
+      case 'file':
       case 'hidden':
       case 'number':
       case 'text':
@@ -510,7 +501,7 @@ class USI_WordPress_Solutions_Settings {
       echo PHP_EOL .
          '<div class="wrap">' . PHP_EOL .
          '  <h1>' . ($page_header ? $page_header : __($this->name . ' Settings', $this->text_domain)) . $title_buttons . '</h1>' . PHP_EOL .
-         '  <form method="post" action="options.php">' . PHP_EOL;
+         '  <form action="options.php"' . $this->enctype . ' method="post">' . PHP_EOL;
 
       if ($this->is_tabbed) {
          echo 
@@ -521,9 +512,9 @@ class USI_WordPress_Solutions_Settings {
                   $active_class = ' nav-tab-active';
                   $submit_text = isset($section['submit']) ? $section['submit'] : 'Save ' . $section['label'];
                }
-               echo '      <a href="options-general.php?page=' . $this->page_slug . '&tab=' . $section_id . $tab_parameter .
-                  '" class="nav-tab' . $active_class . '">' .
-                  __($section['label'], $this->text_domain) . '</a>' . PHP_EOL;
+               echo '      <a href="' . ('menu' == $this->page ? 'admin' : 'options-general') . '.php?page=' . 
+                  $this->page_slug . '&tab=' . $section_id . $tab_parameter . ($this->query ? $this->query : '') . 
+                  '" class="nav-tab' . $active_class . '">' . __($section['label'], $this->text_domain) . '</a>' . PHP_EOL;
             }
          echo
             '    </h2>' . PHP_EOL .

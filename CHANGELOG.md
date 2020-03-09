@@ -2,6 +2,12 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.4.8 (2020-03-09) ##
+* Set all versions numbers to same version.
+
+## 2.4.7 (2020-02-28) ##
+* Added query parameter option for tabbed settings.
+
 ## 2.4.6 (2020-02-27) ##
 * Fixed a foreach loop error.
 
