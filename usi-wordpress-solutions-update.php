@@ -92,7 +92,7 @@ class USI_WordPress_Solutions_Update {
 
          $this->get_repository_info();
 
-         if ($this->repository) {
+         if (!empty($this->repository['tag_name'])) {
 
             $out_of_date = version_compare($this->repository['tag_name'], $checked[$this->base_name], 'gt');
 
