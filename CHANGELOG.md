@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.4.9 (2020-03-16) ##
+* Added 'current_user_can' convenience function to capabilities.
+
 ## 2.4.8 (2020-03-09) ##
 * Set all versions numbers to same version.
 

@@ -15,6 +15,8 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
+// https://digwp.com/2016/05/wordpress-admin-notices/
+
 require_once('usi-wordpress-solutions.php');
 require_once('usi-wordpress-solutions-versions.php');
 
@@ -153,7 +155,7 @@ class USI_WordPress_Solutions_Settings {
 
          if (!empty($section['settings'])) {
             foreach ($section['settings'] as $option_id => $attributes) {
-               $option_name  = $this->option_name . '[' . $section_id . ']['  . $option_id . ']';
+               $option_name  = (!empty($attributes['name']) ? $attributes['name'] : $this->option_name . '[' . $section_id . ']['  . $option_id . ']');
                $option_value = (!empty($this->options[$section_id][$option_id]) ?
                   $this->options[$section_id][$option_id] : (('number' == $attributes['type']) ? 0 : null));
 
