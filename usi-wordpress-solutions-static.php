@@ -17,23 +17,29 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.4.8 (2020-03-09)';
+   const VERSION = '2.4.9 (2020-03-22)';
 
    private function __construct() {
    } // __construct();
 
    public static function action_admin_head($columns) {
 
-      echo '<style>' . PHP_EOL;
+      $hidden = get_hidden_columns(get_current_screen());
+
+      foreach ($hidden as $hide) {
+         unset($columns[$hide]);
+      }
 
       $total = 0;
       foreach ($columns as $width) { 
          $total += $width;
       }
 
+      echo '<style>' . PHP_EOL;
+
       foreach ($columns as $name => $width) { 
          $percent = number_format(100 * $width / $total, 1);
-         echo '.wp-list-table .column-' . $name . '{overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:' . 
+         echo '.wp-list-table .column-' . $name . '{border:solid red 1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:' . 
             $percent . '%;}' . PHP_EOL;
       }
 
