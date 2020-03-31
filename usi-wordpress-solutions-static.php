@@ -17,34 +17,45 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.4.9 (2020-03-22)';
+   const VERSION = '2.4.10 (2020-03-31)';
 
    private function __construct() {
    } // __construct();
 
-   public static function action_admin_head($columns) {
+   public static function column_style($columns, $style = null) {
+
+      $space  = $style ? ' ' : '';
 
       $hidden = get_hidden_columns(get_current_screen());
 
-      foreach ($hidden as $hide) {
-         unset($columns[$hide]);
-      }
+      foreach ($hidden as $hide) unset($columns[$hide]);
 
-      $total = 0;
-      foreach ($columns as $width) { 
-         $total += $width;
-      }
+      $total = 0; foreach ($columns as $width) $total += $width;
 
-      echo '<style>' . PHP_EOL;
+      $html  = '<style>' . PHP_EOL;
 
       foreach ($columns as $name => $width) { 
          $percent = number_format(100 * $width / $total, 1);
-         echo '.wp-list-table .column-' . $name . '{border:solid red 1px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:' . 
-            $percent . '%;}' . PHP_EOL;
+         $html   .= ".wp-list-table .column-$name{width:$percent%;$space$style}" . PHP_EOL;
       }
 
-      echo '</style>' . PHP_EOL;
+      return($html . '</style>' . PHP_EOL);
 
+   } // column_style();
+
+   public static function action_admin_head($css = null) {
+      echo 
+         '<style>' . PHP_EOL .
+         '.form-table td{padding-bottom:2px; padding-top:2px;} /* 15px; */' . PHP_EOL .
+         '.form-table th{padding-bottom:7px; padding-top:7px;} /* 20px; */' . PHP_EOL .
+         'h2{margin-bottom:0.1em; margin-top:2em;} /* 1em; */' . PHP_EOL;
+      if ($css) echo $css;
+      if (USI_WordPress_Solutions::$options['diagnostics']['visible-grid']) echo
+         '.form-table{border:solid 4px yellow;}' . PHP_EOL .
+         '.form-table td,.form-table th{border:solid 2px yellow;}' . PHP_EOL .
+         '.wrap{border:solid 1px green;}' . PHP_EOL;
+      echo 
+         '</style>' . PHP_EOL;
    } // action_admin_head();
 
 } // Class USI_WordPress_Solutions_Static;
