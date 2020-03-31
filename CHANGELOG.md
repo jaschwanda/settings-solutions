@@ -2,8 +2,12 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
-## 2.4.10 (2020-03-22) ##
+## 2.4.11 (2020-03-31) ##
 * Added 'action_admin_head' convenience function to new static class.
+* Added 'visual-grid' option to 'diagnostics'.
+
+## 2.4.10 (2020-03-22) ##
+* Added 'column_style' convenience function to new static class.
 
 ## 2.4.9 (2020-03-16) ##
 * Added 'current_user_can' convenience function to capabilities.
