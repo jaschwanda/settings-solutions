@@ -111,12 +111,14 @@ class USI_WordPress_Solutions_Settings {
          add_filter('user_row_actions', array($this, 'filter_user_row_actions'), 10, 2);
       }
 
-      switch (USI_WordPress_Solutions::$options['preferences']['menu-sort']) {
-      case 'alpha':
-      case 'usi':
-         add_filter('custom_menu_order' , '__return_true');
-         add_filter('menu_order' , array($this, 'filter_menu_order'));
-         break;
+      if (!empty(USI_WordPress_Solutions::$options['preferences']['menu-sort'])) {
+         switch (USI_WordPress_Solutions::$options['preferences']['menu-sort']) {
+         case 'alpha':
+         case 'usi':
+            add_filter('custom_menu_order' , '__return_true');
+            add_filter('menu_order' , array($this, 'filter_menu_order'));
+            break;
+         }
       }
 
       if (!empty($config['file'])) register_activation_hook($config['file'], array($this, 'hook_activation'));
