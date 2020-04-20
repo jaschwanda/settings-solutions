@@ -15,12 +15,15 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
+require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-solutions-popup.php');
 require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-solutions-settings.php');
 require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.8 (2020-03-09)';
+   const VERSION = '2.4.12 (2020-04-19)';
+
+   private $popup = null;
 
    function __construct() {
 
@@ -33,21 +36,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
          )
       );
 
-      // $this->debug('usi_log');
-
    } // __construct();
-
-   function config_section_footer() {
-      submit_button(__('Save Changes', USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
-      return(null);
-   } // config_section_footer();
-
-   function config_section_header() {
-      echo '<p>' . __('The WordPress-Solutions plugin is used by many Universal Solutions plugins and themes to simplify the ' .
-         'implementation of WordPress functionality. Additionally, you can place all of the Universal Solutions settings pages ' .
-         'at the end of the Settings sub-menu, or you can sort the Settings sub-menu alphabetically or not at all.', 
-          USI_WordPress_Solutions::TEXTDOMAIN) . '</p>' . PHP_EOL;
-   } // config_section_header();
 
    function filter_plugin_row_meta($links, $file) {
       if (false !== strpos($file, USI_WordPress_Solutions::TEXTDOMAIN)) {
@@ -66,14 +55,26 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
    function sections() {
 
-      // https://codex.wordpress.org/Javascript_Reference/ThickBox
-      // http://codylindley.com/thickbox/
+      $this->popup = USI_WordPress_Solutions_Popup::build(
+         array(
+            'class'  => 'usi-wordpress-popup-phpinfo', // class for anchor;;
+            'close'  => __('Close', USI_WordPress_Solutions::TEXTDOMAIN),
+            'direct' => '.usi-wordpress-popup-phpinfo', // Elements with this class invoke popup;
+            'height' => 600,
+            'link'   => 'phpinfo()',
+            'tip'    => __('Display PHP information', USI_WordPress_Solutions::TEXTDOMAIN),
+            'title'  => 'phpinfo()',
+            'type'   => 'iframe',
+            'url'    => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-phpinfo-scan.php',
+            'width'  => 950,
+         )
+      );
 
       $sections = array(
 
          'preferences' => array(
-            'header_callback' => array($this, 'config_section_header'),
-            'footer_callback' => array($this, 'config_section_footer'),
+            'header_callback' => array($this, 'sections_header'),
+            'footer_callback' => array($this, 'sections_footer'),
             'label' => __('Sidebar Menu Sorting', USI_WordPress_Solutions::TEXTDOMAIN), 
             'localize_labels' => 'yes',
             'localize_notes' => 3, // <p class="description">__()</p>;
@@ -131,9 +132,12 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             'settings' => array(
                'phpinfo' => array(
                   'type' => 'html', 
-                  'html' => '<a class="thickbox" href="' . plugins_url(null, __FILE__) . '/usi-wordpress-solutions-phpinfo-scan.php' .
-                    '#?TB_iframe=true&height=600&width=950" title="phpinfo()">phpinfo()</a>',
+                  'html' => $this->popup['anchor'],
                   'label' => 'Information',
+               ),
+               'visible-grid' => array(
+                  'type' => 'checkbox', 
+                  'label' => 'Visable Grid Borders',
                ),
             ),
          ), // diagnostics;
@@ -143,6 +147,20 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
       return($sections);
 
    } // sections();
+
+   function sections_footer() {
+      echo '    ';
+      submit_button(__('Save Changes', USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
+      echo $this->popup['script'];
+      return(null);
+   } // sections_footer();
+
+   function sections_header() {
+      echo '    <p>' . __('The WordPress-Solutions plugin is used by many Universal Solutions plugins and themes to simplify the ' .
+         'implementation of WordPress functionality. Additionally, you can place all of the Universal Solutions settings pages ' .
+         'at the end of the Settings sub-menu, or you can sort the Settings sub-menu alphabetically or not at all.', 
+          USI_WordPress_Solutions::TEXTDOMAIN) . '</p>' . PHP_EOL;
+   } // sections_header();
 
 } // Class USI_WordPress_Solutions_Settings_Settings;
 
