@@ -2,6 +2,11 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.4.12 (2020-04-19) ##
+* Added popup static class.
+* Added logging static class.
+* Set all versions numbers to same version.
+
 ## 2.4.11 (2020-03-31) ##
 * Added 'action_admin_head' convenience function to new static class.
 * Added 'visual-grid' option to 'diagnostics'.

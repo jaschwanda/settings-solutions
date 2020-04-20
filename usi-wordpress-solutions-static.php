@@ -17,12 +17,14 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.4.10 (2020-03-31)';
+   const VERSION = '2.4.12 (2020-04-19)';
 
    private function __construct() {
    } // __construct();
 
    public static function column_style($columns, $style = null) {
+
+      $border = !empty(USI_WordPress_Solutions::$options['diagnostics']['visible-grid']) ? 'border:solid 1px yellow; ' : '';
 
       $space  = $style ? ' ' : '';
 
@@ -36,7 +38,7 @@ class USI_WordPress_Solutions_Static {
 
       foreach ($columns as $name => $width) { 
          $percent = number_format(100 * $width / $total, 1);
-         $html   .= ".wp-list-table .column-$name{width:$percent%;$space$style}" . PHP_EOL;
+         $html   .= ".wp-list-table .column-$name{{$border}width:$percent%;$space$style}" . PHP_EOL;
       }
 
       return($html . '</style>' . PHP_EOL);
@@ -57,6 +59,14 @@ class USI_WordPress_Solutions_Static {
       echo 
          '</style>' . PHP_EOL;
    } // action_admin_head();
+
+   public static function divider($indent, $text = null) {
+      if ($length = strlen($text)) {
+         $text    = ' ' . $text . ' ';
+         $length += 2;
+      }
+      return('<!--' . $text . str_repeat('-', 121 - $length - $indent) . '>' . PHP_EOL);
+   } // divider();
 
 } // Class USI_WordPress_Solutions_Static;
 

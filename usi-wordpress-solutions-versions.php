@@ -15,18 +15,36 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
+require_once('usi-wordpress-solutions-popup.php');
+
 class USI_WordPress_Solutions_Versions {
 
-   const VERSION = '2.4.8 (2020-03-09)';
+   const VERSION = '2.4.12 (2020-04-19)';
+
+   private static $pass = 0;
 
    private function __construct() {
    } // __construct();
 
-   public static function link($link_text, $title, $version, $text_domain, $file) {
+   public static function link($link, $title, $version, $text_domain, $file) {
 
-      return('<a class="thickbox" href="' . plugins_url(null, __FILE__) . '/usi-wordpress-solutions-versions-scan.php' .
-         '?' . urlencode($file) . '" title="' . 
-         $title . ' &nbsp; &nbsp; Version ' . $version . '">' . $link_text . '</a>');
+      $popup = USI_WordPress_Solutions_Popup::build(
+         array(
+            'class'  => 'usi-wordpress-popup-version',
+            'close'  => __('Close', $text_domain),
+            'direct' => '.usi-wordpress-popup-version',
+            'height' => 500,
+            'link'   => $link,
+            'pass'   => ++self::$pass,
+            'tip'    => __('Display detailed version information', $text_domain),
+            'title'  => $title . ' &nbsp; &nbsp; ' . __('Version', $text_domain) . ' ' . $version,
+            'type'   => 'iframe',
+            'url'    => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-versions-scan.php?' . urlencode($file),
+            'width'  => 500,
+         )
+      );
+
+      return($popup['script'] . $popup['anchor']);
 
    } //link();
 

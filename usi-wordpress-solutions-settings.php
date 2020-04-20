@@ -15,17 +15,21 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
-// https://digwp.com/2016/05/wordpress-admin-notices/
+// Reference: https://developer.wordpress.org/plugins/settings/using-settings-api/
+// Reference: https://digwp.com/2016/05/wordpress-admin-notices/
 
 require_once('usi-wordpress-solutions.php');
+require_once('usi-wordpress-solutions-static.php');
 require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.8 (2020-03-09)';
+   const VERSION = '2.4.12 (2020-04-19)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
+
+   private static $one_per_line = false;
 
    protected $active_tab = null;
    protected $capability = 'manage_options';
@@ -35,13 +39,11 @@ class USI_WordPress_Solutions_Settings {
    protected $hide = null;
    protected $icon_url = null;
    protected $is_tabbed = false;
-   protected $logger = null;
    protected $name = null;
    protected $option_name = null;
    protected $options = null;
-   protected $override_do_settings_fields = false;
-   protected static $override_do_settings_one_per_line = false;
-   protected $override_do_settings_sections = false;
+   protected $override_do_settings_fields = true;
+   protected $override_do_settings_sections = true;
    protected $page = null;
    protected $page_slug = null;
    protected $position = null;
@@ -68,15 +70,15 @@ class USI_WordPress_Solutions_Settings {
 
       $add_settings_link = empty($config['no_settings_link']);
 
-      if (!empty($config['debug']))      $this->debug($config['debug']);
-      if (!empty($config['capability'])) $this->capability = $config['capability'];
+      if (!empty($config['debug']))        $this->debug        = $config['debug'];
+      if (!empty($config['capability']))   $this->capability   = $config['capability'];
       if (!empty($config['capabilities'])) $this->capabilities = $config['capabilities'];
-      if (!empty($config['hide']))       $this->hide       = $config['hide'];
-      if (!empty($config['icon_url']))   $this->icon_url   = $config['icon_url'];
-      if (!empty($config['page']))       $this->page       = $config['page'];
-      if (!empty($config['position']))   $this->position   = $config['position'];
-      if (!empty($config['query']))      $this->query      = $config['query'];
-      if (!empty($config['roles']))      $this->roles      = $config['roles'];
+      if (!empty($config['hide']))         $this->hide         = $config['hide'];
+      if (!empty($config['icon_url']))     $this->icon_url     = $config['icon_url'];
+      if (!empty($config['page']))         $this->page         = $config['page'];
+      if (!empty($config['position']))     $this->position     = $config['position'];
+      if (!empty($config['query']))        $this->query        = $config['query'];
+      if (!empty($config['roles']))        $this->roles        = $config['roles'];
 
       $script = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1);
 
@@ -101,7 +103,8 @@ class USI_WordPress_Solutions_Settings {
 
       add_action('admin_menu', array($this, 'action_admin_menu'));
 
-      add_action('admin_notices', array($this, 'action_admin_notices'));
+      // Add notices for custom options pages, WordPress does settings pages automatically;
+      if ('menu' == $this->page) add_action('admin_notices', array($this, 'action_admin_notices'));
 
       if ($this->impersonate) {
          add_action('init', array( $this, 'action_init'));
@@ -120,13 +123,8 @@ class USI_WordPress_Solutions_Settings {
 
    } // __construct();
 
-   function action_admin_head() {
-      if ($this->page_slug != ((!empty($_GET['page'])) ? esc_attr($_GET['page']) : '')) return;
-      echo '<style>' . PHP_EOL .
-          '.form-table td{padding-bottom:2px; padding-top:2px;} /* 15px; */' . PHP_EOL .
-          '.form-table th{padding-bottom:7px; padding-top:7px;} /* 20px; */' . PHP_EOL .
-          'h2{margin-bottom:0.1em; margin-top:2em;} /* 1em; */' . PHP_EOL .
-          '</style>' . PHP_EOL;
+   function action_admin_head($css = null) {
+      USI_WordPress_Solutions_Static::action_admin_head($css );
    } // action_admin_head();
 
    function action_admin_init() {
@@ -142,7 +140,7 @@ class USI_WordPress_Solutions_Settings {
 
          add_settings_section(
             $section_id, // Section id;
-            !$this->is_tabbed && !empty($section['label']) ? $section['label'] : null, // Section title;
+            !$this->is_tabbed && !empty($section['label']) ? $section['label'] : (!empty($section['title']) ? $section['title'] : ''), // Section title;
             array($this, 'section_render'), // Render section callback;
             $this->page_slug // Settings page menu slug;
          );
@@ -155,11 +153,11 @@ class USI_WordPress_Solutions_Settings {
 
          if (!empty($section['settings'])) {
             foreach ($section['settings'] as $option_id => $attributes) {
-               $option_name  = (!empty($attributes['name']) ? $attributes['name'] : $this->option_name . '[' . $section_id . ']['  . $option_id . ']');
+               $option_name  = (!empty($attributes['name']) ? $attributes['name'] : $this->option_name . '[' . $section_id . '][' . $option_id . ']');
                $option_value = (!empty($this->options[$section_id][$option_id]) ?
                   $this->options[$section_id][$option_id] : (('number' == $attributes['type']) ? 0 : null));
 
-               if (self::DEBUG_INIT & $this->debug) call_user_func($this->logger, __METHOD__.':$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
+               if (self::DEBUG_INIT & $this->debug) usi::log('$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
                if (empty($attributes['skip'])) {
                   add_settings_field(
                      $option_id, // Option name;
@@ -189,7 +187,9 @@ class USI_WordPress_Solutions_Settings {
 
    function action_admin_menu() { 
 
+      // IF custom settings page;
       if ('menu' == $this->page) {
+
          $slug = add_menu_page(
             __($this->name . ' Settings', $this->text_domain), // Page <title/> text;
             __($this->name, $this->text_domain), // Sidebar menu text; 
@@ -199,7 +199,9 @@ class USI_WordPress_Solutions_Settings {
             $this->icon_url, // URL of icon for menu item;
             $this->position // Position in menu order;
          );
-      } else {
+
+      } else { // ELSE standard settings page;
+
          $slug = add_options_page(
             __($this->name . ' Settings', $this->text_domain), // Page <title/> text;
             __($this->name, $this->text_domain), // Sidebar menu text; 
@@ -207,7 +209,8 @@ class USI_WordPress_Solutions_Settings {
             $this->page_slug, // Menu page slug name;
             array($this, 'page_render') // Render page callback;
          );
-      }
+
+      } // ENDIF standard settings page;
 
       $action_load_help_tab = array($this, 'action_load_help_tab');
 
@@ -225,8 +228,11 @@ class USI_WordPress_Solutions_Settings {
 
    } // action_admin_menu();
 
+   // Add settings error/success status for custom settings pages;
    function action_admin_notices() {
-      settings_errors($this->page_slug);
+      if (isset($_GET['settings-updated'])) {
+         settings_errors($this->page_slug);
+      }
    } // action_admin_notices();
 
    function action_init() { 
@@ -246,16 +252,16 @@ class USI_WordPress_Solutions_Settings {
       return($this->capabilities); 
    } // capabilities();
 
-   function debug($logger, $debug = 0xFF) {
-      if (is_callable($logger)) {
-         $this->debug  = $debug;
-         $this->logger = $logger;
-      }
-   } // debug();
-
    // This function riped from wp-admin/includes/template.php;
    function do_settings_fields($page, $section) {
       global $wp_settings_fields;
+
+      $i  = $this->is_tabbed ? '  ' : '';
+      $i2 = '  ' . $i;
+      $i3 = '  ' . $i2;
+      $i4 = '  ' . $i3;
+      $i5 = '  ' . $i4;
+      $n  = PHP_EOL;
 
       if (!isset($wp_settings_fields[$page][$section])) return;
 
@@ -264,51 +270,56 @@ class USI_WordPress_Solutions_Settings {
 
          if (!empty($field['args']['class'])) $class = ' class="' . esc_attr( $field['args']['class'] ) . '"';
 
-         if (!self::$override_do_settings_one_per_line) {
-            echo "<tr{$class}>";
+         if (!self::$one_per_line) {
+            echo "$i4<tr{$class}>$n$i5";
             if (!empty($field['args']['label_for'])) {
-               echo '<th scope="row"><label for="' . esc_attr( $field['args']['label_for'] ) . '">' . $field['title'] . '</label></th>';
-            } else {
+               echo '<th scope="row"><label for="' . esc_attr($field['args']['label_for']) . '">' . $field['title'] . '</label></th>';
+            } else if (empty( $field['args']['alt_html'])) {
                echo '<th scope="row">' . $field['title'] . '</th>';
+            } else {
+               echo '<th scope="row">' . $field['args']['alt_html'] . '</th>';
             }
-            echo '<td>';
+            echo $n . $i5 . '<td>';
          }
          call_user_func($field['callback'], $field['args']);
-         if (!self::$override_do_settings_one_per_line) {
-            echo '</td>';
-            echo '</tr>';
+         if (!self::$one_per_line) {
+            echo '</td>' . $n;
+            echo $i4 . '</tr>' . $n;
          }
       }
    } // do_settings_fields();
 
    // This function riped from wp-admin/includes/template.php;
    function do_settings_sections($page) {
+      $i  = $this->is_tabbed ? '  ' : '';
+      $i2 = '  ' . $i;
+      $i3 = '  ' . $i2;
+      $n  = PHP_EOL;
       global $wp_settings_sections, $wp_settings_fields;
       if (!isset($wp_settings_sections[$page])) return;
-
       foreach ((array)$wp_settings_sections[$page] as $section) {
-         if ($section['title']) echo "<h2>{$section['title']}</h2>\n";
-         if ($section['callback']) call_user_func( $section['callback'], $section );
+         if ($section['title']) echo "$i3<h2>{$section['title']}</h2>\n";
+         if ($section['callback']) call_user_func($section['callback'], $section);
          if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) continue;
-         echo '<table class="form-table" role="presentation">';
-         if ($this->override_do_settings_sections) {
+         echo $i3 . '<table class="form-table" role="presentation">' . $n;
+         if ($this->override_do_settings_fields) {
             $this->do_settings_fields($page, $section['id']);
          } else {
             do_settings_fields($page, $section['id']);
          }
-         echo '</table>';
+         echo $i3 . '</table>' . $n;
       }
    } // do_settings_sections();
 
    function fields_render($args) {
-      if (self::DEBUG_INIT & $this->debug) call_user_func($this->logger, __METHOD__.':args=' . print_r($args, true));
+      if (self::DEBUG_RENDER & $this->debug) usi::log('args=', $args);
       self::fields_render_static($args);
    }
 
-   // Statis version so that other classes can use this rendering function;
+   // Static version so that other classes can use this rendering function;
    public static function fields_render_static($args) {
 
-      if (isset($args['one_per_line'])) self::$override_do_settings_one_per_line = empty($args['one_per_line']);
+      if (isset($args['one_per_line'])) self::$one_per_line = empty($args['one_per_line']);
 
       $notes    = !empty($args['notes'])   ? $args['notes'] : null;
       $type     = !empty($args['type'])    ? $args['type']  : 'text';
@@ -316,6 +327,7 @@ class USI_WordPress_Solutions_Settings {
       $id       = !empty($args['id'])      ? ' id="'    . $args['id']      . '"' : null;
       $class    = !empty($args['f-class']) ? ' class="' . $args['f-class'] . '"' : null;
       $name     = !empty($args['name'])    ? ' name="'  . $args['name']    . '"' : null;
+      $attr     = !empty($args['attr'])    ? ' '        . $args['attr']          : null;
 
       $min      = isset($args['min'])      ? ' min="'   . $args['min']     . '"' : null;
       $max      = isset($args['max'])      ? ' max="'   . $args['max']     . '"' : null;
@@ -329,7 +341,7 @@ class USI_WordPress_Solutions_Settings {
 
       $maxlen   = !empty($args['maxlength']) ? (is_integer($args['maxlength']) ? ' maxlength="' . $args['maxlength'] . '"' : null) : null;
 
-      $attributes = $id . $class . $name . $min . $max . $maxlen . $readonly . $rows;
+      $attributes = $id . $class . $name . $attr . $min . $max . $maxlen . $readonly . $rows;
 
       switch ($type) {
 
@@ -371,7 +383,7 @@ class USI_WordPress_Solutions_Settings {
 
       }
 
-      if ($notes) echo $notes . PHP_EOL;
+      if ($notes) echo $notes;
 
       if (!empty($args['more'])) {
          foreach ($args['more'] as $more) {
@@ -492,6 +504,12 @@ class USI_WordPress_Solutions_Settings {
    // To include more options on this page, override this function and call parent::page_render($options);
    function page_render($options = null) {
 
+      $i  = '  ';
+      $i2 = '    ';
+      $i3 = '      ';
+      $n  = PHP_EOL;
+      $n2 = PHP_EOL . PHP_EOL;
+
       $page_header   = !empty($options['page_header'])   ? $options['page_header']   : null;
       $title_buttons = !empty($options['title_buttons']) ? $options['title_buttons'] : null;
       $tab_parameter = !empty($options['tab_parameter']) ? $options['tab_parameter'] : null;
@@ -500,27 +518,31 @@ class USI_WordPress_Solutions_Settings {
 
       $submit_text   = null;
 
-      echo PHP_EOL .
-         '<div class="wrap">' . PHP_EOL .
-         '  <h1>' . ($page_header ? $page_header : __($this->name . ' Settings', $this->text_domain)) . $title_buttons . '</h1>' . PHP_EOL .
-         '  <form action="options.php"' . $this->enctype . ' method="post">' . PHP_EOL;
+      echo 
+         $n . '<div class="wrap">' . $n .
+         $i . '<h1>' . ($page_header ? $page_header : __($this->name . ' Settings', $this->text_domain)) . $title_buttons . '</h1>' . $n .
+         $i . USI_WordPress_Solutions_Static::divider(2) .
+         $i . USI_WordPress_Solutions_Static::divider(2, $this->name) .
+         $i . USI_WordPress_Solutions_Static::divider(2) .
+         $i . '<form id="myForm" action="options.php"' . $this->enctype . ' method="post">' . $n;
 
       if ($this->is_tabbed) {
          echo 
-            '    <h2 class="nav-tab-wrapper">' . PHP_EOL;
+            $i2 . '<h2 class="nav-tab-wrapper">' . $n;
             if ($this->sections) foreach ($this->sections as $section_id => $section) {
+               if (!empty($section['not_tabbed'])) continue;
                $active_class = null;
                if ($section_id == $this->active_tab) {
                   $active_class = ' nav-tab-active';
                   $submit_text = isset($section['submit']) ? $section['submit'] : 'Save ' . $section['label'];
                }
-               echo '      <a href="' . ('menu' == $this->page ? 'admin' : 'options-general') . '.php?page=' . 
+               echo $i3 . '<a href="' . ('menu' == $this->page ? 'admin' : 'options-general') . '.php?page=' . 
                   $this->page_slug . '&tab=' . $section_id . $tab_parameter . ($this->query ? $this->query : '') . 
-                  '" class="nav-tab' . $active_class . '">' . __($section['label'], $this->text_domain) . '</a>' . PHP_EOL;
+                  '" class="nav-tab' . $active_class . '">' . __($section['label'], $this->text_domain) . '</a>' . $n;
             }
          echo
-            '    </h2>' . PHP_EOL .
-            '    <input type="hidden" name="' . $this->prefix . '-tab" value="' . $this->active_tab . '" />' . PHP_EOL;
+            $i2 . '</h2>' . $n2 .
+            $i2 . '<input type="hidden" name="' . $this->prefix . '-tab" value="' . $this->active_tab . '" />' . $n2;
       }
 
       settings_fields($this->page_slug);
@@ -532,8 +554,10 @@ class USI_WordPress_Solutions_Settings {
 
       if ($this->is_tabbed) {
 
-         if ($this->section_callback_offset) echo PHP_EOL . '</div><!--' . $this->page_slug . '-' . 
-            $this->section_ids[$this->section_callback_offset - 1] .'-->' . PHP_EOL . PHP_EOL;
+         if ($this->section_callback_offset) {
+            $section_name = $this->page_slug . '-' . $this->section_ids[$this->section_callback_offset - 1];
+            echo $i2 . '</div>' . USI_WordPress_Solutions_Static::divider(10, $section_name);
+         }
 
          if ($this->sections) foreach ($this->sections as $section_id => $section) {
             if ($section_id == $this->active_tab) {
@@ -567,9 +591,12 @@ class USI_WordPress_Solutions_Settings {
 
       if ($wrap_submit) echo '</p>';
 
-      echo PHP_EOL .
-         '  </form>' . PHP_EOL .
-         '</div>' . PHP_EOL . 
+      echo 
+         $n .
+         $i . '</form>' . $n .
+         $i . USI_WordPress_Solutions_Static::divider(2) .
+         $i . USI_WordPress_Solutions_Static::divider(2, $this->name) .
+         $i . USI_WordPress_Solutions_Static::divider(2) .
          $trailing_code;
 
    } // page_render();
@@ -605,7 +632,14 @@ class USI_WordPress_Solutions_Settings {
 
       if ($this->sections) foreach ($this->sections as $section_id => & $section) {
          if (isset($section['localize_labels'])) $labels = ('yes' == $section['localize_labels']);
-         if (isset($section['localize_notes']))  $notes  = $section['localize_notes'];
+         if (isset($section['localize_notes'])) $notes   = (int)$section['localize_notes'];
+         // The WordPress do_settings_sections() function renders the title before WordPress calls the section_render() function
+         // which means the title is rendered before the previous tab <div> is closed, so we save the title under the usi-title 
+         // property name, unset the title, then render the usi-title in the section_render() function when we want to;
+         if (isset($section['title'])) {
+            $section['usi-title'] = __($section['title'], $this->text_domain);
+            unset($section['title']);
+         }
          foreach ($section['settings'] as $name => & $setting) {
             if ($labels && !empty($setting['label'])) $setting['label'] = __($setting['label'], $this->text_domain);
             if ($notes  && !empty($setting['notes'])) {
@@ -625,6 +659,7 @@ class USI_WordPress_Solutions_Settings {
          $active_tab  = !empty($_POST[$prefix_tab]) ? $_POST[$prefix_tab] : (!empty($_GET['tab']) ? $_GET['tab'] : null);
          $default_tab = null;
          if ($this->sections) foreach ($this->sections as $section_id => $section) {
+            if (!empty($section['not_tabbed'])) continue;
             if (!$default_tab) $default_tab = $section_id;
             if ($section_id == $active_tab) {
                $this->active_tab = $active_tab;
@@ -636,23 +671,38 @@ class USI_WordPress_Solutions_Settings {
 
    } // sections_load();
 
-   public function set_options($section, $name, $value) { 
-      $this->options[$section][$name] = $value;
-   } // set_options();
-
-   public function text_domain() { 
-      return($this->text_domain); 
-   } // text_domain();
-
    function section_render() {
 
+      $i  = '  ';
+      $i2 = '    ';
+      $i3 = '      ';
+      $n  = PHP_EOL;
+      $n2 = PHP_EOL . PHP_EOL;
+
+      $section_id = $this->section_ids[$this->section_callback_offset];
+
       if ($this->is_tabbed) {
-         if ($this->section_callback_offset) echo PHP_EOL . '</div><!--' . $this->page_slug . '-' . 
-            $this->section_ids[$this->section_callback_offset - 1] .'-->';
-         $section_id = $this->section_ids[$this->section_callback_offset];
-         echo PHP_EOL . PHP_EOL . '<div id="' . $this->page_slug . '-' . $section_id . '"' .
-            ($this->active_tab != $section_id ? ' style="display:none;"' : '') . '>' . PHP_EOL;
+
+         if ($this->section_callback_offset) {
+            $old_section_id = $this->section_ids[$this->section_callback_offset - 1];
+            $section_name   = $this->page_slug . '-' . $old_section_id;
+            if (empty($this->sections[$section_id]['not_tabbed'])) {
+               echo $i2 . '</div>' . USI_WordPress_Solutions_Static::divider(10, $section_name);
+            } else {
+               echo $i3 .  USI_WordPress_Solutions_Static::divider(6, $section_name);
+            }
+         }
+
+         $section_name = $this->page_slug . '-' . $section_id;
+         if (empty($this->sections[$section_id]['not_tabbed'])) {
+            echo $n2 . $i2 .  USI_WordPress_Solutions_Static::divider(4, $section_name);
+            echo $i2 . '<div id="' . $section_name . '"' . ($this->active_tab != $section_id ? ' style="display:none;"' : '') . '>' . $n;
+         } else {
+            echo $i3 .  USI_WordPress_Solutions_Static::divider(6, $section_name);
+         }
       }
+
+      if (!empty($this->sections[$section_id]['usi-title'])) echo "      <h2>{$this->sections[$section_id]['usi-title']}</h2>\n";
 
       $section_callback = $this->section_callbacks[$this->section_callback_offset];
       $object = $section_callback[0];
@@ -666,6 +716,14 @@ class USI_WordPress_Solutions_Settings {
    function sections() { // Should be over ridden by extending class;
       return(null);
    } // sections();
+
+   public function set_options($section, $name, $value) { 
+      $this->options[$section][$name] = $value;
+   } // set_options();
+
+   public function text_domain() { 
+      return($this->text_domain); 
+   } // text_domain();
 
 } // Class USI_WordPress_Solutions_Settings;
 

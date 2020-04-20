@@ -15,7 +15,7 @@ Requires at least: 5.0
 Requires PHP:      5.6.25
 Tested up to:      5.3.2
 Text Domain:       usi-wordpress-solutions
-Version:           2.4.10
+Version:           2.4.12
 */
 
 /*
@@ -31,9 +31,13 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
+// Settings pages do not have to add admin notices on success, custom settings pages do;
+
+require_once('usi-wordpress-solutions-log.php');
+
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.4.10 (2020-03-22)';
+   const VERSION = '2.4.12 (2020-04-19)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
@@ -44,6 +48,7 @@ final class USI_WordPress_Solutions {
    function __construct() {
       if (empty(USI_WordPress_Solutions::$options)) {
          $defaults['preferences']['menu-sort'] = 'no';
+         $defaults['diagnostics']['visible-grid'] = false;
          USI_WordPress_Solutions::$options = get_option(self::PREFIX . '-options', $defaults);
       }
    } // __construct();
@@ -61,12 +66,5 @@ if (is_admin() && !defined('WP_UNINSTALL_PLUGIN')) {
       new USI_WordPress_Solutions_Update_GitHub(__FILE__, 'jaschwanda', 'wordpress-solutions');
    }
 }
-
-if (!function_exists('usi_log')) {
-   function usi_log($action) {
-      global $wpdb;
-      $wpdb->insert($wpdb->prefix . 'USI_log', array('action' => $action, 'user_id' => get_current_user_id()));
-   } // usi_log();
-} // ENDIF function_exists('usi_log');
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

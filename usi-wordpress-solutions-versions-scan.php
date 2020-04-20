@@ -15,7 +15,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_Versions_Scan {
 
-   const VERSION = '2.4.8 (2020-03-09)';
+   const VERSION = '2.4.12 (2020-04-19)';
 
    private function __construct() {
    } // __construct();
@@ -38,9 +38,11 @@ final class USI_WordPress_Solutions_Versions_Scan {
    } // scan();
 
    public static function versions() {
+      $style = '<style>td{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,' .
+         '"Helvetica Neue",sans-serif; font-size: 13px;}</style>';
       foreach ($_COOKIE as $key => $value) {
          if (substr($key, 0, 20) == 'wordpress_logged_in_') {
-            die('<table>' . self::scan(explode('&', urldecode($_SERVER['QUERY_STRING']))[0]) . '</table>');
+            die($style . '<table>' . self::scan(explode('?', urldecode($_SERVER['QUERY_STRING']))[0]) . '</table>');
          }
       }
       die('Accesss not allowed.');
