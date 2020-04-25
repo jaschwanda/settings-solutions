@@ -21,13 +21,14 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.4.12 (2020-04-19)';
+   const VERSION = '2.4.14 (2020-04-25)';
 
    protected $access_token = null;
    protected $active = null;
    protected $base_name = null;
    protected $debug = null;
    protected $file = null;
+   protected $notice = null;
    protected $plugin = null;
    protected $repo_name = null;
    protected $repository = null;
@@ -51,6 +52,13 @@ class USI_WordPress_Solutions_Update {
       $this->plugin    = get_plugin_data($this->file);
 
    } // action_admin_init();
+
+   public function action_admin_notices() {
+      global $pagenow;
+      if ('plugins.php' == $pagenow) {
+        echo '<div class="notice notice-warning is-dismissible"><p>' . $this->notice . '</p></div>';
+      }
+   } // action_admin_notices();
 
    public function filter_plugins_api($result, $action, $args) {
 
@@ -142,11 +150,20 @@ class USI_WordPress_Solutions_Update {
          if (!empty($response_body)) {
             return(json_decode($response_body, true));
          }
+      } else {
+         $this->notice = __('While fetching an update for ', USI_WordPress_Solutions::TEXTDOMAIN) .
+            '<b>' . basename($this->base_name, '.php') . '</b>';
+         $this->response_error($response, $response_code);
+         add_action('admin_notices', array($this, 'action_admin_notices'));
       }
 
       return(null);
 
    } // get_response();
+
+   protected function response_error($response, $response_code) {
+      $this->notice .= '. . .<!-- ' . print_r($response, true) . '-->';
+   } // response_error();
 
 } // Class USI_WordPress_Solutions_Update;
 
@@ -239,6 +256,19 @@ class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Upda
       }
 
    } // get_repository_info();
+
+   protected function response_error($response, $response_code) {
+      if (!empty($response['body'])) {
+         $body  = json_decode($response['body'], true);
+         $error = !empty($body['error']) ? $body['error'] : '';
+         $description = !empty($body['error_description']) ? $body['error_description'] : '';
+         if ($error && $description) {
+            $this->notice .= ', GitLab returns with error <b>' . $error . ', ' . $description . '</b>';
+            return;
+         }
+      }
+      parent::response_error($response, $response_code);
+   } // response_error();
 
 } // Class USI_WordPress_Solutions_Update_GitLab;
 
