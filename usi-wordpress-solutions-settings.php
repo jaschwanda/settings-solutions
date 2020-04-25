@@ -24,7 +24,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.12 (2020-04-19)';
+   const VERSION = '2.4.13 (2020-04-25)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -60,10 +60,7 @@ class USI_WordPress_Solutions_Settings {
 
       $this->impersonate = !empty(USI_WordPress_Solutions::$options['admin-options']['impersonate']);
 
-      $this->name        = $config['name'];
-      $this->options     = & $config['options'];
-      $this->prefix      = $config['prefix'];
-      $this->text_domain = $config['text_domain'];
+      if (!empty($config['prefix'])) $this->prefix = $config['prefix'];
 
       $this->option_name = $this->prefix . '-options' . (!empty($config['suffix']) ? $config['suffix'] : '');
       $this->page_slug   = self::page_slug($this->prefix);
@@ -75,10 +72,13 @@ class USI_WordPress_Solutions_Settings {
       if (!empty($config['capabilities'])) $this->capabilities = $config['capabilities'];
       if (!empty($config['hide']))         $this->hide         = $config['hide'];
       if (!empty($config['icon_url']))     $this->icon_url     = $config['icon_url'];
+      if (!empty($config['name']))         $this->name         = $config['name'];
       if (!empty($config['page']))         $this->page         = $config['page'];
+      if (!empty($config['options']))      $this->options      = & $config['options'];
       if (!empty($config['position']))     $this->position     = $config['position'];
       if (!empty($config['query']))        $this->query        = $config['query'];
       if (!empty($config['roles']))        $this->roles        = $config['roles'];
+      if (!empty($config['text_domain']))  $this->text_domain  = $config['text_domain'];
 
       $script = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1);
 
