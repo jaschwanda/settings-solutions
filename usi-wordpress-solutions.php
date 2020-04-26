@@ -15,7 +15,7 @@ Requires at least: 5.0
 Requires PHP:      5.6.25
 Tested up to:      5.3.2
 Text Domain:       usi-wordpress-solutions
-Version:           2.4.12
+Version:           2.4.15
 */
 
 /*
@@ -32,12 +32,13 @@ Copyright (c) 2020 by Jim Schwanda.
 */
 
 // Settings pages do not have to add admin notices on success, custom settings pages do;
+// https://dev.to/lucagrandicelli/why-isadmin-is-totally-unsafe-for-your-wordpress-development-1le1
 
 require_once('usi-wordpress-solutions-log.php');
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.4.12 (2020-04-19)';
+   const VERSION = '2.4.15 (2020-04-26)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';

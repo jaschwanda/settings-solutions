@@ -16,12 +16,10 @@ Copyright (c) 2020 by Jim Schwanda.
 */
 
 // https://www.smashingmagazine.com/2015/08/deploy-wordpress-plugins-with-github-using-transients/
-// Update Failed: Download failed. A valid URL was not provided.
-// fails in download_package in class-wp-upgrader.php
 
 class USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.4.14 (2020-04-25)';
+   const VERSION = '2.4.15 (2020-04-26)';
 
    protected $access_token = null;
    protected $active = null;
@@ -169,9 +167,9 @@ class USI_WordPress_Solutions_Update {
 
 class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Update {
 
-// https://developer.github.com/v3/#rate-limiting
+   // https://developer.github.com/v3/#rate-limiting
 
-   const VERSION = '2.3.8 (2020-02-03)';
+   const VERSION = '2.4.15 (2020-04-26)';
 
    private $user_name;
 
@@ -214,7 +212,7 @@ class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Upda
 
 class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.3.8 (2020-02-03)';
+   const VERSION = '2.4.15 (2020-04-26)';
 
    private $service;
 
@@ -226,7 +224,22 @@ class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Upda
       $this->repo_name    = $repo_name;
       $this->access_token = $access_token;
 
+      add_filter('upgrader_pre_download', array($this, 'filter_upgrader_pre_download'), 10, 3);
+
    } // __construct();
+
+   function filter_http_request_host_is_external($allow, $host, $url) {
+      remove_filter('http_request_host_is_external', array($this, 'filter_http_request_host_is_external'), 10);
+      return(false !== stripos($host, 'gitlab'));
+   } // filter_http_request_host_is_external();
+
+   public function filter_upgrader_pre_download($reply, $package, $that) {
+
+      add_filter('http_request_host_is_external', array($this, 'filter_http_request_host_is_external'), 10, 3);
+
+      return($reply);
+
+   } // filter_upgrader_pre_download();
 
    protected function get_repository_info() {
 
