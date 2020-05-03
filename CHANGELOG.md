@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.4.16 (2020-05-02) ##
+* Added diagnostics support.
+
 ## 2.4.15 (2020-04-26) ##
 * Address issue with GitLab updates.
 

@@ -68,6 +68,10 @@ class USI_WordPress_Solutions_Static {
       return('<!--' . $text . str_repeat('-', 121 - $length - $indent) . '>' . PHP_EOL);
    } // divider();
 
+   public static function url() {
+      return('http' . (is_ssl() ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
+   } // this_url();
+
 } // Class USI_WordPress_Solutions_Static;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

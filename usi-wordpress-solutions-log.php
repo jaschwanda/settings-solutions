@@ -27,6 +27,7 @@ final class USI {
    private static $mysqli = null;
    private static $mysqli_stmt = null;
    private static $offset = 0;
+   private static $user   = 0;
 
    private function __construct() {
    } // __construct();
@@ -39,7 +40,8 @@ final class USI {
             if (empty($trace[self::$offset+1])) {
                $info .= $trace[self::$offset+0]['file'];
             } else {
-               $info .= !empty($trace[self::$offset+1]['class']) ? $trace[self::$offset+1]['class'] . ':' : $trace[self::$offset+1]['file'];
+            // $info .= !empty($trace[self::$offset+1]['class']) ? $trace[self::$offset+1]['class'] . ':' : $trace[self::$offset+1]['file'];
+               $info .= !empty($trace[self::$offset+1]['class']) ? $trace[self::$offset+1]['class'] . ':' : $trace[self::$offset+0]['file'];
                if (!empty($trace[self::$offset+1]['function'])) {
                   switch ($trace[self::$offset+1]['function']) {
                   case 'include':
@@ -60,10 +62,18 @@ final class USI {
                if (is_array($arg) || is_object($arg)) {
                   $info .= print_r($arg, true);
                } else if (is_string($arg)) {
-                  if ('\n' == substr($arg, 0, 2)) {
-                     $info .= PHP_EOL . substr($arg, 2);
-                  } else if ('\2n' == substr($arg, 0, 3)) {
-                     $info .= PHP_EOL . PHP_EOL . substr($arg, 3);
+                  $first = substr($arg, 0, 1);
+                  if ('\\' == $first) {
+                     $second = substr($arg, 1, 1);
+                     if ('!' == $second) {
+                        $info = substr($arg, 1);
+                     } else if ('n' == $second) {
+                        $info .= PHP_EOL . substr($arg, 2);
+                     } else if ('%' == $second) {
+                        $info .= PHP_EOL . 'backtrace=' . print_r($trace, true) . PHP_EOL;
+                     } else if ('2n' == substr($arg, 1, 2)) {
+                        $info .= PHP_EOL . PHP_EOL . substr($arg, 3);
+                     }
                   } else {
                      $info .= $arg;
                   }
@@ -79,10 +89,11 @@ final class USI {
       if (!self::$mysqli) {
          self::$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
          self::$mysqli_stmt = new mysqli_stmt(self::$mysqli);
-         $status = self::$mysqli_stmt->prepare('INSERT INTO `' . DB_WP_PREFIX . 'USI_log` (`user_id`, `action`) VALUES (0, ?)');     
-         $status = self::$mysqli_stmt->bind_param('s', self::$info);
+         self::$mysqli_stmt->prepare('INSERT INTO `' . DB_WP_PREFIX . 'USI_log` (`user_id`, `action`) VALUES (?, ?)');     
+         self::$mysqli_stmt->bind_param('is', self::$user, self::$info);
       }
       self::$info = substr($info, 0, 65535);
+      self::$user = get_current_user_id();
       self::$mysqli_stmt->execute();
 
    } // log();

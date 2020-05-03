@@ -32,6 +32,7 @@ Copyright (c) 2020 by Jim Schwanda.
 */
 
 // Settings pages do not have to add admin notices on success, custom settings pages do;
+// Un-activated plugin builds settings page;
 // https://dev.to/lucagrandicelli/why-isadmin-is-totally-unsafe-for-your-wordpress-development-1le1
 
 require_once('usi-wordpress-solutions-log.php');

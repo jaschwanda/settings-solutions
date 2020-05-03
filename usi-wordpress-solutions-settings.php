@@ -24,7 +24,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.13 (2020-04-25)';
+   const VERSION = '2.4.16 (2020-05-02)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -404,7 +404,6 @@ class USI_WordPress_Solutions_Settings {
    } // fields_render_select();
 
    function fields_sanitize($input) {
-
       foreach ($this->sections as $section_id => $section) {
          if (!empty($section['fields_sanitize'])) {
             $object = $section['fields_sanitize'][0];
@@ -622,6 +621,11 @@ class USI_WordPress_Solutions_Settings {
       // Convert capabilities object to array();
       if (!empty($this->sections['capabilities']) && is_object($this->sections['capabilities'])) {
          $this->sections['capabilities'] = $this->sections['capabilities']->section;
+      }
+
+      // Convert diagnostics object to array();
+      if (!empty($this->sections['diagnostics']) && is_object($this->sections['diagnostics'])) {
+         $this->sections['diagnostics'] = $this->sections['diagnostics']->section;
       }
 
       // Convert updates object to array();
