@@ -19,12 +19,13 @@ Copyright (c) 2020 by Jim Schwanda.
 // Reference: https://digwp.com/2016/05/wordpress-admin-notices/
 
 require_once('usi-wordpress-solutions.php');
+require_once('usi-wordpress-solutions-history.php');
 require_once('usi-wordpress-solutions-static.php');
 require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.16 (2020-05-02)';
+   const VERSION = '2.5.1 (2020-05-07)';
 
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
@@ -241,6 +242,11 @@ class USI_WordPress_Solutions_Settings {
       if ($this->impersonate && !empty($_REQUEST['action']) && !empty( $_REQUEST['user_id']) && ('impersonate' == $_REQUEST['action'])) {
          if ($user = get_userdata($user_id = $_REQUEST['user_id'])) {
             if (wp_verify_nonce($_REQUEST['_wpnonce'], "impersonate_$user_id")) {
+               if (!empty(USI_WordPress_Solutions::$options['admin-options']['history'])) {
+                  $old_user = get_userdata($old_user_id = get_current_user_id());
+                  USI_WordPress_Solutions_History::history($old_user_id, 'user', 
+                     'User <' . $old_user->user_login . '> impersonating user <' . $user->user_login . '>', $user_id, $_REQUEST);
+               }
                wp_clear_auth_cookie();
                wp_set_current_user($user_id, $user->user_login);
                wp_set_auth_cookie($user_id);
@@ -404,13 +410,19 @@ class USI_WordPress_Solutions_Settings {
    } // fields_render_select();
 
    function fields_sanitize($input) {
+
       foreach ($this->sections as $section_id => $section) {
          if (!empty($section['fields_sanitize'])) {
             $object = $section['fields_sanitize'][0];
             $method = $section['fields_sanitize'][1];
-            if (method_exists($object, $method)) $input = $object->$method($input, $section_id);
+            if (method_exists($object, $method)) {
+               $input = $object->$method($input, $section_id);
+            }
          }
       }
+
+      USI_WordPress_Solutions_History::history(get_current_user_id(), 'code', 
+         'Modified <' . $this->name . '> settings', 0, $input);
 
       return($input);
 

@@ -52,7 +52,7 @@ width   = int|300                       // popup width in pixels;
 
 class USI_WordPress_Solutions_Popup {
 
-   const VERSION = '2.4.12 (2020-04-19)';
+   const VERSION = '2.5.1 (2020-05-07)';
 
    private function __construct() {
    } // __construct();

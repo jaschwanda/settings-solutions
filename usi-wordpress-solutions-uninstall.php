@@ -15,34 +15,25 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_Uninstall {
 
-   const VERSION = '2.4.12 (2020-04-19)';
+   const VERSION = '2.5.1 (2020-05-07)';
 
    private function __construct() {
    } // __construct();
 
-   static function uninstall($config) {
+   static function uninstall($prefix) {
 
       global $wpdb;
 
       if (!defined('WP_UNINSTALL_PLUGIN')) exit;
 
-      $capabilities = !empty($config['capabilities']) ? $config['capabilities'] : null;
-      $post_type    = !empty($config['post_type'])    ? $config['post_type']    : null;
-      $prefix       = !empty($config['prefix'])       ? $config['prefix']       : null;
-
-      if ($capabilities) {
-
-      }
-
+/*
       if ($post_type) {
-
          $posts = get_posts(array('post_type' => $post_type, 'numberposts' => -1));
          foreach ($posts as $post) {
             wp_delete_post($post->ID, true);
          }
-
       }
-
+*/
       if ($prefix) {
 
          $results = $wpdb->get_results('SELECT option_name FROM ' . $wpdb->prefix . 

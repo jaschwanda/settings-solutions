@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Diagnostics {
 
-   const VERSION = '2.4.16 (2020-05-02)';
+   const VERSION = '2.5.1 (2020-05-07)';
 
    private $options     = null;
    private $text_domain = null;
@@ -64,17 +64,19 @@ class USI_WordPress_Solutions_Diagnostics {
       return($input);
    } // fields_sanitize();
 
-   public static function get_log($options) {
+   public static function get_log($options, $log_log = false) {
+      $log = 0;
       if (!empty($options['diagnostics']['session'])) {
          if (!($session_id = session_id())) {
             session_start(); 
             $session_id = session_id();
          }
-         if ($session_id == $options['diagnostics']['session']) {
-            if (!empty($options['diagnostics']['code'])) return($options['diagnostics']['code']);
+         if (($session_id == $options['diagnostics']['session']) || ('all' == $options['diagnostics']['session'])) {
+            if (!empty($options['diagnostics']['code'])) $log = (int)$options['diagnostics']['code'];
          }
       }
-      return(0);
+      if ($log_log) usi::log('$log=', $log);
+      return($log);
    } // get_log();
 
    function section_header() {

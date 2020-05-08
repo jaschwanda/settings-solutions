@@ -1,6 +1,6 @@
 <?php // ------------------------------------------------------------------------------------------------------------------------ //
 
-defined('ABSPATH') or die('Accesss not allowed.');
+//defined('ABSPATH') or die('Accesss not allowed.');
 
 /*
 WordPress-Solutions is free software: you can redistribute it and/or modify it under the terms of the GNU General Public 
@@ -15,31 +15,32 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
-class USI_WordPress_Solutions_Custom_Post {
+if (!defined('WP_UNINSTALL_PLUGIN')) exit;
+
+require_once('usi-wordpress-solutions-uninstall.php');
+require_once('usi-wordpress-solutions.php');
+
+final class USI_WordPress_Solutions_Uninstall_Uninstall {
 
    const VERSION = '2.5.1 (2020-05-07)';
 
-   const POST    = 'custom-post';
-
-   private $autosave_disable = true;
-
-   function __construct() {
-
-      if ($this->autosave_disable) add_action('admin_enqueue_scripts', array($this, 'action_admin_enqueue_scripts'));
-
-      add_action('do_meta_boxes', array($this, 'action_do_meta_boxes'));
-
+   private function __construct() {
    } // __construct();
 
-   function action_admin_enqueue_scripts() {
-      if (self::POST == get_post_type()) {
-         wp_deregister_script('autosave');
-      }
-   } // action_admin_enqueue_scripts();
+   static function uninstall() {
 
-   function action_do_meta_boxes() {
-   } // action_do_meta_boxes();
+      global $wpdb;
 
-} // Class USI_WordPress_Solutions_Custom_Post;
+      $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}USI_history");
+
+      $wpdb->query("DROP TABLE IF EXISTS {$wpdb->prefix}USI_log");
+
+   } // uninstall();
+
+} // Class USI_Variable_Solutions_Uninstall_Uninstall;
+
+USI_WordPress_Solutions_Uninstall::uninstall(USI_WordPress_Solutions::PREFIX);
+
+USI_WordPress_Solutions_Uninstall_Uninstall::uninstall();
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

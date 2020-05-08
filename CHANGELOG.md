@@ -2,6 +2,17 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.5.01 (2020-05-07) ##
+* Added logging logger option to diagnostices get_log() method.
+* Added user action logging.
+* Set all versions numbers to same version.
+
+## 2.4.18 (2020-05-07) ##
+* Improved uninstall support.
+
+## 2.4.17 (2020-05-07) ##
+* Added history support.
+
 ## 2.4.16 (2020-05-02) ##
 * Added diagnostics support.
 

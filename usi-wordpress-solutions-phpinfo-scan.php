@@ -15,7 +15,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_Phpinfo_Scan {
 
-   const VERSION = '2.4.12 (2020-04-19)';
+   const VERSION = '2.5.1 (2020-05-07)';
 
    private function __construct() {
    } // __construct();

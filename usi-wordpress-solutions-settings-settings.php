@@ -21,7 +21,7 @@ require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-s
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.4.12 (2020-04-19)';
+   const VERSION = '2.5.1 (2020-05-07)';
 
    private $popup = null;
 
@@ -81,7 +81,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             'settings' => array(
                'menu-sort' => array(
                   'type' => 'radio', 
-                  'label' => 'Settings menu sort option',
+                  'label' => 'Settings Menu Sort Option',
                   'choices' => array(
                      array(
                         'value' => 'none', 
@@ -109,15 +109,20 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
          'admin-options' => array(
             'label' => __('Administrator Options', USI_WordPress_Solutions::TEXTDOMAIN),
             'settings' => array(
-               'impersonate' => array(
-                  'type' => 'checkbox', 
-                  'label' => 'Enable user switching',
-                  'notes' => 'Enables administrators to impersonate another WordPress user.',
-               ),
                'git-update' => array(
                   'type' => 'checkbox', 
-                  'label' => 'Enable Git updates',
+                  'label' => 'Enable Git Updates',
                   'notes' => 'Checks GitHub/GitLab for updates and notifies the administrator when updates are avaiable for download and installation.',
+               ),
+               'history' => array(
+                  'type' => 'checkbox', 
+                  'label' => 'Enable Historian',
+                  'notes' => 'The system historian records user, configuration and update events in the system database.',
+               ),
+               'impersonate' => array(
+                  'type' => 'checkbox', 
+                  'label' => 'Enable User Switching',
+                  'notes' => 'Enables administrators to impersonate another WordPress user.',
                ),
                'options_php' => array(
                   'type' => 'html', 

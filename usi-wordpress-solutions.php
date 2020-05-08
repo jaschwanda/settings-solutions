@@ -15,7 +15,7 @@ Requires at least: 5.0
 Requires PHP:      5.6.25
 Tested up to:      5.3.2
 Text Domain:       usi-wordpress-solutions
-Version:           2.4.15
+Version:           2.5.1
 */
 
 /*
@@ -39,7 +39,7 @@ require_once('usi-wordpress-solutions-log.php');
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.4.15 (2020-04-26)';
+   const VERSION = '2.5.1 (2020-05-07)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
@@ -48,11 +48,18 @@ final class USI_WordPress_Solutions {
    public static $options = array();
 
    function __construct() {
-      if (empty(USI_WordPress_Solutions::$options)) {
-         $defaults['preferences']['menu-sort'] = 'no';
+
+      if (empty(self::$options)) {
+         $defaults['admin-options']['history']    = false;
+         $defaults['preferences']['menu-sort']    = 'no';
          $defaults['diagnostics']['visible-grid'] = false;
-         USI_WordPress_Solutions::$options = get_option(self::PREFIX . '-options', $defaults);
+         self::$options = get_option(self::PREFIX . '-options', $defaults);
       }
+
+      if (!empty(self::$options['admin-options']['history'])) {
+         require_once('usi-wordpress-solutions-history.php');
+      }
+
    } // __construct();
 
 } // Class USI_WordPress_Solutions;

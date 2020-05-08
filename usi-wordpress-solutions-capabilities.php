@@ -19,7 +19,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Capabilities {
 
-   const VERSION = '2.4.12 (2020-04-19)';
+   const VERSION = '2.5.1 (2020-05-07)';
 
    public $section = null;
 
@@ -129,7 +129,6 @@ class USI_WordPress_Solutions_Capabilities {
    } // current_user_can();
 
    function fields_sanitize($input) {
-
       if (!empty($this->capabilities)) {
          foreach ($this->capabilities as $name => $capability) {
             $slug = self::capability_slug($this->prefix, $name);

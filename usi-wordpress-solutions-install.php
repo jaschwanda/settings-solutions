@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_Install {
 
-   const VERSION = '2.4.12 (2020-04-19)';
+   const VERSION = '2.5.1 (2020-05-07)';
 
    const VERSION_DATA = '1.0';
 
@@ -41,6 +41,22 @@ final class USI_WordPress_Solutions_Install {
       require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
       $user_id = get_current_user_id();
+
+      $SAFE_history_table = $wpdb->prefix . 'USI_history';
+
+      // The new-lines and double space after PRIMARY KEY are required;
+      $sql = "CREATE TABLE `$SAFE_history_table` " .
+         '(`history_id` int(10) unsigned NOT NULL AUTO_INCREMENT,' . PHP_EOL .
+         "`time_stamp` timestamp DEFAULT CURRENT_TIMESTAMP," . PHP_EOL .
+         "`user_id` bigint(20) unsigned DEFAULT '0'," . PHP_EOL .
+         '`type` char(4) DEFAULT NULL,' . PHP_EOL .
+         '`action` text DEFAULT NULL,' . PHP_EOL .
+         "`target_id` bigint(20) unsigned DEFAULT '0'," . PHP_EOL .
+         '`data` text DEFAULT NULL,' . PHP_EOL .
+         'PRIMARY KEY  (`history_id`),' . PHP_EOL .
+         'KEY `TARGET` (`target_id`))';
+
+      $result = dbDelta($sql);
 
       $SAFE_log_table = $wpdb->prefix . 'USI_log';
 
