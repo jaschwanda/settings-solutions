@@ -19,6 +19,8 @@ final class USI_WordPress_Solutions_History {
 
    const VERSION = '2.5.1 (2020-05-07)';
 
+   public static $source = null;
+
    private function __construct() {
    } // __construct();
 
@@ -28,7 +30,6 @@ final class USI_WordPress_Solutions_History {
       add_action('edit_user_profile_update', array(__CLASS__, 'action_profile_update'));
       add_action('user_register', array(__CLASS__, 'action_user_register'), 10, 2);
       add_action('wp_login', array(__CLASS__, 'action_wp_login'), 10, 3);
-      add_action('wp', array(__CLASS__, '_wp'), 10);
 
       add_filter('logout_redirect', array(__CLASS__, 'filter_logout_redirect'), 10, 3);
 
@@ -47,9 +48,11 @@ final class USI_WordPress_Solutions_History {
    } // action_profile_update();
 
    public static function action_user_register($user_id) {
-      $user = get_userdata($user_id);
+      $source = self::$source ? self::$source : $_REQUEST;
+      $user   = get_userdata($user_id);
       self::history(get_current_user_id(), 'user', 
-         'Added <' . $user->data->user_login . '> as new user', $user_id, $_REQUEST);
+         'Added <' . $user->data->user_login . '> as new user', $user_id, $source);
+      self::$source = null;
    } // action_user_register();
 
    public static function action_wp_login($user_login = null, $user = null) {
@@ -64,7 +67,7 @@ final class USI_WordPress_Solutions_History {
 
    public static function history($user_id, $type, $action, $target_id = 0, $data = null) {
       global $wpdb;
-      if (is_array($data)) $data = print_r($data, true);
+      if (is_array($data) || is_object($data)) $data = print_r($data, true);
       if (false === $wpdb->insert(
          $wpdb->prefix . 'USI_history', 
          array('user_id' => $user_id, 'type' => $type, 'action' => $action, 'target_id' => $target_id, 'data' => $data),

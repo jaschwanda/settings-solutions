@@ -53,8 +53,8 @@ class USI_WordPress_Solutions_Static {
          'h2{margin-bottom:0.1em; margin-top:2em;} /* 1em; */' . PHP_EOL;
       if ($css) echo $css;
       if (USI_WordPress_Solutions::$options['diagnostics']['visible-grid']) echo
-         '.form-table{border:solid 4px yellow;}' . PHP_EOL .
-         '.form-table td,.form-table th{border:solid 2px yellow;}' . PHP_EOL .
+         '.form-table,.wp-list-table{border:solid 4px yellow;}' . PHP_EOL .
+         '.form-table td,.form-table th,.wp-list-table td,.wp-list-table th{border:solid 2px yellow;}' . PHP_EOL .
          '.wrap{border:solid 1px green;}' . PHP_EOL;
       echo 
          '</style>' . PHP_EOL;

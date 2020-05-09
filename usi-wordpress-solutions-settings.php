@@ -83,6 +83,8 @@ class USI_WordPress_Solutions_Settings {
 
       $script = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1);
 
+      global $pagenow;
+if ($script != $pagenow) die("$script != $pagenow");
       if ('plugins.php' == $script) {
 
          if ($add_settings_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
@@ -99,6 +101,16 @@ class USI_WordPress_Solutions_Settings {
          add_action('admin_head', array($this, 'action_admin_head'));
 
          add_action('admin_init', array($this, 'action_admin_init'));
+
+      } else if (!empty(USI_WordPress_Solutions::$options['diagnostics']['visible-grid'])) {
+
+         switch ($pagenow) {
+         case 'profile.php':
+         case 'user-edit.php': 
+         case 'users.php': 
+            add_action('admin_head', array($this, 'action_admin_head'));
+            break;
+         }
 
       }
 
@@ -127,7 +139,7 @@ class USI_WordPress_Solutions_Settings {
    } // __construct();
 
    function action_admin_head($css = null) {
-      USI_WordPress_Solutions_Static::action_admin_head($css );
+      USI_WordPress_Solutions_Static::action_admin_head($css);
    } // action_admin_head();
 
    function action_admin_init() {
