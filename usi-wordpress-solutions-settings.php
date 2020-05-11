@@ -107,6 +107,7 @@ if ($script != $pagenow) die("$script != $pagenow");
          switch ($pagenow) {
          case 'profile.php':
          case 'user-edit.php': 
+         case 'user-new.php': 
          case 'users.php': 
             add_action('admin_head', array($this, 'action_admin_head'));
             break;
