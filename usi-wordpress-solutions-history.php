@@ -33,35 +33,59 @@ final class USI_WordPress_Solutions_History {
 
       add_filter('logout_redirect', array(__CLASS__, 'filter_logout_redirect'), 10, 3);
 
+      add_action('wp_dashboard_setup', array(__CLASS__, 'my_custom_dashboard_widgets'));
+
+      add_action( 'wp_dashboard_setup', array(__CLASS__, 'wporg_remove_all_dashboard_metaboxes') );
+
    } // _init();
+
+   public static function wporg_remove_all_dashboard_metaboxes() {
+      remove_action( 'welcome_panel', 'wp_welcome_panel' );
+      remove_meta_box( 'dashboard_primary', 'dashboard', 'side' );
+      remove_meta_box( 'dashboard_quick_press', 'dashboard', 'side' );
+      remove_meta_box( 'health_check_status', 'dashboard', 'normal' );
+      remove_meta_box( 'dashboard_right_now', 'dashboard', 'normal' );
+      remove_meta_box( 'dashboard_activity', 'dashboard', 'normal');
+  }
+// https://developer.wordpress.org/apis/handbook/dashboard-widgets/  
+   public static function my_custom_dashboard_widgets() {
+      global $wp_meta_boxes;
+usi::log('$wp_meta_boxes=', $wp_meta_boxes['dashboard']);
+      wp_add_dashboard_widget('custom_help_widget', 'History', array(__CLASS__, 'custom_dashboard_help'));
+   }
+
+   public static function custom_dashboard_help() {
+      echo '<p>Welcome to Custom Blog Theme! Need help? Contact the developer <a href="mailto:yourusername@gmail.com">here</a>. For WordPress Tutorials visit: <a href="https://www.wpbeginner.com" target="_blank">WPBeginner</a></p>';
+   }
 
    public static function action_delete_user($id, $reassign) {
       $user = get_userdata($id);
       self::history(get_current_user_id(), 'user', 
-         'Deleted <' . $user->data->user_login . '> from user list', $id, $_REQUEST);
+         'Deleted <' . $user->data->display_name . '> from user list', $id, $_REQUEST);
    } // action_delete_user();
 
    public static function action_profile_update($user_id) {
       $user = get_userdata($user_id);
       self::history(get_current_user_id(), 'user', 
-         'Modified <' . $user->data->user_login . '> user profile', $user_id, $_REQUEST);
+         'Modified <' . $user->data->display_name . '> user profile', $user_id, $_REQUEST);
    } // action_profile_update();
 
    public static function action_user_register($user_id) {
       $source = self::$source ? self::$source : $_REQUEST;
       $user   = get_userdata($user_id);
       self::history(get_current_user_id(), 'user', 
-         'Added <' . $user->data->user_login . '> as new user', $user_id, $source);
+         'Added <' . $user->data->display_name . '> as new user', $user_id, $source);
       self::$source = null;
    } // action_user_register();
 
    public static function action_wp_login($user_login = null, $user = null) {
       // https://usersinsights.com/wordpress-user-login-hooks/
-      self::history($user->ID, 'user', 'User <' . $user_login . '> logged in from ' . $_SERVER['REMOTE_ADDR'], $user->ID);
+      $from = !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
+      self::history($user->ID, 'user', 'User <' . $user->data->display_name . '> logged in from ' . $from, $user->ID);
    } // action_wp_login();
 
    public static function filter_logout_redirect($redirect_to, $requested_redirect_to, $user) {
-      self::history($user->ID, 'user', 'User <' . $user->data->user_login . '> logged out from ' . $_SERVER['REMOTE_ADDR'], $user->ID);
+      self::history($user->ID, 'user', 'User <' . $user->data->display_name . '> logged out from ' . $_SERVER['REMOTE_ADDR'], $user->ID);
       return($redirect_to);
    } // filter_logout_redirect();
 

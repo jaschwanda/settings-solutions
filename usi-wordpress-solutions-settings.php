@@ -31,6 +31,7 @@ class USI_WordPress_Solutions_Settings {
    const DEBUG_RENDER = 0x02;
 
    private static $one_per_line = false;
+   private static $one_per_row  = false;
 
    protected $active_tab = null;
    protected $capability = 'manage_options';
@@ -140,6 +141,7 @@ if ($script != $pagenow) die("$script != $pagenow");
    } // __construct();
 
    function action_admin_head($css = null) {
+      if (!empty($this->options['css'])) $css .= $this->options['css'];
       USI_WordPress_Solutions_Static::action_admin_head($css);
    } // action_admin_head();
 
@@ -273,6 +275,17 @@ if ($script != $pagenow) die("$script != $pagenow");
       return($this->capabilities); 
    } // capabilities();
 
+/*
+do_settings_sections <h2>{$section['title']}</h2>
+do_settings_sections call_user_func($section['callback']);
+do_settings_sections <table class="form-table" role="presentation">
+do_settings_fields     <tr{$class}>
+do_settings_fields       <th scope="row"><label></label></th>
+do_settings_fields       <td>do_settings_fields call_user_func($field['callback']);</td>
+do_settings_fields     </tr>
+do_settings_sections </table>';
+*/
+
    // This function riped from wp-admin/includes/template.php;
    function do_settings_fields($page, $section) {
       global $wp_settings_fields;
@@ -284,10 +297,13 @@ if ($script != $pagenow) die("$script != $pagenow");
       $i5 = '  ' . $i4;
       $n  = PHP_EOL;
 
+
       if (!isset($wp_settings_fields[$page][$section])) return;
 
       foreach ((array)$wp_settings_fields[$page][$section] as $field) {
          $class = '';
+
+         $o1 = self::$one_per_row ? $n . $i4 . '</tr>' . $n . $i4 . '<tr>' : '';
 
          if (!empty($field['args']['class'])) $class = ' class="' . esc_attr( $field['args']['class'] ) . '"';
 
@@ -300,7 +316,7 @@ if ($script != $pagenow) die("$script != $pagenow");
             } else {
                echo '<th scope="row">' . $field['args']['alt_html'] . '</th>';
             }
-            echo $n . $i5 . '<td>';
+            echo $o1 . $n . $i5 . '<td>';
          }
          call_user_func($field['callback'], $field['args']);
          if (!self::$one_per_line) {
@@ -664,6 +680,7 @@ if ($script != $pagenow) die("$script != $pagenow");
       if ($this->sections) foreach ($this->sections as $section_id => & $section) {
          if (isset($section['localize_labels'])) $labels = ('yes' == $section['localize_labels']);
          if (isset($section['localize_notes'])) $notes   = (int)$section['localize_notes'];
+         if (isset($section['one_per_row']))   self::$one_per_row  = empty($section['one_per_row']);
          // The WordPress do_settings_sections() function renders the title before WordPress calls the section_render() function
          // which means the title is rendered before the previous tab <div> is closed, so we save the title under the usi-title 
          // property name, unset the title, then render the usi-title in the section_render() function when we want to;
@@ -671,6 +688,11 @@ if ($script != $pagenow) die("$script != $pagenow");
             $section['usi-title'] = __($section['title'], $this->text_domain);
             unset($section['title']);
          }
+         if (isset($section['options'])) {
+            $options = $section['options'];
+            $this->options['css'] = !empty($options['css']) ? $options['css'] : '';
+         }
+
          foreach ($section['settings'] as $name => & $setting) {
             if ($labels && !empty($setting['label'])) $setting['label'] = __($setting['label'], $this->text_domain);
             if ($notes  && !empty($setting['notes'])) {
