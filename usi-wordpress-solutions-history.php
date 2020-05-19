@@ -50,7 +50,7 @@ final class USI_WordPress_Solutions_History {
 // https://developer.wordpress.org/apis/handbook/dashboard-widgets/  
    public static function my_custom_dashboard_widgets() {
       global $wp_meta_boxes;
-usi::log('$wp_meta_boxes=', $wp_meta_boxes['dashboard']);
+//usi::log('$wp_meta_boxes=', $wp_meta_boxes['dashboard']);
       wp_add_dashboard_widget('custom_help_widget', 'History', array(__CLASS__, 'custom_dashboard_help'));
    }
 
