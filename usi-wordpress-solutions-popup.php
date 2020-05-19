@@ -28,6 +28,7 @@ choice  = string|null                   // WP_List_Table:message displayed if no
 class   = string                        // html class added to anchor, usualy used to identofy items to be scanned for selection;
 close   = string|null                   // Close button text, usually used to remove information only popups;
 direct  = string|null                   // jQuery selector(s) that when clicked start scan of items in document to include in popup operation, must include . and # and may include more than one;
+format  = 'br'|'li'                     // List format, use breaks or list tags;
 id      = string|null                   // Id of hidden <div> that contains the popup elements;
 info    = string|null                   // Information included in the data-info"" attribute for item anchor;
 input   = 'file'|'check'                // Input field types, usually checkboxes;
@@ -68,6 +69,7 @@ class USI_WordPress_Solutions_Popup {
       $class  = !empty($options['class'] ) ? esc_attr($options['class'])  : null;
       $close  = !empty($options['close'] ) ?          $options['close']   : null;
       $direct = !empty($options['direct']) ? esc_attr($options['direct']) : null;
+      $format = !empty($options['format']) ?          $options['format']  : 'br';
       $height = !empty($options['height']) ?     (int)$options['height']  : 300;
       $id     = !empty($options['id']    ) ?          $options['id']      : null;
       $key_id = !empty($options['key_id']) ?          $options['key_id']  : null;
@@ -135,6 +137,7 @@ jQuery(document).ready(
       var cancel = '{$cancel}';
       var choice = '{$choice}';
       var close  = '{$close}';
+      var format = '{$format}';
       var ok     = '{$ok}';
       var prefix = '{$prefix}';
       var select = '{$select}';
@@ -232,7 +235,7 @@ jQuery(document).ready(
 
          html  = '';
          if (show_prefix) html += '<p>' + prefix + '</p>';
-         if (show_body)   html += '<p>' + body   + '</p>';
+         if (show_body)   html += '<ul>' + body   + '</ul>';
          if (show_suffix) html += '<p>' + suffix + '</p>';
          html += '<hr><p>';
          if (show_accept) {
@@ -308,18 +311,35 @@ jQuery(document).ready(
                   id_list = '';
                   var ids = $('{$list}');
                   if (log) console.log("$('{$submit}').click():$('{$list}').length=" + ids.length);
+                  try {
                   for (var i = 0; i < ids.length; i++) {
                      if (ids[i].checked) {
                         var key  = ids[i].getAttribute('data-key');
                         var info = ids[i].getAttribute('data-info');
+                        if (!key && !info) {
+                           //Take attributes from anchor tag in next field;
+                           key  = ids[i].parentElement.nextSibling.firstChild.getAttribute('data-key');
+                           info = ids[i].parentElement.nextSibling.firstChild.getAttribute('data-info');
+                        }
                         if (log) console.log("$('{$submit}').click():$('{$list}').key=" + key + ' info=' + info);
                         id_list += (id_list.length ? ',' : '')  + key;
-                        body    += (body ? '<br/>' : '') + info;
+                        if ('li' == format) {
+                           body    += '<li>' + info + '</li>';
+                        } else {
+                           body    += (body ? '<br/>' : '') + info;
+                        }
                      } else if (ids[i].files && ids[i].files[0] && ids[i].files[0].name) {
                         var name = ' &nbsp; ' + ids[i].files[0].name;
                         if (log) console.log("$('{$submit}').click():$('{$list}').name=" + name);
-                        body    += (body ? '<br/>' : '') + name;
+                        if ('li' == format) {
+                           body    += '<li>' + name + '</li>';
+                        } else {
+                           body    += (body ? '<br/>' : '') + name;
+                        }
                      }
+                  }
+                  } catch (exception) {
+                     console.log(exception.message);
                   }
                   if (body) {
                      show_ok = false;
