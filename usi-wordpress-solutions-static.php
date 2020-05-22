@@ -32,9 +32,9 @@ class USI_WordPress_Solutions_Static {
 
       foreach ($hidden as $hide) unset($columns[$hide]);
 
-      $total = 0; foreach ($columns as $width) $total += $width;
+      $total  = 0; foreach ($columns as $width) $total += $width;
 
-      $html  = '<style>' . PHP_EOL;
+      $html   = '<style>' . PHP_EOL;
 
       foreach ($columns as $name => $width) { 
          $percent = number_format(100 * $width / $total, 1);

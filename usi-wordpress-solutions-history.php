@@ -26,9 +26,11 @@ final class USI_WordPress_Solutions_History {
 
    public static function _init() {
 
+      add_action('delete_post', array(__CLASS__, 'action_delete_post'));
       add_action('delete_user', array(__CLASS__, 'action_delete_user'), 10, 2);
       add_action('edit_user_profile_update', array(__CLASS__, 'action_profile_update'));
       add_action('user_register', array(__CLASS__, 'action_user_register'), 10, 2);
+      add_action('wp_insert_post', array(__CLASS__, 'action_wp_insert_post'), 10, 3);
       add_action('wp_login', array(__CLASS__, 'action_wp_login'), 10, 3);
 
       add_filter('logout_redirect', array(__CLASS__, 'filter_logout_redirect'), 10, 3);
@@ -58,6 +60,15 @@ final class USI_WordPress_Solutions_History {
       echo '<p>Welcome to Custom Blog Theme! Need help? Contact the developer <a href="mailto:yourusername@gmail.com">here</a>. For WordPress Tutorials visit: <a href="https://www.wpbeginner.com" target="_blank">WPBeginner</a></p>';
    }
 
+   public static function action_delete_post($post_id) {
+      $post_type = get_post_type($post_id);
+      $title     = get_the_title($post_id);
+      $length    = strlen($title);
+      if (36 < $length) $title = substr($title, 0, 33) . '...';
+      self::history(get_current_user_id(), 'post', 
+         'Deleted ' . $post_type . ' <' . $title . '> from system', $post_id, $_REQUEST);
+   } // action_delete_post();
+
    public static function action_delete_user($id, $reassign) {
       $user = get_userdata($id);
       self::history(get_current_user_id(), 'user', 
@@ -77,6 +88,13 @@ final class USI_WordPress_Solutions_History {
          'Added <' . $user->data->display_name . '> as new user', $user_id, $source);
       self::$source = null;
    } // action_user_register();
+
+   public static function action_wp_insert_post($post_id, $post, $update) {
+      $length = strlen($title = $post->post_title);
+      if (36 < $length) $title = substr($title, 0, 33) . '...';
+      self::history(get_current_user_id(), 'post', 
+         'Added <' . $title . '> as new ' . $post->post_type, $post_id, $_REQUEST);
+   } // action_wp_insert_post();
 
    public static function action_wp_login($user_login = null, $user = null) {
       // https://usersinsights.com/wordpress-user-login-hooks/

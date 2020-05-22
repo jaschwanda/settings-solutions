@@ -30,8 +30,9 @@ class USI_WordPress_Solutions_Settings {
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
 
+   private static $grid         = null;
+   private static $label_option = null; // Null means default behavior, label to left of field;
    private static $one_per_line = false;
-   private static $one_per_row  = false;
 
    protected $active_tab = null;
    protected $capability = 'manage_options';
@@ -82,11 +83,9 @@ class USI_WordPress_Solutions_Settings {
       if (!empty($config['roles']))        $this->roles        = $config['roles'];
       if (!empty($config['text_domain']))  $this->text_domain  = $config['text_domain'];
 
-      $script = substr($_SERVER['SCRIPT_NAME'], strrpos($_SERVER['SCRIPT_NAME'], '/') + 1);
-
       global $pagenow;
-if ($script != $pagenow) die("$script != $pagenow");
-      if ('plugins.php' == $script) {
+
+      if ('plugins.php' == $pagenow) {
 
          if ($add_settings_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
 
@@ -95,8 +94,8 @@ if ($script != $pagenow) die("$script != $pagenow");
          if (is_callable($filter_plugin_row_meta)) add_filter('plugin_row_meta', $filter_plugin_row_meta, 10, 2);
 
       } else if (
-         ((('admin.php' == $script) || ('options-general.php' == $script)) && !empty($_GET['page']) && ($_GET['page'] == $this->page_slug)) ||
-         (('options.php' == $script) && !empty($_POST['option_page']) && ($_POST['option_page'] == $this->page_slug)) 
+         ((('admin.php' == $pagenow) || ('options-general.php' == $pagenow)) && !empty($_GET['page']) && ($_GET['page'] == $this->page_slug)) ||
+         (('options.php' == $pagenow) && !empty($_POST['option_page']) && ($_POST['option_page'] == $this->page_slug)) 
          ) {
 
          add_action('admin_head', array($this, 'action_admin_head'));
@@ -173,7 +172,7 @@ if ($script != $pagenow) die("$script != $pagenow");
             foreach ($section['settings'] as $option_id => $attributes) {
                $option_name  = (!empty($attributes['name']) ? $attributes['name'] : $this->option_name . '[' . $section_id . '][' . $option_id . ']');
                $option_value = (!empty($this->options[$section_id][$option_id]) ?
-                  $this->options[$section_id][$option_id] : (('number' == $attributes['type']) ? 0 : null));
+                  $this->options[$section_id][$option_id] : (('number' == (!empty($attributes['type']) ? $attributes['type'] : '')) ? 0 : null));
 
                if (self::DEBUG_INIT & $this->debug) usi::log('$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
                if (empty($attributes['skip'])) {
@@ -303,7 +302,7 @@ do_settings_sections </table>';
       foreach ((array)$wp_settings_fields[$page][$section] as $field) {
          $class = '';
 
-         $o1 = self::$one_per_row ? $n . $i4 . '</tr>' . $n . $i4 . '<tr>' : '';
+         $o1 = self::$label_option ? $n . $i4 . '</tr>' . $n . $i4 . '<tr>' : '';
 
          if (!empty($field['args']['class'])) $class = ' class="' . esc_attr( $field['args']['class'] ) . '"';
 
@@ -311,7 +310,7 @@ do_settings_sections </table>';
             echo "$i4<tr{$class}>$n$i5";
             if (!empty($field['args']['label_for'])) {
                echo '<th scope="row"><label for="' . esc_attr($field['args']['label_for']) . '">' . $field['title'] . '</label></th>';
-            } else if (empty( $field['args']['alt_html'])) {
+            } else if (empty($field['args']['alt_html'])) {
                echo '<th scope="row">' . $field['title'] . '</th>';
             } else {
                echo '<th scope="row">' . $field['args']['alt_html'] . '</th>';
@@ -348,6 +347,81 @@ do_settings_sections </table>';
       }
    } // do_settings_sections();
 
+   function do_settings_fields_advanced($page, $section) {
+
+      global $wp_settings_fields;
+
+      $i  = $this->is_tabbed ? '  ' : '';
+      $i2 = '  ' . $i;
+      $i3 = '  ' . $i2;
+      $i4 = '  ' . $i3;
+      $i5 = '  ' . $i4;
+      $n  = PHP_EOL;
+
+      if (!isset($wp_settings_fields[$page][$section])) return;
+
+      foreach ((array)$wp_settings_fields[$page][$section] as $field) {
+
+         $class = '';
+
+         if (!empty($field['args']['class'])) $class = ' class="' . esc_attr( $field['args']['class'] ) . '"';
+
+         // IF default or over mode (not none);
+         if ('none' != self::$grid) {
+            $html = null;
+            if (!self::$grid) {
+            } else if ('over' == self::$grid) {
+               $span = (!empty($field['args']['span']) ? ' colspan="' . $field['args']['span'] . '"' : '');
+               if (!empty($field['args']['label_for'])) {
+                  $html = '<th' . $span . ' scope="row"><label for="' . esc_attr($field['args']['label_for']) . '">' . $field['title'] . '</label></th>';
+               } else if (!empty($field['args']['alt_html'])) {
+                  $html = '<th' . $span . ' scope="row" data-info="alt_html">' . $field['args']['alt_html'] . '</th>';
+               } else if (!empty($field['title'])) {
+                  $html = '<th' . $span . ' scope="row" data-info="title">' . $field['title'] . '</th>';
+               }
+               if ($html) echo "$i4<tr{$class}>$n$i5" . $html . $n . $i4 . '</tr>' . $n;
+               echo $i4 . '<tr>' . $n . $i5 . "<td$span>";
+            } else if ('none' == self::$grid) {
+               if (!empty($field['args']['label_for'])) {
+                  $html = '<th' . $span . ' scope="row"><label for="' . esc_attr($field['args']['label_for']) . '">' . $field['title'] . '</label></th>';
+               } else if (!empty($field['args']['alt_html'])) {
+                  $html = '<th' . $span . ' scope="row" data-info="alt_html">' . $field['args']['alt_html'] . '</th>';
+               } else if (!empty($field['title'])) {
+                  $html = '<th' . $span . ' scope="row" data-info="title">' . $field['title'] . '</th>';
+               }
+               if ($html) echo "$i4<tr{$class}>$n$i5" . $html . $n . $i4 . '</tr>' . $n;
+               echo $i4 . '<tr>' . $n . $i5 . "<td$span>";
+            }
+         } // ENDIF default or over mode (not nonoe);
+
+         // emit the actual field;
+         call_user_func($field['callback'], $field['args']);
+         if ('none' != self::$grid) {
+            echo '</td>' . $n . $i4 . '</tr>' . $n;
+         }
+      }
+
+   } // do_settings_fields_advanced();
+
+   // This function riped from wp-admin/includes/template.php;
+   function do_settings_sections_advanced($page) {
+      $i  = $this->is_tabbed ? '  ' : '';
+      $i2 = '  ' . $i;
+      $i3 = '  ' . $i2;
+      $n  = PHP_EOL;
+      global $wp_settings_sections, $wp_settings_fields;
+      if (!isset($wp_settings_sections[$page])) return;
+      foreach ((array)$wp_settings_sections[$page] as $section) {
+         if (isset($section['grid'])) self::$grid = $section['grid'];
+         if ($section['title']) echo "$i3<h2>{$section['title']}</h2>\n";
+         if ($section['callback']) call_user_func($section['callback'], $section);
+         if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) continue;
+         echo $i3 . '<table class="form-table" role="presentation">' . $n;
+         $this->do_settings_fields_advanced($page, $section['id']);
+         echo $i3 . '</table>' . $n;
+      }
+   } // do_settings_sections_advanced();
+
    function fields_render($args) {
       if (self::DEBUG_RENDER & $this->debug) usi::log('args=', $args);
       self::fields_render_static($args);
@@ -356,7 +430,11 @@ do_settings_sections </table>';
    // Static version so that other classes can use this rendering function;
    public static function fields_render_static($args) {
 
+      // A field of 'alt_html' will put the html given in the default label column;
+
       if (isset($args['one_per_line'])) self::$one_per_line = empty($args['one_per_line']);
+
+      if (isset($args['.grid'])) self::$grid = $args['.grid'];
 
       $notes    = !empty($args['notes'])   ? $args['notes'] : null;
       $type     = !empty($args['type'])    ? $args['type']  : 'text';
@@ -370,6 +448,7 @@ do_settings_sections </table>';
       $max      = isset($args['max'])      ? ' max="'   . $args['max']     . '"' : null;
 
       $prefix   = isset($args['prefix'])   ? $args['prefix'] : '';
+      $suffix   = isset($args['suffix'])   ? $args['suffix'] : '';
 
       $rows     = isset($args['rows'])     ? ' rows="'  . $args['rows']  . '"' : null;
 
@@ -394,7 +473,7 @@ do_settings_sections </table>';
 
       case 'checkbox':
          // Not sure why we have to convert 'true' to true, but checked() sometimes wouldn't check otherwise;
-         echo $prefix . '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />';
+         echo $prefix . '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />' . $suffix;
          break;
 
       case 'null-number':
@@ -403,7 +482,7 @@ do_settings_sections </table>';
       case 'hidden':
       case 'number':
       case 'text':
-         echo $prefix . '<input type="' . $type . '"' . $attributes . ' value="' . $value . '" />';
+         echo $prefix . '<input type="' . $type . '"' . $attributes . ' value="' . $value . '" />' . $suffix;
          break;
 
       case 'html':
@@ -411,11 +490,11 @@ do_settings_sections </table>';
          break;
 
       case 'select':
-         echo $prefix . self::fields_render_select($attributes, $args['options'], $value);
+         echo $prefix . self::fields_render_select($attributes, $args['options'], $value) . $suffix;
          break;
 
       case 'textarea':
-         echo $prefix . '<textarea' . $attributes . '>' . $value . '</textarea>';
+         echo $prefix . '<textarea' . $attributes . '>' . $value . '</textarea>' . $suffix;
          break;
 
       }
@@ -427,6 +506,8 @@ do_settings_sections </table>';
             self::fields_render_static($more);
          }
       }
+
+      if (isset($args['grid.'])) self::$grid = $args['grid.'];
 
    } // fields_render();
 
@@ -560,6 +641,10 @@ do_settings_sections </table>';
 
       $submit_text   = null;
 
+      if ($section = reset($this->sections)) {
+         self::$grid = !empty($section['options']['grid']) ? $section['options']['grid'] : null;
+      }
+
       echo 
          $n . '<div class="wrap">' . $n .
          $i . '<h1>' . ($page_header ? $page_header : __($this->name . ' Settings', $this->text_domain)) . $title_buttons . '</h1>' . $n .
@@ -588,7 +673,9 @@ do_settings_sections </table>';
       }
 
       settings_fields($this->page_slug);
-      if ($this->override_do_settings_sections) {
+      if (self::$grid) {
+         $this->do_settings_sections_advanced($this->page_slug);
+      } else if ($this->override_do_settings_sections) {
          $this->do_settings_sections($this->page_slug);
       } else {
          do_settings_sections($this->page_slug);
@@ -680,7 +767,6 @@ do_settings_sections </table>';
       if ($this->sections) foreach ($this->sections as $section_id => & $section) {
          if (isset($section['localize_labels'])) $labels = ('yes' == $section['localize_labels']);
          if (isset($section['localize_notes'])) $notes   = (int)$section['localize_notes'];
-         if (isset($section['one_per_row']))   self::$one_per_row  = empty($section['one_per_row']);
          // The WordPress do_settings_sections() function renders the title before WordPress calls the section_render() function
          // which means the title is rendered before the previous tab <div> is closed, so we save the title under the usi-title 
          // property name, unset the title, then render the usi-title in the section_render() function when we want to;
@@ -689,8 +775,7 @@ do_settings_sections </table>';
             unset($section['title']);
          }
          if (isset($section['options'])) {
-            $options = $section['options'];
-            $this->options['css'] = !empty($options['css']) ? $options['css'] : '';
+            $this->options['css'] = !empty($section['options']['css']) ? $section['options']['css']    : '';
          }
 
          foreach ($section['settings'] as $name => & $setting) {
@@ -756,6 +841,10 @@ do_settings_sections </table>';
       }
 
       if (!empty($this->sections[$section_id]['usi-title'])) echo "      <h2>{$this->sections[$section_id]['usi-title']}</h2>\n";
+
+      if (isset($this->sections[$section_id]['grid'])) self::$grid = $this->sections[$section_id]['grid'];
+
+      usi::log('$section_id=', $section_id, ' $grid=', self::$grid);
 
       $section_callback = $this->section_callbacks[$this->section_callback_offset];
       $object = $section_callback[0];
