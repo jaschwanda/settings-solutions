@@ -30,7 +30,7 @@ class USI_WordPress_Solutions_Settings {
    const DEBUG_INIT   = 0x01;
    const DEBUG_RENDER = 0x02;
 
-   private static $grid         = null;
+   private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
    private static $one_per_line = false;
 
@@ -370,7 +370,6 @@ do_settings_sections </table>';
          if ('none' != self::$grid) {
             $html = null;
             if (!self::$grid) {
-            } else if ('over' == self::$grid) {
                $span = (!empty($field['args']['span']) ? ' colspan="' . $field['args']['span'] . '"' : '');
                if (!empty($field['args']['label_for'])) {
                   $html = '<th' . $span . ' scope="row"><label for="' . esc_attr($field['args']['label_for']) . '">' . $field['title'] . '</label></th>';
@@ -378,10 +377,11 @@ do_settings_sections </table>';
                   $html = '<th' . $span . ' scope="row" data-info="alt_html">' . $field['args']['alt_html'] . '</th>';
                } else if (!empty($field['title'])) {
                   $html = '<th' . $span . ' scope="row" data-info="title">' . $field['title'] . '</th>';
-               }
-               if ($html) echo "$i4<tr{$class}>$n$i5" . $html . $n . $i4 . '</tr>' . $n;
-               echo $i4 . '<tr>' . $n . $i5 . "<td$span>";
-            } else if ('none' == self::$grid) {
+               } // chack if this would be blank;
+               if ($html) echo "$i4<tr{$class}>$n$i5" . $html . $n;
+               echo $i5 . "<td$span>";
+            } else if ('over' == self::$grid) {
+               $span = (!empty($field['args']['span']) ? ' colspan="' . $field['args']['span'] . '"' : '');
                if (!empty($field['args']['label_for'])) {
                   $html = '<th' . $span . ' scope="row"><label for="' . esc_attr($field['args']['label_for']) . '">' . $field['title'] . '</label></th>';
                } else if (!empty($field['args']['alt_html'])) {
@@ -396,6 +396,7 @@ do_settings_sections </table>';
 
          // emit the actual field;
          call_user_func($field['callback'], $field['args']);
+
          if ('none' != self::$grid) {
             echo '</td>' . $n . $i4 . '</tr>' . $n;
          }
@@ -412,7 +413,7 @@ do_settings_sections </table>';
       global $wp_settings_sections, $wp_settings_fields;
       if (!isset($wp_settings_sections[$page])) return;
       foreach ((array)$wp_settings_sections[$page] as $section) {
-         if (isset($section['grid'])) self::$grid = $section['grid'];
+         if (isset($section['grid'])) self::set_grid($section['grid']);
          if ($section['title']) echo "$i3<h2>{$section['title']}</h2>\n";
          if ($section['callback']) call_user_func($section['callback'], $section);
          if (!isset($wp_settings_fields) || !isset($wp_settings_fields[$page]) || !isset($wp_settings_fields[$page][$section['id']])) continue;
@@ -434,7 +435,7 @@ do_settings_sections </table>';
 
       if (isset($args['one_per_line'])) self::$one_per_line = empty($args['one_per_line']);
 
-      if (isset($args['.grid'])) self::$grid = $args['.grid'];
+      if (isset($args['.grid'])) self::set_grid($args['.grid']);
 
       $notes    = !empty($args['notes'])   ? $args['notes'] : null;
       $type     = !empty($args['type'])    ? $args['type']  : 'text';
@@ -507,7 +508,7 @@ do_settings_sections </table>';
          }
       }
 
-      if (isset($args['grid.'])) self::$grid = $args['grid.'];
+      if (isset($args['grid.'])) self::set_grid($args['grid.']);
 
    } // fields_render();
 
@@ -642,7 +643,7 @@ do_settings_sections </table>';
       $submit_text   = null;
 
       if ($section = reset($this->sections)) {
-         self::$grid = !empty($section['options']['grid']) ? $section['options']['grid'] : null;
+         if (isset($section['options']['grid'])) self::set_grid($section['options']['grid']);
       }
 
       echo 
@@ -842,9 +843,9 @@ do_settings_sections </table>';
 
       if (!empty($this->sections[$section_id]['usi-title'])) echo "      <h2>{$this->sections[$section_id]['usi-title']}</h2>\n";
 
-      if (isset($this->sections[$section_id]['grid'])) self::$grid = $this->sections[$section_id]['grid'];
+      if (isset($this->sections[$section_id]['grid'])) self::set_grid($this->sections[$section_id]['grid']);
 
-      usi::log('$section_id=', $section_id, ' $grid=', self::$grid);
+      // usi::log('$section_id=', $section_id, ' $grid=', self::$grid);
 
       $section_callback = $this->section_callbacks[$this->section_callback_offset];
       $object = $section_callback[0];
@@ -858,6 +859,10 @@ do_settings_sections </table>';
    function sections() { // Should be over ridden by extending class;
       return(null);
    } // sections();
+
+   private static function set_grid($grid) {
+      self::$grid = (('none' == $grid) || ('over' == $grid)) ? $grid : false;
+   } // set_grid();
 
    public function set_options($section, $name, $value) { 
       $this->options[$section][$name] = $value;
