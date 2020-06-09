@@ -15,7 +15,7 @@ Requires at least: 5.0
 Requires PHP:      5.6.25
 Tested up to:      5.3.2
 Text Domain:       usi-wordpress-solutions
-Version:           2.5.1
+Version:           2.7.0
 */
 
 /*
@@ -39,25 +39,51 @@ require_once('usi-wordpress-solutions-log.php');
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.5.1 (2020-05-07)';
+   const VERSION = '2.7.0 (2020-06-08)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
    const TEXTDOMAIN = 'usi-wordpress-solutions';
+
+   const DEBUG_INIT   = 0x0001;
+   const DEBUG_RENDER = 0x0002;
+
+   public static $capabilities = array(
+      'impersonate-user' => 'Impersonate User|administrator',
+   );
 
    public static $options = array();
 
    function __construct() {
 
       if (empty(self::$options)) {
-         $defaults['admin-options']['history']    = false;
-         $defaults['preferences']['menu-sort']    = 'no';
-         $defaults['diagnostics']['visible-grid'] = false;
+         $defaults['admin-options']['history']     = false;
+         $defaults['preferences']['menu-sort']     = 'no';
+         $defaults['illumination']['visible-grid'] = false;
          self::$options = get_option(self::PREFIX . '-options', $defaults);
       }
-
       if (!empty(self::$options['admin-options']['history'])) {
          require_once('usi-wordpress-solutions-history.php');
+      }
+
+
+      if (is_admin()) {
+
+         global $pagenow;
+         if ('admin.php' == $pagenow) {
+            require_once('usi-wordpress-solutions-user-sessions.php');
+         }
+
+         if (!defined('WP_UNINSTALL_PLUGIN')) {
+            add_action('init', 'add_thickbox');
+            require_once('usi-wordpress-solutions-install.php');
+            require_once('usi-wordpress-solutions-settings-settings.php');
+            if (!empty(USI_WordPress_Solutions::$options['admin-options']['git-update'])) {
+               require_once('usi-wordpress-solutions-update.php');
+               new USI_WordPress_Solutions_Update_GitHub(__FILE__, 'jaschwanda', 'wordpress-solutions');
+            }
+         }
+
       }
 
    } // __construct();
@@ -65,15 +91,5 @@ final class USI_WordPress_Solutions {
 } // Class USI_WordPress_Solutions;
 
 new USI_WordPress_Solutions();
-
-if (is_admin() && !defined('WP_UNINSTALL_PLUGIN')) {
-   add_action('init', 'add_thickbox');
-   require_once('usi-wordpress-solutions-install.php');
-   require_once('usi-wordpress-solutions-settings-settings.php');
-   if (!empty(USI_WordPress_Solutions::$options['admin-options']['git-update'])) {
-      require_once('usi-wordpress-solutions-update.php');
-      new USI_WordPress_Solutions_Update_GitHub(__FILE__, 'jaschwanda', 'wordpress-solutions');
-   }
-}
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

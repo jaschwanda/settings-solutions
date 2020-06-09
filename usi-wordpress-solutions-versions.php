@@ -19,7 +19,7 @@ require_once('usi-wordpress-solutions-popup.php');
 
 class USI_WordPress_Solutions_Versions {
 
-   const VERSION = '2.5.1 (2020-05-07)';
+   const VERSION = '2.7.0 (2020-06-08)';
 
    private static $pass = 0;
 

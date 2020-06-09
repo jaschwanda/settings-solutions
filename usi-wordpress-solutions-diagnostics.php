@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Diagnostics {
 
-   const VERSION = '2.5.1 (2020-05-07)';
+   const VERSION = '2.7.0 (2020-06-08)';
 
    private $options     = null;
    private $text_domain = null;
@@ -32,23 +32,30 @@ class USI_WordPress_Solutions_Diagnostics {
          'fields_sanitize' => array($this, 'fields_sanitize'),
          'header_callback' => array($this, 'section_header'),
          'label' => 'Diagnostics',
+         'localize_labels' => 'yes',
+         'localize_notes' => 3, // <p class="description">__()</p>;
          'settings' => array(
-            'code' => array(
-               'type' => 'hidden', 
-            ),
             'session' => array(
                'f-class' => 'regular-text', 
                'label' => 'Diagnostic Session',
                'notes' => 'Enter the diagnostic session from the user you wish to analyze.',
                'type' => 'text', 
             ),
+            'code' => array(
+               'f-class' => 'regular-text', 
+               'label' => 'Diagnostic Code',
+               'notes' => 'Code used to select diagnostic operations.',
+               'readonly' => true, 
+               'type' => 'text', 
+            ),
          ),
       );
 
       foreach ($options as $key => $values) {
-         $this->section['settings'][$key] = $values;
          $this->section['settings'][$key]['label'] = $key;
+         $this->section['settings'][$key]['notes'] = $values['notes'];
          $this->section['settings'][$key]['type'] = 'checkbox';
+         $this->section['settings'][$key]['usi-code'] = $values['value'];
       }
 
    } // __construct();
@@ -57,7 +64,9 @@ class USI_WordPress_Solutions_Diagnostics {
       $code = 0;
       if (!empty($input['diagnostics']['session'])) {
          foreach ($input['diagnostics'] as $key => $value) {
-            if (!empty($this->options[$key]['value'])) $code |= $this->options[$key]['value'];
+            if ('checkbox' == $this->section['settings'][$key]['type']) {
+               if (!empty($this->options[$key]['value'])) $code |= $this->section['settings'][$key]['usi-code'];
+            }
          }
       }
       $input['diagnostics']['code'] = $code;
@@ -75,7 +84,7 @@ class USI_WordPress_Solutions_Diagnostics {
             if (!empty($options['diagnostics']['code'])) $log = (int)$options['diagnostics']['code'];
          }
       }
-      if ($log_log) usi::log('$log=', $log);
+      if ($log_log) usi::log2('$log=', $log);
       return($log);
    } // get_log();
 

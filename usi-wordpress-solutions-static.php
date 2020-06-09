@@ -17,14 +17,14 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.5.1 (2020-05-07)';
+   const VERSION = '2.7.0 (2020-06-08)';
 
    private function __construct() {
    } // __construct();
 
    public static function column_style($columns, $style = null) {
 
-      $border = !empty(USI_WordPress_Solutions::$options['diagnostics']['visible-grid']) ? 'border:solid 1px yellow; ' : '';
+      $border = !empty(USI_WordPress_Solutions::$options['illumination']['visible-grid']) ? 'border:solid 1px yellow; ' : '';
 
       $space  = $style ? ' ' : '';
 
@@ -52,7 +52,7 @@ class USI_WordPress_Solutions_Static {
          '.form-table th{padding-bottom:7px; padding-top:7px;} /* 20px; */' . PHP_EOL .
          'h2{margin-bottom:0.1em; margin-top:2em;} /* 1em; */' . PHP_EOL;
       if ($css) echo $css;
-      if (USI_WordPress_Solutions::$options['diagnostics']['visible-grid']) echo
+      if (USI_WordPress_Solutions::$options['illumination']['visible-grid']) echo
          '.form-table,.wp-list-table{border:solid 4px yellow;}' . PHP_EOL .
          '.form-table td,.form-table th,.wp-list-table td,.wp-list-table th{border:solid 2px yellow;}' . PHP_EOL .
          '.wrap{border:solid 1px green;}' . PHP_EOL;

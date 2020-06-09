@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_History {
 
-   const VERSION = '2.5.1 (2020-05-07)';
+   const VERSION = '2.7.0 (2020-06-08)';
 
    public static $source = null;
 
@@ -35,30 +35,7 @@ final class USI_WordPress_Solutions_History {
 
       add_filter('logout_redirect', array(__CLASS__, 'filter_logout_redirect'), 10, 3);
 
-      add_action('wp_dashboard_setup', array(__CLASS__, 'my_custom_dashboard_widgets'));
-
-      add_action( 'wp_dashboard_setup', array(__CLASS__, 'wporg_remove_all_dashboard_metaboxes') );
-
    } // _init();
-
-   public static function wporg_remove_all_dashboard_metaboxes() {
-      remove_action( 'welcome_panel', 'wp_welcome_panel' );
-      remove_meta_box( 'dashboard_primary', 'dashboard', 'side' );
-      remove_meta_box( 'dashboard_quick_press', 'dashboard', 'side' );
-      remove_meta_box( 'health_check_status', 'dashboard', 'normal' );
-      remove_meta_box( 'dashboard_right_now', 'dashboard', 'normal' );
-      remove_meta_box( 'dashboard_activity', 'dashboard', 'normal');
-  }
-// https://developer.wordpress.org/apis/handbook/dashboard-widgets/  
-   public static function my_custom_dashboard_widgets() {
-      global $wp_meta_boxes;
-//usi::log('$wp_meta_boxes=', $wp_meta_boxes['dashboard']);
-      wp_add_dashboard_widget('custom_help_widget', 'History', array(__CLASS__, 'custom_dashboard_help'));
-   }
-
-   public static function custom_dashboard_help() {
-      echo '<p>Welcome to Custom Blog Theme! Need help? Contact the developer <a href="mailto:yourusername@gmail.com">here</a>. For WordPress Tutorials visit: <a href="https://www.wpbeginner.com" target="_blank">WPBeginner</a></p>';
-   }
 
    public static function action_delete_post($post_id) {
       $post_type = get_post_type($post_id);
@@ -90,26 +67,31 @@ final class USI_WordPress_Solutions_History {
    } // action_user_register();
 
    public static function action_wp_insert_post($post_id, $post, $update) {
+      $source = self::$source ? self::$source : $_REQUEST;
       $length = strlen($title = $post->post_title);
       if (36 < $length) $title = substr($title, 0, 33) . '...';
       self::history(get_current_user_id(), 'post', 
-         'Added <' . $title . '> as new ' . $post->post_type, $post_id, $_REQUEST);
+         'Added <' . $title . '> as new ' . $post->post_type, $post_id, $source);
+      self::$source = null;
    } // action_wp_insert_post();
 
    public static function action_wp_login($user_login = null, $user = null) {
       // https://usersinsights.com/wordpress-user-login-hooks/
-      $from = !empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR'];
-      self::history($user->ID, 'user', 'User <' . $user->data->display_name . '> logged in from ' . $from, $user->ID);
+      self::history($user->ID, 'user', 'User <' . $user->data->display_name . '> logged in from ' . self::from(), $user->ID);
    } // action_wp_login();
 
    public static function filter_logout_redirect($redirect_to, $requested_redirect_to, $user) {
-      self::history($user->ID, 'user', 'User <' . $user->data->display_name . '> logged out from ' . $_SERVER['REMOTE_ADDR'], $user->ID);
+      self::history($user->ID, 'user', 'User <' . $user->data->display_name . '> logged out from ' . self::from(), $user->ID);
       return($redirect_to);
    } // filter_logout_redirect();
 
+   private static function from() {
+      return(!empty($_SERVER['HTTP_X_FORWARDED_FOR']) ? $_SERVER['HTTP_X_FORWARDED_FOR'] : $_SERVER['REMOTE_ADDR']);
+   } // from();
+
    public static function history($user_id, $type, $action, $target_id = 0, $data = null) {
       global $wpdb;
-      if (is_array($data) || is_object($data)) $data = print_r($data, true);
+      if (is_array($data) || is_object($data)) $data = substr(print_r($data, true), 0, 65535);
       if (false === $wpdb->insert(
          $wpdb->prefix . 'USI_history', 
          array('user_id' => $user_id, 'type' => $type, 'action' => $action, 'target_id' => $target_id, 'data' => $data),

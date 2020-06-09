@@ -15,15 +15,20 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
-require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-solutions-popup.php');
-require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-solutions-settings.php');
-require_once(plugin_dir_path(__DIR__) . 'usi-wordpress-solutions/usi-wordpress-solutions-versions.php');
+require_once('usi-wordpress-solutions-capabilities.php');
+require_once('usi-wordpress-solutions-diagnostics.php');
+require_once('usi-wordpress-solutions-popup.php');
+require_once('usi-wordpress-solutions-settings.php');
+require_once('usi-wordpress-solutions-updates.php');
+require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.5.1 (2020-05-07)';
+   const VERSION = '2.7.0 (2020-06-08)';
 
-   private $popup = null;
+   protected $is_tabbed = true;
+
+   private $popup = array();
 
    function __construct() {
 
@@ -33,6 +38,8 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             'prefix' => USI_WordPress_Solutions::PREFIX, 
             'text_domain' => USI_WordPress_Solutions::TEXTDOMAIN,
             'options' => USI_WordPress_Solutions::$options,
+            'capabilities' => USI_WordPress_Solutions::$capabilities,
+            'file' => str_replace('-settings', '', __FILE__), // Plugin main file, this initializes capabilities on plugin activation;
          )
       );
 
@@ -55,7 +62,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
    function sections() {
 
-      $this->popup = USI_WordPress_Solutions_Popup::build(
+      $this->popup['php-info'] = USI_WordPress_Solutions_Popup::build(
          array(
             'class'  => 'usi-wordpress-popup-phpinfo', // class for anchor;;
             'close'  => __('Close', USI_WordPress_Solutions::TEXTDOMAIN),
@@ -70,12 +77,26 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
          )
       );
 
+      $diagnostics = new USI_WordPress_Solutions_Diagnostics($this, 
+         array(
+            'DEBUG_INIT' => array(
+               'value' => USI_WordPress_Solutions::DEBUG_INIT,
+               'notes' => 'Log USI_WordPress_Solutions_Settings::action_admin_init() method.',
+            ),
+            'DEBUG_RENDER' => array(
+               'value' => USI_WordPress_Solutions::DEBUG_RENDER,
+               'notes' => 'Log USI_WordPress_Solutions_Settings::fields_render() method.',
+            ),
+         )
+      );
+
+      $diagnostics->section['footer_callback'] = array($this, 'sections_diagnostics_footer');
+
       $sections = array(
 
          'preferences' => array(
             'header_callback' => array($this, 'sections_header'),
-            'footer_callback' => array($this, 'sections_footer'),
-            'label' => __('Sidebar Menu Sorting', USI_WordPress_Solutions::TEXTDOMAIN), 
+            'label' => __('Preferences', USI_WordPress_Solutions::TEXTDOMAIN), 
             'localize_labels' => 'yes',
             'localize_notes' => 3, // <p class="description">__()</p>;
             'settings' => array(
@@ -107,13 +128,9 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
          ), // preferences;
 
          'admin-options' => array(
-            'label' => __('Administrator Options', USI_WordPress_Solutions::TEXTDOMAIN),
+            'title' => __('Administrator Options', USI_WordPress_Solutions::TEXTDOMAIN),
+            'not_tabbed' => 'preferences',
             'settings' => array(
-               'git-update' => array(
-                  'type' => 'checkbox', 
-                  'label' => 'Enable Git Updates',
-                  'notes' => 'Checks GitHub/GitLab for updates and notifies the administrator when updates are avaiable for download and installation.',
-               ),
                'history' => array(
                   'type' => 'checkbox', 
                   'label' => 'Enable Historian',
@@ -132,20 +149,32 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             ),
          ), // admin-options;
 
-         'diagnostics' => array(
-            'label' => __('Diagnostics', USI_WordPress_Solutions::TEXTDOMAIN),
+         'capabilities' => new USI_WordPress_Solutions_Capabilities($this),
+
+         'diagnostics' => $diagnostics,
+
+         'illumination' => array(
+            'title' => 'Illumination',
+            'not_tabbed' => 'diagnostics',
             'settings' => array(
-               'phpinfo' => array(
+               'php-info' => array(
                   'type' => 'html', 
-                  'html' => $this->popup['anchor'],
+                  'html' => $this->popup['php-info']['anchor'],
                   'label' => 'Information',
+               ),
+               'active-users' => array(
+                  'type' => 'html', 
+                  'html' => '<a href="admin.php?page=usi-wordpress-solutions-user-sessions">Users Logged In</a>',
+                  'label' => 'Users Currently Logged In',
                ),
                'visible-grid' => array(
                   'type' => 'checkbox', 
                   'label' => 'Visable Grid Borders',
-               ),
+               )
             ),
-         ), // diagnostics;
+         ), // illumination;
+
+         'updates' => new USI_WordPress_Solutions_Updates($this),
 
       );
 
@@ -153,12 +182,12 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
    } // sections();
 
-   function sections_footer() {
+   function sections_diagnostics_footer() {
       echo '    ';
-      submit_button(__('Save Changes', USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
-      echo $this->popup['script'];
+      submit_button(__('Save Diagnostics', USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
+      echo $this->popup['php-info']['script'];
       return(null);
-   } // sections_footer();
+   } // sections_diagnostics_footer();
 
    function sections_header() {
       echo '    <p>' . __('The WordPress-Solutions plugin is used by many Universal Solutions plugins and themes to simplify the ' .
