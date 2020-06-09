@@ -88,8 +88,6 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
          $session_tokens = get_user_meta($item->ID, 'session_tokens', true);
 
-         usi::log('$item=', $item, '\n$session_tokens=', $session_tokens); 
-
          return($item->ID);
 
       case 'user': 
