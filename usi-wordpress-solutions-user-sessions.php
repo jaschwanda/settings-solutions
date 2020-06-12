@@ -24,7 +24,7 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
       );
 
       echo USI_WordPress_Solutions_Static::column_style($columns, 'overflow:hidden; text-overflow:ellipsis; white-space:nowrap;');
-usi::log();
+
       USI_WordPress_Solutions_Static::action_admin_head(
          '.usi-wordpress-session-photo{float:left;}' .
          '.usi-wordpress-session-info{float:left; padding-left:5px;}' .
