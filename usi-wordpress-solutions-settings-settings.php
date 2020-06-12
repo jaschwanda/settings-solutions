@@ -124,6 +124,12 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                   ),
                   'notes' => 'Defaults to <b>No sorting</b>.',
                ), // menu-sort;
+               'admin-notice' => array(
+                  'f-class' => 'large-text', 
+                  'rows' => 2,
+                  'type' => 'textarea', 
+                  'label' => 'Admin Notice',
+               ),
             ),
          ), // preferences;
 

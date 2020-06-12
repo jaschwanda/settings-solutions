@@ -15,7 +15,7 @@ Requires at least: 5.0
 Requires PHP:      5.6.25
 Tested up to:      5.3.2
 Text Domain:       usi-wordpress-solutions
-Version:           2.7.0
+Version:           2.7.1
 */
 
 /*
@@ -39,7 +39,7 @@ require_once('usi-wordpress-solutions-log.php');
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.7.0 (2020-06-08)';
+   const VERSION = '2.7.1 (2020-06-12)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
@@ -83,7 +83,12 @@ final class USI_WordPress_Solutions {
                new USI_WordPress_Solutions_Update_GitHub(__FILE__, 'jaschwanda', 'wordpress-solutions');
             }
          }
-
+/*
+   add_action('admin_notices', function () {
+      echo '<div class="notice notice-warning is-dismissible"><p>' . 
+         __('Development System - <span style="color:red; font-weight:bold;">No real entries are processed or saved here</span>.') . '</p></div>';
+   });
+*/
       }
 
    } // __construct();

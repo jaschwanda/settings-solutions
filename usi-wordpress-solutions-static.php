@@ -17,7 +17,9 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.7.0 (2020-06-08)';
+   const VERSION = '2.7.1 (2020-06-12)';
+
+   private static $calls_action_admin_head = 0;
 
    private function __construct() {
    } // __construct();
@@ -34,7 +36,7 @@ class USI_WordPress_Solutions_Static {
 
       $total  = 0; foreach ($columns as $width) $total += $width;
 
-      $html   = '<style>' . PHP_EOL;
+      $html   = '<style>/*USI_WordPress_Solutions_Static' . __LINE__ . '*/' . PHP_EOL;
 
       foreach ($columns as $name => $width) { 
          $percent = number_format(100 * $width / $total, 1);
@@ -46,18 +48,22 @@ class USI_WordPress_Solutions_Static {
    } // column_style();
 
    public static function action_admin_head($css = null) {
-      echo 
+      if (self::$calls_action_admin_head++) {
+         if ($css) echo '<style>' . PHP_EOL . $css . '</style>' . PHP_EOL;
+      } else {
+         echo 
          '<style>' . PHP_EOL .
          '.form-table td{padding-bottom:2px; padding-top:2px;} /* 15px; */' . PHP_EOL .
          '.form-table th{padding-bottom:7px; padding-top:7px;} /* 20px; */' . PHP_EOL .
          'h2{margin-bottom:0.1em; margin-top:2em;} /* 1em; */' . PHP_EOL;
-      if ($css) echo $css;
-      if (USI_WordPress_Solutions::$options['illumination']['visible-grid']) echo
+         if ($css) echo $css;
+         if (!empty(USI_WordPress_Solutions::$options['illumination']['visible-grid'])) echo
          '.form-table,.wp-list-table{border:solid 4px yellow;}' . PHP_EOL .
          '.form-table td,.form-table th,.wp-list-table td,.wp-list-table th{border:solid 2px yellow;}' . PHP_EOL .
          '.wrap{border:solid 1px green;}' . PHP_EOL;
-      echo 
+         echo 
          '</style>' . PHP_EOL;
+      }
    } // action_admin_head();
 
    public static function divider($indent, $text = null) {

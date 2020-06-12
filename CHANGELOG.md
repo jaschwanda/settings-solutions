@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.7.1 (2020-06-12) ##
+* Updated USI_WordPress_Solutions_Static::action_admin_head() to not emit redendant css and also fixed an index error.
+
 ## 2.7.0 (2020-06-08) ##
 * Added diagnostics session tracking.
 * Added current users logged in list.
