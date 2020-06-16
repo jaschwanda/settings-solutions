@@ -19,7 +19,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Capabilities {
 
-   const VERSION = '2.7.0 (2020-06-08)';
+   const VERSION = '2.7.2 (2020-06-16)';
 
    public $section = null;
 
@@ -167,12 +167,21 @@ class USI_WordPress_Solutions_Capabilities {
             if (in_array($role_name, $defaults)) {
                $role->add_cap($slug);
             } else {
-               $role->remove_cap($slug); // Remove capabilties from previous uses, if any;
+               $role->remove_cap($slug); // Remove capabilties from previous role, if any;
             }
          }
       }
-      $roles = get_editable_roles();
    } // init();
+
+   public static function remove($prefix, $capabilities) {
+      $roles  = wp_roles();
+      foreach ($capabilities as $capability_name => $capability) {
+         $slug = self::capability_slug($prefix, $capability_name);
+         foreach ($roles->role_objects as $role_name => $role) {
+            $role->remove_cap($slug);
+         }
+      }
+   } // remove();
 
    function render_section() {
 

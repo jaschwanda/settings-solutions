@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.7.2 (2020-06-16) ##
+* Added USI_WordPress_Solutions_Capabilities::remove() method to remove capabilities on plugin deletion.
+
 ## 2.7.1 (2020-06-12) ##
 * Updated USI_WordPress_Solutions_Static::action_admin_head() to not emit redendant css and also fixed an index error.
 
