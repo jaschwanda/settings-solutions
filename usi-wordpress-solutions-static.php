@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.7.1 (2020-06-12)';
+   const VERSION = '2.7.3 (2020-07-06)';
 
    private static $calls_action_admin_head = 0;
 
@@ -73,6 +73,12 @@ class USI_WordPress_Solutions_Static {
       }
       return('<!--' . $text . str_repeat('-', 121 - $length - $indent) . '>' . PHP_EOL);
    } // divider();
+
+   public static function is_int($variable) {
+      if (is_integer($variable)) return($variable);
+      if (!is_string($variable) || !ctype_digit($variable)) return(false);
+      return(intval($variable));
+   } // is_int();
 
    public static function url() {
       return('http' . (is_ssl() ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);

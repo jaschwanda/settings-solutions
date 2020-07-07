@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.7.3 (2020-07-06) ##
+* Added USI_WordPress_Solutions_Static::is_int() method.
+
 ## 2.7.2 (2020-06-16) ##
 * Added USI_WordPress_Solutions_Capabilities::remove() method to remove capabilities on plugin deletion.
 
