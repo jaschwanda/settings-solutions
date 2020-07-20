@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_History {
 
-   const VERSION = '2.7.0 (2020-06-08)';
+   const VERSION = '2.7.4 (2020-07-20)';
 
    private static $pre_post_update_data = null;
    private static $pre_post_update_id   = 0;
