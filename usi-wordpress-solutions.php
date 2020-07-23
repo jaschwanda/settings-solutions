@@ -15,7 +15,7 @@ Requires at least: 5.0
 Requires PHP:      5.6.25
 Tested up to:      5.3.2
 Text Domain:       usi-wordpress-solutions
-Version:           2.7.4
+Version:           2.7.5
 */
 
 /*
@@ -39,7 +39,7 @@ require_once('usi-wordpress-solutions-log.php');
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.7.4 (2020-07-20)';
+   const VERSION = '2.7.5 (2020-07-22)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
@@ -47,6 +47,8 @@ final class USI_WordPress_Solutions {
 
    const DEBUG_INIT   = 0x0001;
    const DEBUG_RENDER = 0x0002;
+
+   private static $scripts = null;
 
    public static $capabilities = array(
       'impersonate-user' => 'Impersonate User|administrator',
@@ -86,7 +88,17 @@ final class USI_WordPress_Solutions {
 
       }
 
+      add_action('admin_print_footer_scripts', array($this, 'action_admin_print_footer_scripts'));
+
    } // __construct();
+
+   public function action_admin_print_footer_scripts() {
+      if (self::$scripts) echo self::$scripts;
+   } // action_admin_print_footer_scripts();
+
+   public static function admin_footer_script($script) {
+      self::$scripts .= PHP_EOL . $script;
+   } // admin_footer_script();
 
 } // Class USI_WordPress_Solutions;
 

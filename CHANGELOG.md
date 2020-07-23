@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.7.5 (2020-07-22) ##
+* Added admin_footer_script() method for queuing dynamic scripts.
+
 ## 2.7.4 (2020-07-20) ##
 * Improved the post upfdate log function so that non-changed saves are not logged.
 

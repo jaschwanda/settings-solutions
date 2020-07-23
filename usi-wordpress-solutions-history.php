@@ -82,7 +82,6 @@ final class USI_WordPress_Solutions_History {
    public static function action_wp_insert_post($post_id, $post, $update) {
 
       if (wp_is_post_revision($post_id)) return; // Don't log revision actions, may confuse users;
-//usi::log('$post_id=', $post_id, ' $update=', $update, ' status=', $post->post_status, ' $post->post_type=', $post->post_type, '\n$post=', $post);
 
       $source = self::$source ? self::$source : $_REQUEST;
       $length = strlen($title = $post->post_title);

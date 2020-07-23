@@ -49,6 +49,34 @@ title   = string|'WordPress-Solutions'  // popup title;
 type    = 'ajax'|'iframe'|'inline'      // popup implementation type;
 url     = sting|null                    // URL for iframe source;
 width   = int|300                       // popup width in pixels;
+
+
+why is <ul></ul> in the ru-email-action pop up?
+try putting the script at the end of the file;
+
+Popup with inline window;
+Popup with iframe and load another file;
+Popup with where list a itmes listed asking for confirmation;
+
+
+
+Popup Usage:
+usi-media-solutions-manage.php
+   - inline uses USI_WordPress_Solutions_Static::popup()
+
+usi-wordpress-solutions-settings-settings.php 
+   - iframe with source from usi-wordpress-solutions-phpinfo-scan.php
+   - works well
+usi-wordpress-solutions-versions.php 
+   - iframe with source from usi-wordpress-solutions-versions-scan.php
+   - change browser size causes popup to change, close button vanishes
+
+ru-email-action.php
+   - inline
+
+usi-variable-solutions-table.php
+   - uses thick box but not this pop-up
+
 */
 
 class USI_WordPress_Solutions_Popup {
@@ -382,7 +410,7 @@ jQuery(document).ready(
 
             show();
 
-            if (log) console.log("$('{$direct}').click():begin");
+            if (log) console.log("$('{$direct}').click():end");
 
             return(false);
 
