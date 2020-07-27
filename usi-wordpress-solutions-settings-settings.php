@@ -24,11 +24,9 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.7.0 (2020-06-08)';
+   const VERSION = '2.8.0 (2020-07-27)';
 
    protected $is_tabbed = true;
-
-   private $popup = array();
 
    function __construct() {
 
@@ -62,18 +60,16 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
    function sections() {
 
-      $this->popup['php-info'] = USI_WordPress_Solutions_Popup::build(
+      $phpinfo_anchor = USI_WordPress_Solutions_Popup::build(
          array(
-            'class'  => 'usi-wordpress-popup-phpinfo', // class for anchor;;
-            'close'  => __('Close', USI_WordPress_Solutions::TEXTDOMAIN),
-            'direct' => '.usi-wordpress-popup-phpinfo', // Elements with this class invoke popup;
-            'height' => 600,
-            'link'   => 'phpinfo()',
+            'close'   => __('Close', USI_WordPress_Solutions::TEXTDOMAIN),
+            'height' => '640px',
+            'id'     => 'usi-popup-phpinfo',
+            'iframe' => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-phpinfo-scan.php',
+            'link'   => array('text' => 'phpinfo()'),
             'tip'    => __('Display PHP information', USI_WordPress_Solutions::TEXTDOMAIN),
             'title'  => 'phpinfo()',
-            'type'   => 'iframe',
-            'url'    => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-phpinfo-scan.php',
-            'width'  => 950,
+            'width'  => '980px',
          )
       );
 
@@ -165,7 +161,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             'settings' => array(
                'php-info' => array(
                   'type' => 'html', 
-                  'html' => $this->popup['php-info']['anchor'],
+                  'html' => $phpinfo_anchor,
                   'label' => 'Information',
                ),
                'active-users' => array(
@@ -191,7 +187,6 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
    function sections_diagnostics_footer() {
       echo '    ';
       submit_button(__('Save Diagnostics', USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
-      echo $this->popup['php-info']['script'];
       return(null);
    } // sections_diagnostics_footer();
 

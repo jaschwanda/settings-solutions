@@ -21,30 +21,25 @@ class USI_WordPress_Solutions_Versions {
 
    const VERSION = '2.7.0 (2020-06-08)';
 
-   private static $pass = 0;
-
    private function __construct() {
    } // __construct();
 
    public static function link($link, $title, $version, $text_domain, $file) {
 
-      $popup = USI_WordPress_Solutions_Popup::build(
-         array(
-            'class'  => 'usi-wordpress-popup-version',
-            'close'  => __('Close', $text_domain),
-            'direct' => '.usi-wordpress-popup-version',
-            'height' => 500,
-            'link'   => $link,
-            'pass'   => ++self::$pass,
-            'tip'    => __('Display detailed version information', $text_domain),
-            'title'  => $title . ' &nbsp; &nbsp; ' . __('Version', $text_domain) . ' ' . $version,
-            'type'   => 'iframe',
-            'url'    => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-versions-scan.php?' . urlencode($file),
-            'width'  => 500,
+      return(
+         USI_WordPress_Solutions_Popup::build(
+            array(
+               'close'   => __('Close', $text_domain),
+               'height' => '500px',
+               'id'     => 'usi-popup-version',
+               'iframe' => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-versions-scan.php?' . urlencode($file),
+               'link'   => array('text' => $link),
+               'tip'    => __('Display detailed version information', $text_domain),
+               'title'  => $title . ' &nbsp; &nbsp; ' . __('Version', $text_domain) . ' ' . $version,
+               'width'  => '500px',
+            )
          )
       );
-
-      return($popup['script'] . $popup['anchor']);
 
    } //link();
 

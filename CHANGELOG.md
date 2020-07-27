@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.8.0 (2020-07-27) ##
+* Reworked the USI_WordPress_Solutions_Popup class.
+
 ## 2.7.5 (2020-07-22) ##
 * Added admin_footer_script() method for queuing dynamic scripts.
 

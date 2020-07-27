@@ -15,6 +15,163 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
+class USI_WordPress_Solutions_Popup_2 {
+
+   const VERSION = '2.8.0 (2020-07-27)';
+
+   private static $scripts = array();
+
+   private function __construct() {
+   } // __construct();
+
+   public static function build($options) {
+
+      $attributes  = ' href="javascript:void(0);"';
+
+      if (empty($options['link']['text'])) {
+         $link     = null;
+      } else {
+         $link     = esc_attr($options['link']['text']);
+         if (!empty($options['link']['class'])) $attributes .= ' class="' . $options['link']['class'] . '"';
+         if (!empty($options['link']['style'])) $attributes .= ' style="' . $options['link']['style'] . '"';
+      }
+
+      if (!empty($options['tip'])) {
+         $attributes .= ' title="' . esc_attr($options['tip']) . '"';
+      }
+
+      if (!empty($options['iframe'])) {
+         $iframe   = $options['iframe'];
+         $attributes .= ' usi-popup-iframe="' . $iframe . '"';
+         $type     = 'iframe';
+      }
+
+      if (!empty($options['id'])) {
+         $id       = $options['id'];
+      } else {
+         $id       = 'usi-popup';
+      }
+      $attributes .= ' usi-popup-open="' . $id . '"';
+
+      if (!empty($options['title'])) {
+         $title    = esc_attr($options['title']);
+      } else {
+         $title    = 'WordPress-Solutions Popup';
+      }
+      $attributes .= ' usi-popup-title="' . $title . '"';
+
+      if (empty($options['height'])) {
+         $size     = ' height:300px;';
+         $frame    = 202;
+      } else {
+         $height   = explode(',', $options['height']);
+         if (1 == count($height)) {
+            $size  = ' height:' . $height[0] . ';';
+            $frame = (int)substr($height[0], 0, 3) - 98;
+         } else {
+            $size  = ' min-height:' . $height[0] . '; max-height:' . $height[1] . ';';
+         }
+      }
+
+      if (empty($options['width'])) {
+         $size    .= ' width:300px;';
+      } else {
+         $width    = explode(',', $options['width']);
+         if (1 == count($width)) {
+            $size .= ' width:' . $width[0] . ';';
+         } else {
+            $size .= ' min-width:' . $width[0] . '; max-width:' . $width[1] . ';';
+         }
+      }
+
+      $extra  = !empty($options['extra'] ) ?    ' ' . $options['extra']   : null;
+      $close  = !empty($options['close'] ) ?          $options['close']   : null;
+      $tag    = !empty($options['tag'] )   ?          $options['tag']     : 'a';
+
+      $invoke = $link
+         ? apply_filters('usi_wordpress_popup_invoke', "<$tag$attributes$extra>$link</$tag>")
+         : null
+         ;
+
+      if (empty(self::$scripts[$id])) {
+// The {$id}-head div is equivalent to the WordPress thickbox TB_title div;
+// The {$id}-title div is equivalent to the WordPress thickbox TB_ajaxWindowTitle div;
+         $divider = USI_WordPress_Solutions_Static::divider(0, $id);
+         self::$scripts[$id] = <<<EOD
+{$divider}<div id="{$id}" style="background:rgba(0,0,0,0.7); display:none; height:100%; left:0; position:fixed; top:0; width:100%; z-index:100050;">
+  <div id="{$id}-wrap" style="background:#ffffff; box-sizing:border-box; left:50%; position:relative; top:50%; transform:translate(-50%,-50%); {$size}">
+    <div id="{$id}-head" style="background:#fcfcfc; border-bottom:1px solid #ddd; height:29px;">
+      <div id="{$id}-title" style="float:left; font-weight:600; line-height:29px; overflow:hidden; padding:0 29px 0 10px; text-overflow:ellipsis; white-space: nowrap; width:calc(100%-39px);"></div>
+        <button type="button" style="background:#fcfcfc; border:solid 1px #00a0d2; color:#00a0d2; cursor:pointer; height:29px; position:absolute; right:0; top:0;" usi-popup-action="close" usi-popup-close="{$id}" >
+          <span class="screen-reader-text">{$close}</span>
+          <span class="dashicons dashicons-no"></span>
+        </button>
+    </div><!--{$id}-head-->
+    <div id="{$id}-body" style="border-bottom:1px solid #ddd;"></div>
+    <div id="{$id}-foot">
+      <span class="button" style="margin:15px 0 0 15px;" usi-popup-action="close" usi-popup-close="{$id}">{$close}</span>
+    </div><!--{$id}-foot-->
+  </div><!--{$id}-wrap-->
+</div>
+<script> 
+jQuery(document).ready(
+   function($) {
+
+   // Close Popup with cancel/close/delete/ok button;
+   $('[usi-popup-close]').on(
+      'click', 
+      function() {
+         var action = $(this).attr('usi-popup-action');
+         var id     = $(this).attr('usi-popup-close');
+         $('#' + id).fadeOut(300);
+      }
+   );
+
+   // Close with outside click;
+   $('#{$id}').on(
+      'click', 
+      function() {
+         var id = $(this).find('[usi-popup-close]').attr('usi-popup-close');
+         $('#' + id).fadeOut(300);
+      }
+   )
+   .children()
+   .click(
+      function() {
+         return(false);
+      }
+   );
+
+   // Invoke popup
+   $('[usi-popup-open]').on(
+      'click', 
+      function() {
+         var id     = $(this).attr('usi-popup-open');
+         var iframe = $(this).attr('usi-popup-iframe');
+         var title  = $(this).attr('usi-popup-title');
+         $('#' + id + '-title').html(title);
+         $('#' + id + '-body').html('<iframe src="' + iframe + '" height="{$frame}" width="100%"></iframe>');
+         $('#' + id).fadeIn(300);
+      }
+   );
+
+   } // function();
+);
+</script>
+$divider
+EOD;
+
+         //usi::log(self::$scripts[$id]);
+         USI_WordPress_Solutions::admin_footer_script(self::$scripts[$id]);
+
+      }
+
+      return($invoke);
+
+   } // build();
+
+} // Class USI_WordPress_Solutions_Popup_2;
+
 // https://codex.wordpress.org/Javascript_Reference/ThickBox
 // http://codylindley.com/thickbox/
 
@@ -51,9 +208,6 @@ url     = sting|null                    // URL for iframe source;
 width   = int|300                       // popup width in pixels;
 
 
-why is <ul></ul> in the ru-email-action pop up?
-try putting the script at the end of the file;
-
 Popup with inline window;
 Popup with iframe and load another file;
 Popup with where list a itmes listed asking for confirmation;
@@ -87,6 +241,10 @@ class USI_WordPress_Solutions_Popup {
    } // __construct();
 
    public static function build($options) {
+
+      if (!empty($options['iframe'])) {
+         return(USI_WordPress_Solutions_Popup_2::build($options));
+      }
 
       $accept = !empty($options['accept']) ?          $options['accept']  : null;
       $action = !empty($options['action']) ?          $options['action']  : null;
@@ -263,7 +421,7 @@ jQuery(document).ready(
 
          html  = '';
          if (show_prefix) html += '<p>' + prefix + '</p>';
-         if (show_body)   html += '<ul>' + body   + '</ul>';
+         if (show_body)   html += (('li' == format) ? '<ul>' : '') + body   + (('li' == format) ? '</ul>' : '');
          if (show_suffix) html += '<p>' + suffix + '</p>';
          html += '<hr><p>';
          if (show_accept) {
