@@ -62,7 +62,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
       $phpinfo_anchor = USI_WordPress_Solutions_Popup::build(
          array(
-            'close'   => __('Close', USI_WordPress_Solutions::TEXTDOMAIN),
+            'close'  => __('Close', USI_WordPress_Solutions::TEXTDOMAIN),
             'height' => '640px',
             'id'     => 'usi-popup-phpinfo',
             'iframe' => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-phpinfo-scan.php',

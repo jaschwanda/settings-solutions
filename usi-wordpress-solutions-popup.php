@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Popup_2 {
 
-   const VERSION = '2.8.0 (2020-07-27)';
+   const VERSION = '2.7.0 (2020-06-08)';
 
    private static $scripts = array();
 
@@ -63,11 +63,13 @@ class USI_WordPress_Solutions_Popup_2 {
       if (empty($options['height'])) {
          $size     = ' height:300px;';
          $frame    = 202;
+         $attributes .= ' usi-popup-height="' . $frame . '"';
       } else {
          $height   = explode(',', $options['height']);
          if (1 == count($height)) {
             $size  = ' height:' . $height[0] . ';';
             $frame = (int)substr($height[0], 0, 3) - 98;
+            $attributes .= ' usi-popup-height="' . $frame . '"';
          } else {
             $size  = ' min-height:' . $height[0] . '; max-height:' . $height[1] . ';';
          }
@@ -94,26 +96,13 @@ class USI_WordPress_Solutions_Popup_2 {
          ;
 
       if (empty(self::$scripts[$id])) {
-// The {$id}-head div is equivalent to the WordPress thickbox TB_title div;
-// The {$id}-title div is equivalent to the WordPress thickbox TB_ajaxWindowTitle div;
-         $divider = USI_WordPress_Solutions_Static::divider(0, $id);
-         self::$scripts[$id] = <<<EOD
-{$divider}<div id="{$id}" style="background:rgba(0,0,0,0.7); display:none; height:100%; left:0; position:fixed; top:0; width:100%; z-index:100050;">
-  <div id="{$id}-wrap" style="background:#ffffff; box-sizing:border-box; left:50%; position:relative; top:50%; transform:translate(-50%,-50%); {$size}">
-    <div id="{$id}-head" style="background:#fcfcfc; border-bottom:1px solid #ddd; height:29px;">
-      <div id="{$id}-title" style="float:left; font-weight:600; line-height:29px; overflow:hidden; padding:0 29px 0 10px; text-overflow:ellipsis; white-space: nowrap; width:calc(100%-39px);"></div>
-        <button type="button" style="background:#fcfcfc; border:solid 1px #00a0d2; color:#00a0d2; cursor:pointer; height:29px; position:absolute; right:0; top:0;" usi-popup-action="close" usi-popup-close="{$id}" >
-          <span class="screen-reader-text">{$close}</span>
-          <span class="dashicons dashicons-no"></span>
-        </button>
-    </div><!--{$id}-head-->
-    <div id="{$id}-body" style="border-bottom:1px solid #ddd;"></div>
-    <div id="{$id}-foot">
-      <span class="button" style="margin:15px 0 0 15px;" usi-popup-action="close" usi-popup-close="{$id}">{$close}</span>
-    </div><!--{$id}-foot-->
-  </div><!--{$id}-wrap-->
-</div>
-<script> 
+
+         if (empty(self::$scripts[0])) {
+
+            $divider = USI_WordPress_Solutions_Static::divider(0, 'usi-popup');
+
+            self::$scripts[0] = <<<EOD
+$divider<script> 
 jQuery(document).ready(
    function($) {
 
@@ -128,7 +117,7 @@ jQuery(document).ready(
    );
 
    // Close with outside click;
-   $('#{$id}').on(
+   $('[usi-popup-close-outside]').on(
       'click', 
       function() {
          var id = $(this).find('[usi-popup-close]').attr('usi-popup-close');
@@ -147,10 +136,11 @@ jQuery(document).ready(
       'click', 
       function() {
          var id     = $(this).attr('usi-popup-open');
+         var height = $(this).attr('usi-popup-height');
          var iframe = $(this).attr('usi-popup-iframe');
          var title  = $(this).attr('usi-popup-title');
          $('#' + id + '-title').html(title);
-         $('#' + id + '-body').html('<iframe src="' + iframe + '" height="{$frame}" width="100%"></iframe>');
+         $('#' + id + '-body').html('<iframe src="' + iframe + '" height="' + height + '" width="100%"></iframe>');
          $('#' + id).fadeIn(300);
       }
    );
@@ -161,7 +151,30 @@ jQuery(document).ready(
 $divider
 EOD;
 
-         //usi::log(self::$scripts[$id]);
+            USI_WordPress_Solutions::admin_footer_script(self::$scripts[0]);
+
+         }
+// The {$id}-head div is equivalent to the WordPress thickbox TB_title div;
+// The {$id}-title div is equivalent to the WordPress thickbox TB_ajaxWindowTitle div;
+         $divider = USI_WordPress_Solutions_Static::divider(0, $id);
+         self::$scripts[$id] = <<<EOD
+{$divider}<div id="{$id}" usi-popup-close-outside="{$id}" style="background:rgba(0,0,0,0.7); display:none; height:100%; left:0; position:fixed; top:0; width:100%; z-index:100050;">
+  <div id="{$id}-wrap" style="background:#ffffff; box-sizing:border-box; left:50%; position:relative; top:50%; transform:translate(-50%,-50%); {$size}">
+    <div id="{$id}-head" style="background:#fcfcfc; border-bottom:1px solid #ddd; height:29px;">
+      <div id="{$id}-title" style="float:left; font-weight:600; line-height:29px; overflow:hidden; padding:0 29px 0 10px; text-overflow:ellipsis; white-space: nowrap; width:calc(100%-39px);"></div>
+        <button type="button" style="background:#fcfcfc; border:solid 1px #00a0d2; color:#00a0d2; cursor:pointer; height:29px; position:absolute; right:0; top:0;" usi-popup-action="close" usi-popup-close="{$id}" >
+          <span class="screen-reader-text">{$close}</span>
+          <span class="dashicons dashicons-no"></span>
+        </button>
+    </div><!--{$id}-head-->
+    <div id="{$id}-body" style="border-bottom:1px solid #ddd;"></div>
+    <div id="{$id}-foot">
+      <span class="button" style="margin:15px 0 0 15px;" usi-popup-action="close" usi-popup-close="{$id}">{$close}</span>
+    </div><!--{$id}-foot-->
+  </div><!--{$id}-wrap-->
+</div>
+$divider
+EOD;
          USI_WordPress_Solutions::admin_footer_script(self::$scripts[$id]);
 
       }
