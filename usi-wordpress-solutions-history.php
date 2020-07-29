@@ -88,7 +88,7 @@ final class USI_WordPress_Solutions_History {
       if (36 < $length) $title = substr($title, 0, 33) . '...';
 
       // IF updating an auto-draft copy with the post title;
-      if (!empty($source['auto_draft'])) {
+      if (!is_object($source) && !empty($source['auto_draft'])) {
          global $wpdb;
          $results = $wpdb->update(
             $wpdb->prefix . 'USI_history', 
