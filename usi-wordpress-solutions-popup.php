@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Popup_2 {
 
-   const VERSION = '2.7.0 (2020-06-08)';
+   const VERSION = '2.9.0 (2020-07-30)';
 
    private static $scripts = array();
 
