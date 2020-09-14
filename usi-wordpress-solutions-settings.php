@@ -43,7 +43,7 @@ class USI_WordPress_Solutions_Settings {
    protected $is_tabbed = false;
    protected $name = null;
    protected $option_name = null;
-   protected $option_page = true;
+   protected $option_page = true;; // Options are paged via section_id's;
    protected $options = null;
    protected $override_do_settings_fields = true;
    protected $override_do_settings_sections = true;
