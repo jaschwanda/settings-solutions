@@ -196,7 +196,7 @@ class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Upda
       $this->repo_name    = $repo_name;
       $this->user_name    = $user_name;
       $this->access_token = $access_token;
-      $this->foreced      = $forced;
+      $this->forced       = $forced;
 
    } // __construct();
 
