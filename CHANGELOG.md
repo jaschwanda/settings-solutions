@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.9.4 (2020-09-14) ##
+* Fixed syntax error.
+
 ## 2.9.3 (2020-09-14) ##
 * Fixed include file error.
 
