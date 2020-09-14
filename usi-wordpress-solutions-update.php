@@ -185,7 +185,7 @@ class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Upda
 
    // https://developer.github.com/v3/#rate-limiting
 
-   const VERSION = '2.4.15 (2020-04-26)';
+   const VERSION = '2.9.5 (2020-09-14)';
 
    private $user_name;
 
@@ -231,7 +231,7 @@ class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Upda
 
 class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.4.15 (2020-04-26)';
+   const VERSION = '2.9.5 (2020-09-14)';
 
    private $service;
 
