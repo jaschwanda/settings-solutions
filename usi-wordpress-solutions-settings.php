@@ -19,7 +19,6 @@ Copyright (c) 2020 by Jim Schwanda.
 // Reference: https://digwp.com/2016/05/wordpress-admin-notices/
 
 require_once('usi-wordpress-solutions.php');
-require_once('usi-wordpress-solutions-diagnostics.php');
 require_once('usi-wordpress-solutions-history.php');
 require_once('usi-wordpress-solutions-static.php');
 require_once('usi-wordpress-solutions-versions.php');
