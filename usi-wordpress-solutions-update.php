@@ -19,13 +19,15 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.9.1 (2020-09-14)';
+   const VERSION = '2.9.2 (2020-09-14)';
 
    protected $access_token = null;
    protected $active = null;
    protected $base_name = null;
    protected $debug = null;
    protected $file = null;
+   protected $forced = false;
+   protected $log = false;
    protected $notice = null;
    protected $plugin = null;
    protected $repo_name = null;
@@ -34,6 +36,12 @@ class USI_WordPress_Solutions_Update {
    function __construct($file) {
 
       $this->file = $file;
+
+      $log        = USI_WordPress_Solutions_Diagnostics::get_log(USI_WordPress_Solutions::$options);
+
+      $this->log  = USI_WordPress_Solutions::DEBUG_UPDATE == (USI_WordPress_Solutions::DEBUG_UPDATE & $log);
+
+      if ($this->log) usi::log('$file=', $file);
 
       add_action('admin_init', array($this, 'action_admin_init'));
 
@@ -60,6 +68,8 @@ class USI_WordPress_Solutions_Update {
 
    public function filter_plugins_api($result, $action, $args) {
 
+      if ($this->log) usi::log('$result=', $result, '\n$action=', $action, '\$args=', $args);
+
       if (!empty($args->slug) && ($args->slug == $this->base_name)) {
 
          $this->get_repository_info();
@@ -82,6 +92,8 @@ class USI_WordPress_Solutions_Update {
                'download_link'     => $this->repository['download_link']
             );
 
+            if ($this->log) usi::log('$plugin=', $plugin);
+
             return((object)$plugin);
 
          }
@@ -94,6 +106,8 @@ class USI_WordPress_Solutions_Update {
 
    public function filter_pre_set_site_transient_update_plugins($transient) {
 
+      if ($this->log) usi::log('$transient=', $transient);
+
       if (isset($transient->checked) && ($checked = $transient->checked)) {
 
          $this->get_repository_info();
@@ -102,7 +116,9 @@ class USI_WordPress_Solutions_Update {
 
             $out_of_date = version_compare($this->repository['tag_name'], $checked[$this->base_name], 'gt');
 
-            if ($out_of_date) {
+            if ($this->log) usi::log('tag_name=', $this->repository['tag_name'], '\n$checked=', $checked, '\n$forced=', ($this->forced ? 'YES' : 'no'), '\$out_of_date=', ($out_of_date ? 'YES' : 'no'));
+
+            if ($out_of_date || $this->forced) {
 
                $plugin = array(
                   'new_version' => $this->repository['tag_name'],
@@ -173,13 +189,14 @@ class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Upda
 
    private $user_name;
 
-   function __construct($file, $user_name, $repo_name, $access_token = null) {
+   function __construct($file, $user_name, $repo_name, $access_token = null, $forced = false) {
 
       parent::__construct($file);
 
       $this->repo_name    = $repo_name;
       $this->user_name    = $user_name;
       $this->access_token = $access_token;
+      $this->foreced      = $forced;
 
    } // __construct();
 
@@ -204,6 +221,8 @@ class USI_WordPress_Solutions_Update_GitHub extends USI_WordPress_Solutions_Upda
             'tag_name'      => $data['tag_name'],
          );
 
+         if ($this->log) usi::log('$request_uri=', $request_uri, '\n$data=', $data, '\$repository=', $this->repository);
+
       }
 
    } // get_repository_info();
@@ -216,13 +235,14 @@ class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Upda
 
    private $service;
 
-   function __construct($file, $service, $repo_name, $access_token = null) {
+   function __construct($file, $service, $repo_name, $access_token = null, $forced = false) {
 
       parent::__construct($file);
 
       $this->service      = $service;
       $this->repo_name    = $repo_name;
       $this->access_token = $access_token;
+      $this->forced       = $forced;
 
       add_filter('upgrader_pre_download', array($this, 'filter_upgrader_pre_download'), 10, 3);
 
@@ -265,6 +285,8 @@ class USI_WordPress_Solutions_Update_GitLab extends USI_WordPress_Solutions_Upda
             'published_at'  => !empty($data['commit']['created_at']) ? $data['commit']['created_at'] : date('Y-m-d'),
             'tag_name'      => $tag_name,
          );
+
+         if ($this->log) usi::log('$request_uri=', $request_uri, '\n$data=', $data, '\n$tag_name=', $tag_name, '\n$download_link=', $download_link, '\$repository=', $this->repository);
 
       }
 

@@ -26,7 +26,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.1 (2020-09-14)';
+   const VERSION = '2.9.2 (2020-09-14)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -187,7 +187,7 @@ class USI_WordPress_Solutions_Settings {
                      $option_value = isset($this->options[$section_id][$option_id]) 
                         ? $this->options[$section_id][$option_id] 
                         : self::get_value($attributes);
-                     if (USI_WordPress_Solutions::DEBUG_INIT & $this->debug) usi::log('$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
+                     if (USI_WordPress_Solutions::DEBUG_INIT == (USI_WordPress_Solutions::DEBUG_INIT & $this->debug)) usi::log('$options[' . $section_id . '][' . $option_id . ']=' . $option_value);
 
                   } else {
 
@@ -195,7 +195,7 @@ class USI_WordPress_Solutions_Settings {
                      $option_value = isset($this->options[$option_id]) 
                         ? $this->options[$option_id] 
                         : self::get_value($attributes);
-                     if (USI_WordPress_Solutions::DEBUG_INIT & $this->debug) usi::log('$options[' . $option_id . ']=' . $option_value);
+                     if (USI_WordPress_Solutions::DEBUG_INIT == (USI_WordPress_Solutions::DEBUG_INIT & $this->debug)) usi::log('$options[' . $option_id . ']=' . $option_value);
 
                   }
 
@@ -457,7 +457,7 @@ do_settings_sections </table>';
    } // do_settings_sections_advanced();
 
    function fields_render($args) {
-      if (USI_WordPress_Solutions::DEBUG_RENDER & $this->debug) {
+      if (USI_WordPress_Solutions::DEBUG_RENDER == (USI_WordPress_Solutions::DEBUG_RENDER & $this->debug)) {
          if ($this->field) {
             $temp = array();
             foreach ($this->field as $key => $value) {

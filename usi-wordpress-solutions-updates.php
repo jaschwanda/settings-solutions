@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Updates {
 
-   const VERSION = '2.9.1 (2020-09-14)';
+   const VERSION = '2.9.2 (2020-09-14)';
 
    public $section = null;
 
@@ -28,6 +28,7 @@ class USI_WordPress_Solutions_Updates {
       $this->text_domain = $parent->text_domain();
 
       $this->section      = array(
+         'fields_sanitize' => array($this, 'fields_sanitize'),
          'header_callback' => array($this, 'section_header'),
          'label' => 'Updates',
          'settings' => array(
@@ -36,10 +37,25 @@ class USI_WordPress_Solutions_Updates {
                'label' => 'Enable Git updates',
                'notes' => 'Checks GitHub/GitLab for updates and notifies the administrator when updates are avaiable for download and installation.',
             ),
+            'force-update' => array(
+               'type' => 'checkbox', 
+               'label' => 'Force Git updates',
+               'notes' => 'GitHub/GitLab update checks will generate notification to update even if at latest version.',
+               'readonly' => empty(USI_WordPress_Solutions::$options['updates']['git-update']),
+            ),
          ),
       );
 
    } // __construct();
+
+   function fields_sanitize($input) {
+      if (empty($input['updates']['git-update'])) unset($input['updates']['force-update']);
+      if (!empty($input['updates']['force-update'])) {
+         global $wpdb;
+         $wpdb->query("UPDATE {$wpdb->prefix}options SET `option_value` = '' WHERE (`option_name` = '_site_transient_update_plugins')");
+      }
+      return($input);
+   } // fields_sanitize();
 
    function section_header() {
       echo '<p>' . __('GitHub and GitLab are code hosting platforms for version control and collaboration. Thay are used to publish updates for this WordPress plugin.', $this->text_domain) . '</p>' . PHP_EOL;

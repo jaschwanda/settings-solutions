@@ -24,7 +24,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.1 (2020-09-14)';
+   const VERSION = '2.9.2 (2020-09-14)';
 
    protected $is_tabbed = true;
 
@@ -79,9 +79,17 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                'value' => USI_WordPress_Solutions::DEBUG_INIT,
                'notes' => 'Log USI_WordPress_Solutions_Settings::action_admin_init() method.',
             ),
+            'DEBUG_OPTIONS' => array(
+               'value' => USI_WordPress_Solutions::DEBUG_OPTIONS,
+               'notes' => 'Log USI_WordPress_Solutions::$options.',
+            ),
             'DEBUG_RENDER' => array(
                'value' => USI_WordPress_Solutions::DEBUG_RENDER,
                'notes' => 'Log USI_WordPress_Solutions_Settings::fields_render() method.',
+            ),
+            'DEBUG_UPDATE' => array(
+               'value' => USI_WordPress_Solutions::DEBUG_UPDATE,
+               'notes' => 'Log USI_WordPress_Solutions_Update methods.',
             ),
          )
       );

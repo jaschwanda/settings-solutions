@@ -15,7 +15,7 @@ Requires at least: 5.0
 Requires PHP:      5.6.25
 Tested up to:      5.3.2
 Text Domain:       usi-wordpress-solutions
-Version:           2.9.1
+Version:           2.9.2
 */
 
 /*
@@ -39,14 +39,17 @@ require_once('usi-wordpress-solutions-log.php');
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.9.1 (2020-09-14)';
+   const VERSION = '2.9.2 (2020-09-14)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
    const TEXTDOMAIN = 'usi-wordpress-solutions';
 
-   const DEBUG_INIT   = 0x0001;
-   const DEBUG_RENDER = 0x0002;
+   const DEBUG_OFF     = 0x17000000;
+   const DEBUG_INIT    = 0x17000001;
+   const DEBUG_OPTIONS = 0x17000002;
+   const DEBUG_RENDER  = 0x17000004;
+   const DEBUG_UPDATE  = 0x17000008;
 
    private static $scripts = null;
 
@@ -68,6 +71,9 @@ final class USI_WordPress_Solutions {
          require_once('usi-wordpress-solutions-history.php');
       }
 
+      $log  = USI_WordPress_Solutions_Diagnostics::get_log(self::$options);
+
+      if (self::DEBUG_OPTIONS == (self::DEBUG_OPTIONS & $log)) usi::log('$options=', self::$options);
 
       if (is_admin()) {
 
@@ -80,9 +86,9 @@ final class USI_WordPress_Solutions {
             add_action('init', 'add_thickbox');
             require_once('usi-wordpress-solutions-install.php');
             require_once('usi-wordpress-solutions-settings-settings.php');
-            if (!empty(USI_WordPress_Solutions::$options['admin-options']['git-update'])) {
+            if (!empty(USI_WordPress_Solutions::$options['updates']['git-update'])) {
                require_once('usi-wordpress-solutions-update.php');
-               new USI_WordPress_Solutions_Update_GitHub(__FILE__, 'jaschwanda', 'wordpress-solutions');
+               new USI_WordPress_Solutions_Update_GitHub(__FILE__, 'jaschwanda', 'wordpress-solutions', null, !empty(USI_WordPress_Solutions::$options['updates']['force-update']));
             }
          }
 
