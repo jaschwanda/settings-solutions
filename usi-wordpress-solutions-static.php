@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.9.1 (2020-09-14)';
+   const VERSION = '2.9.5 (2020-09-14)';
 
    private static $calls_action_admin_head = 0;
 

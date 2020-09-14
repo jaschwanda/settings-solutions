@@ -2,17 +2,8 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
-## 2.9.4 (2020-09-14) ##
-* Fixed syntax error.
-
-## 2.9.3 (2020-09-14) ##
-* Fixed include file error.
-
-## 2.9.2 (2020-09-14) ##
+## 2.9.5 (2020-09-14) ##
 * Added forced update capabilities to the USI_WordPress_Update class.
-
-## 2.9.1 (2020-09-14) ##
-* Fixed PHP syntax error, set all versions numbers to same version.
 
 ## 2.9.0 (2020-07-30) ##
 * Set all versions numbers to same version.

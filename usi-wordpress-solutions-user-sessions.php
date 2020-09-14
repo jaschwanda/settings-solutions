@@ -11,7 +11,7 @@ if (!class_exists('WP_List_Table')) {
 
 class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
-   const VERSION = '2.9.1 (2020-09-14)';
+   const VERSION = '2.9.5 (2020-09-14)';
 
    public static function action_admin_head() {
 
