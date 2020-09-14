@@ -26,7 +26,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.0 (2020-07-30)';
+   const VERSION = '2.9.1 (2020-09-14)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -43,7 +43,7 @@ class USI_WordPress_Solutions_Settings {
    protected $is_tabbed = false;
    protected $name = null;
    protected $option_name = null;
-   protected $option_page = true;; // Options are paged via section_id's;
+   protected $option_page = true; // Options are paged via section_id's;
    protected $options = null;
    protected $override_do_settings_fields = true;
    protected $override_do_settings_sections = true;

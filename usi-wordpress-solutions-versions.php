@@ -19,7 +19,7 @@ require_once('usi-wordpress-solutions-popup.php');
 
 class USI_WordPress_Solutions_Versions {
 
-   const VERSION = '2.9.0 (2020-07-30)';
+   const VERSION = '2.9.1 (2020-09-14)';
 
    private function __construct() {
    } // __construct();
