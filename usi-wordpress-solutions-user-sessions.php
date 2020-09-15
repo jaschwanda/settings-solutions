@@ -11,7 +11,7 @@ if (!class_exists('WP_List_Table')) {
 
 class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
-   const VERSION = '2.9.5 (2020-09-14)';
+   const VERSION = '2.9.6 (2020-09-15)';
 
    public static function action_admin_head() {
 
@@ -86,7 +86,7 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
       case 'id': 
 
-         $session_tokens = get_user_meta($item->ID, 'session_tokens', true);
+         $session_tokens = $item->session_tokens;
 
          return($item->ID);
 
@@ -169,7 +169,18 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
    } // render_list();
 
    private function table_data() {
-      return(get_users(array('meta_key' => 'session_tokens', 'meta_compare' => 'EXISTS')));
+      $active_users = array();
+      $current_time = time();
+      $users        = get_users(array('meta_key' => 'session_tokens', 'meta_compare' => 'EXISTS'));
+      foreach ($users as $user) {
+         $session_tokens = get_user_meta($user->ID, 'session_tokens', true);
+         $key = key($session_tokens);
+         if ($current_time < $session_tokens[$key]['expiration']) {
+            $user->session_tokens = $session_tokens;
+            $active_users[] = $user;
+         }
+      }
+      return($active_users);
    } // table_data();
 
 } // USI_WordPress_Solutions_User_Sessions();

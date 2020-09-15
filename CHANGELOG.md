@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.9.6 (2020-09-15) ##
+* Removed expired users from logged in users list.
+
 ## 2.9.5 (2020-09-14) ##
 * Added forced update capabilities to the USI_WordPress_Update class.
 
