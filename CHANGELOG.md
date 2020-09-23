@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.9.7 (2020-09-22) ##
+* Added free-format settings page rendering.
+
 ## 2.9.6 (2020-09-15) ##
 * Removed expired users from logged in users list.
 

@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.5 (2020-09-14)';
+   const VERSION = '2.9.7 (2020-09-22)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -51,12 +51,14 @@ class USI_WordPress_Solutions_Settings {
    protected $position = null;
    protected $prefix = null;
    protected $query = null;
+   protected $render = 'page_render';
    protected $roles = null;
    protected $section_callback_offset = 0;
    protected $section_callbacks = array();
    protected $section_ids = array();
    protected $sections = null;
    protected $text_domain = null;
+   protected $title = null;
 
    function __construct($config) {
 
@@ -236,7 +238,7 @@ class USI_WordPress_Solutions_Settings {
             __($this->name, $this->text_domain), // Sidebar menu text; 
             $this->capability, // Capability required to enable page;
             $this->page_slug, // Menu page slug name;
-            array($this, 'page_render'), // Render page callback;
+            array($this, $this->render), // Render page callback;
             $this->icon_url, // URL of icon for menu item;
             $this->position // Position in menu order;
          );
@@ -248,7 +250,7 @@ class USI_WordPress_Solutions_Settings {
             __($this->name, $this->text_domain), // Sidebar menu text; 
             $this->capability, // Capability required to enable page;
             $this->page_slug, // Menu page slug name;
-            array($this, 'page_render') // Render page callback;
+            array($this, $this->render) // Render page callback;
          );
 
       } // ENDIF standard settings page;
@@ -652,6 +654,48 @@ do_settings_sections </table>';
 //     usi::log('$whitelist_options=', $whitelist_options);
 //     return($whitelist_options);
 // } // filter_whitelist_options();
+
+   function free_render() {
+
+      ob_start();
+      settings_fields($this->page_slug);
+      $settings_fields = ob_get_clean();
+
+      $i  = '  ';
+      $i2 = '    ';
+      $n  = PHP_EOL;
+
+      echo 
+         $n . '<div class="wrap">' . $n .
+         ($this->title ? $i . $this->title . $n : '') .
+         $i . USI_WordPress_Solutions_Static::divider(2) .
+         $i . USI_WordPress_Solutions_Static::divider(2, $this->name) .
+         $i . USI_WordPress_Solutions_Static::divider(2) .
+         $i . '<form id="myForm" action="options.php"' . $this->enctype . ' method="post">' . $n .
+              str_replace('<input', $n . $i2 . '<input', $settings_fields) . $n;
+
+      global $wp_settings_sections, $wp_settings_fields;
+
+      if (isset($wp_settings_sections[$this->page_slug])) {
+         foreach ((array)$wp_settings_sections[$this->page_slug] as $section) {
+            $section_id = $section['id'];
+            if (isset($wp_settings_fields[$this->page_slug][$section_id])) {
+               foreach ((array)$wp_settings_fields[$this->page_slug][$section_id] as $field) {
+                  call_user_func($field['callback'], $field['args']);
+               }
+            }
+         }
+      }
+
+      echo 
+         $n .
+         $i . '</form>' . $n .
+         $i . USI_WordPress_Solutions_Static::divider(2) .
+         $i . USI_WordPress_Solutions_Static::divider(2, $this->name) .
+         $i . USI_WordPress_Solutions_Static::divider(2) .
+              '</div><!-- wrap -->' . $n;
+
+   } // free_render();
 
    private static function get_value($args) {
       if (!empty($args['value'])) return($args['value']);
