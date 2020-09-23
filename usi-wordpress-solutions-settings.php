@@ -204,7 +204,7 @@ class USI_WordPress_Solutions_Settings {
                      add_settings_field(
                         $option_id, // Option name;
                         !empty($attributes['label']) ? $attributes['label'] : null, // Field title; 
-                        array($this, 'fields_render'), // Render field callback;
+                        array($this, !empty($attributes['callback']) ? $attributes['callback'] : 'fields_render'), // Render field callback;
                         $this->page_slug, // Settings page menu slug;
                         $section_id, // Section id;
                         array_merge($attributes, 
