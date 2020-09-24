@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.7 (2020-09-22)';
+   const VERSION = '2.9.8 (2020-09-24)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -511,7 +511,7 @@ do_settings_sections </table>';
 
       $rows     = isset($args['rows'])     ? ' rows="'  . $args['rows']  . '"' : null;
 
-      $readonly = !empty($args['readonly']) ? ((('checkbox' == $type) || ('select' == $type)) ? ' disabled' : ' readonly') : null;
+      $readonly = !empty($args['readonly']) ? ((('checkbox' == $type) || ('radio' == $type) || ('select' == $type)) ? ' disabled' : ' readonly') : null;
 
       $value    = esc_attr(self::get_value($args));
 

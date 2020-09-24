@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.9.8 (2020-09-24) ##
+* Added disabled/readonly for radio buttons.
+
 ## 2.9.7 (2020-09-22) ##
 * Added free-format settings page rendering.
 
