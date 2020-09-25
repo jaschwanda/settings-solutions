@@ -24,7 +24,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.5 (2020-09-14)';
+   const VERSION = '2.9.9 (2020-09-25)';
 
    protected $is_tabbed = true;
 
@@ -155,6 +155,11 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                   'type' => 'html', 
                   'html' => '<a href="options.php" title="Semi-secret settings on options.php page">options.php</a>',
                   'label' => 'Semi-Secret Settings',
+               ),
+               'versions' => array(
+                  'type' => 'html', 
+                  'html' => '<a href="' . content_url() . '/plugins/usi-wordpress-solutions/usi-wordpress-solutions-versions-scan-all.php?' . WP_CONTENT_DIR  . '" title="versions page" target="_blank">versions</a>',
+                  'label' => 'Plugin/Theme Versions',
                ),
             ),
          ), // admin-options;
