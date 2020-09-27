@@ -67,12 +67,11 @@ class USI_WordPress_Solutions_Versions_Show {
          foreach ($package as $file => $version) {
             $version = trim($version);
             $html   .= '  <tr><td>' . $file . '</td><td>' . $version . '</td>';
-
             foreach ($sites as $site_title => $site) {
                if ($site_title == $first_title) continue;
                $other_version = !empty($site['packages'][$package_name][$file]) ? trim($site['packages'][$package_name][$file]) : null;
                $html         .= '<td' . ($other_version != $version ? ' style="color:red;"' : '') . '>' . ($other_version ? $other_version : 'missing') . '</td>';
-               unset($site['packages'][$package_name][$file]);
+               unset($sites[$site_title]['packages'][$package_name][$file]);
             }
 
             $html .= '</tr>' . PHP_EOL;
@@ -82,9 +81,9 @@ class USI_WordPress_Solutions_Versions_Show {
 
          foreach ($sites as $site_title => $site) {
             if ($site_title == $first_title) continue;
-            if (!empty($sites[$site_title][$package_name])) {
+            if (!empty($site['packages'][$package_name])) {
                $html .= '<td style="color:red;">';
-               foreach ($sites[$site_title][$package_name] as $file => $version) {
+               foreach ($site['packages'][$package_name] as $file => $version) {
                   $html .= $file . '<br/>';
                }
                $html .= '</td>';
