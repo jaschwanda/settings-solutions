@@ -2,7 +2,7 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
-## 2.9.9 (2020-09-25) ##
+## 2.9.9 (2020-09-27) ##
 * Added scan all plugin/theme versions.
 
 ## 2.9.8 (2020-09-24) ##

@@ -24,7 +24,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.9 (2020-09-25)';
+   const VERSION = '2.9.9 (2020-09-27)';
 
    protected $is_tabbed = true;
 
@@ -57,6 +57,22 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
       }
       return($links);
    } // filter_plugin_row_meta();
+
+   function fields_sanitize($input) {
+      $input = parent::fields_sanitize($input);
+      unset($input['versions']['export']);
+      if (!empty($_REQUEST['submit']) && ('Execute Versions' == $_REQUEST['submit'])) {
+         if (!empty($input['versions']['mode'])) {
+            if ('export' == $input['versions']['mode']) {
+               require_once('usi-wordpress-solutions-versions-all.php');
+               $title   = sanitize_title(get_bloginfo('title'));
+               $content = USI_WordPress_Solutions_Versions_All::versions($title, WP_CONTENT_DIR);
+               $input['versions']['export'] = $content;
+            }
+         }
+      }
+      return($input);
+   } // fields_sanitize();
 
    function sections() {
 
@@ -93,8 +109,6 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             ),
          )
       );
-
-      $diagnostics->section['footer_callback'] = array($this, 'sections_diagnostics_footer');
 
       $sections = array(
 
@@ -156,11 +170,6 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                   'html' => '<a href="options.php" title="Semi-secret settings on options.php page">options.php</a>',
                   'label' => 'Semi-Secret Settings',
                ),
-               'versions' => array(
-                  'type' => 'html', 
-                  'html' => '<a href="' . content_url() . '/plugins/usi-wordpress-solutions/usi-wordpress-solutions-versions-scan-all.php?' . WP_CONTENT_DIR  . '" title="versions page" target="_blank">versions</a>',
-                  'label' => 'Plugin/Theme Versions',
-               ),
             ),
          ), // admin-options;
 
@@ -182,6 +191,11 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                   'html' => '<a href="admin.php?page=usi-wordpress-solutions-user-sessions">Users Logged In</a>',
                   'label' => 'Users Currently Logged In',
                ),
+               'versions' => array(
+                  'type' => 'html', 
+                  'html' => '<a href="admin.php?page=usi-wordpress-solutions-versions-show">Version Comparison</a>',
+                  'label' => 'Version Comparision',
+               ),
                'visible-grid' => array(
                   'type' => 'checkbox', 
                   'label' => 'Visable Grid Borders',
@@ -191,17 +205,65 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
          'updates' => new USI_WordPress_Solutions_Updates($this),
 
+         'versions' => array(
+            'label' => __('Versions', USI_WordPress_Solutions::TEXTDOMAIN), 
+            'footer_callback' => array($this, 'sections_footer_versions'),
+            'localize_labels' => 'yes',
+            'localize_notes' => 3, // <p class="description">__()</p>;
+            'settings' => array(
+               'mode' => array(
+                  'f-class' => 'large-text', 
+                  'label' => 'Select Functionality',
+                  'options' => array(
+                     array(0 => 'compare', 1 => 'Compare version information'),
+                     array(0 => 'export', 1 => 'Export current version information'),
+                     array(0 => 'import', 1 => 'Import source version information'),
+                  ),
+                  'type' => 'select', 
+               ),
+            ),
+         ), // versions;
+
       );
+
+      if ('compare' == $this->options['versions']['mode']) {
+         require_once('usi-wordpress-solutions-versions-show.php');
+         $import = $this->options['versions']['import'];
+         $sections['versions']['settings']['compare'] = array(
+            'html' => USI_WordPress_Solutions_Versions_Show::show($import),
+            'type' => 'html', 
+         );
+         $sections['versions']['settings']['import'] = array(
+            'type' => 'hidden', 
+         );
+      } else if ('export' == $this->options['versions']['mode']) {
+         $sections['versions']['settings']['export'] = array(
+            'f-class' => 'large-text', 
+            'rows' => 16,
+            'type' => 'textarea', 
+            'label' => 'Export Current Installation',
+         );
+         $sections['versions']['settings']['import'] = array(
+            'type' => 'hidden', 
+         );
+      } else if ('import' == $this->options['versions']['mode']) {
+         $sections['versions']['settings']['import'] = array(
+            'f-class' => 'large-text', 
+            'rows' => 16,
+            'type' => 'textarea', 
+            'label' => 'Import Source Installation',
+         );
+      }
 
       return($sections);
 
    } // sections();
 
-   function sections_diagnostics_footer() {
+   function sections_footer_versions() {
       echo '    ';
-      submit_button(__('Save Diagnostics', USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
+      submit_button(__('Execute Versions', USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
       return(null);
-   } // sections_diagnostics_footer();
+   } // sections_footer_versions();
 
    function sections_header() {
       echo '    <p>' . __('The WordPress-Solutions plugin is used by many Universal Solutions plugins and themes to simplify the ' .

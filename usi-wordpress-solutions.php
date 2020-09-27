@@ -40,7 +40,7 @@ require_once('usi-wordpress-solutions-log.php');
 
 final class USI_WordPress_Solutions {
 
-   const VERSION = '2.9.9 (2020-09-25)';
+   const VERSION = '2.9.9 (2020-09-27)';
 
    const NAME       = 'WordPress-Solutions';
    const PREFIX     = 'usi-wordpress';
@@ -81,6 +81,7 @@ final class USI_WordPress_Solutions {
          global $pagenow;
          if ('admin.php' == $pagenow) {
             require_once('usi-wordpress-solutions-user-sessions.php');
+            require_once('usi-wordpress-solutions-versions-show.php');
          }
 
          if (!defined('WP_UNINSTALL_PLUGIN')) {
