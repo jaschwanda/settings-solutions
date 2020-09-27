@@ -65,11 +65,12 @@ class USI_WordPress_Solutions_Versions_Show {
          $html .= '  <tr><td>' . $package_name . '</td><td colspan="' . count($sites) . '"></td></tr>' . PHP_EOL;
 
          foreach ($package as $file => $version) {
-            $html .= '  <tr><td>' . $file . '</td><td>' . $version . '</td>';
+            $version = trim($version);
+            $html   .= '  <tr><td>' . $file . '</td><td>' . $version . '</td>';
 
             foreach ($sites as $site_title => $site) {
                if ($site_title == $first_title) continue;
-               $other_version = !empty($site['packages'][$package_name][$file]) ? $site['packages'][$package_name][$file] : null;
+               $other_version = !empty($site['packages'][$package_name][$file]) ? trim($site['packages'][$package_name][$file]) : null;
                $html         .= '<td' . ($other_version != $version ? ' style="color:red;"' : '') . '>' . ($other_version ? $other_version : 'missing') . '</td>';
                unset($site['packages'][$package_name][$file]);
             }
@@ -81,13 +82,15 @@ class USI_WordPress_Solutions_Versions_Show {
 
          foreach ($sites as $site_title => $site) {
             if ($site_title == $first_title) continue;
-            $html .= '<td style="color:red;">';
             if (!empty($sites[$site_title][$package_name])) {
+               $html .= '<td style="color:red;">';
                foreach ($sites[$site_title][$package_name] as $file => $version) {
                   $html .= $file . '<br/>';
                }
+               $html .= '</td>';
+            } else {
+               $html .= '<td></td>';
             }
-            $html .= '</td>';
          }
 
          $html .= '</tr>' . PHP_EOL;
