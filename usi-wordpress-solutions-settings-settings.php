@@ -226,7 +226,8 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
       );
 
-      if ('compare' == $this->options['versions']['mode']) {
+      if (empty($this->options['versions']['mode'])) {
+      } else if ('compare' == $this->options['versions']['mode']) {
          require_once('usi-wordpress-solutions-versions-show.php');
          $import = $this->options['versions']['import'];
          $sections['versions']['settings']['compare'] = array(
