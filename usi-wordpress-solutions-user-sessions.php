@@ -11,7 +11,7 @@ if (!class_exists('WP_List_Table')) {
 
 class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
-   const VERSION = '2.9.6 (2020-09-15)';
+   const VERSION = '2.9.10 (2020-10-16)';
 
    public static function action_admin_head() {
 
@@ -185,7 +185,10 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
 } // USI_WordPress_Solutions_User_Sessions();
 
-add_action('admin_head', array('USI_WordPress_Solutions_User_Sessions', 'action_admin_head'));
+if (!empty($_GET['page']) && ('usi-wordpress-solutions-user-sessions' == $_GET['page'])) {
+   add_action('admin_head', array('USI_WordPress_Solutions_User_Sessions', 'action_admin_head'));
+}
+
 add_action('admin_menu', array('USI_WordPress_Solutions_User_Sessions', 'action_admin_menu'));
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

@@ -17,13 +17,14 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.9.5 (2020-09-14)';
+   const VERSION = '2.9.10 (2020-10-16)';
 
    private static $calls_action_admin_head = 0;
 
    private function __construct() {
    } // __construct();
 
+   // Make sure you have the get_hidden_columns() function in your WP_List_Table;
    public static function column_style($columns, $style = null) {
 
       $border = !empty(USI_WordPress_Solutions::$options['illumination']['visible-grid']) ? 'border:solid 1px yellow; ' : '';
@@ -34,13 +35,19 @@ class USI_WordPress_Solutions_Static {
 
       foreach ($hidden as $hide) unset($columns[$hide]);
 
-      $total  = 0; foreach ($columns as $width) $total += $width;
+      $total  = 0; foreach ($columns as $width) if (!is_array($width)) $total += $width;
 
-      $html   = '<style>/*USI_WordPress_Solutions_Static' . __LINE__ . '*/' . PHP_EOL;
+      $html   = '<style>' . PHP_EOL;
 
-      foreach ($columns as $name => $width) { 
-         $percent = number_format(100 * $width / $total, 1);
-         $html   .= ".wp-list-table .column-$name{{$border}width:$percent%;$space$style}" . PHP_EOL;
+      foreach ($columns as $name => $value) { 
+         if (is_array($value)) {
+            $width    = !empty($value['width']) ? 'width:' . $value['width'] . ';' : '';
+            $ellipsis = !empty($value['ellipsis']) ? 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' : '';
+            $html    .= ".wp-list-table .column-$name{{$border}{$width}{$ellipsis}}" . PHP_EOL;
+         } else {
+            $percent  = number_format(100 * $value / $total, 1);
+            $html    .= ".wp-list-table .column-$name{{$border}width:$percent%;$space$style}" . PHP_EOL;
+         }
       }
 
       return($html . '</style>' . PHP_EOL);

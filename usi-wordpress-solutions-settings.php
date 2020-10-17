@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.8 (2020-09-24)';
+   const VERSION = '2.9.10 (2020-10-16)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;

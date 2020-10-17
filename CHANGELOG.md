@@ -2,6 +2,13 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.9.10 (2020-10-16) ##
+* Added USI_WordPress_Solutions_Popup_Action class.
+* Added USI_WordPress_Solutions_Versions_All class.
+* Made list table improvements.
+* Made session display and history tracking improvements.
+* Set all versions numbers to same version.
+
 ## 2.9.9 (2020-09-27) ##
 * Added scan all plugin/theme versions.
 

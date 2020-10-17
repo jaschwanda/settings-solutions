@@ -19,7 +19,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.9.5 (2020-09-14)';
+   const VERSION = '2.9.10 (2020-10-16)';
 
    protected $access_token = null;
    protected $active = null;
@@ -112,7 +112,7 @@ class USI_WordPress_Solutions_Update {
 
          $this->get_repository_info();
 
-         if (!empty($this->repository['tag_name'])) {
+         if (!empty($this->repository['tag_name']) && !empty($checked[$this->base_name])) {
 
             $out_of_date = version_compare($this->repository['tag_name'], $checked[$this->base_name], 'gt');
 

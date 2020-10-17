@@ -5,13 +5,30 @@ defined('ABSPATH') or die('Accesss not allowed.');
 // https://codex.wordpress.org/Class_Reference/WP_List_Table
 // https://gist.github.com/paulund/7659452
 
-if (!class_exists('WP_List_Table')) {
-   require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
-}
+if (!class_exists('WP_List_Table')) { require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php'); }
 
 class USI_WordPress_Solutions_List extends WP_List_Table {
 
-   const VERSION = '2.9.5 (2020-09-14)';
+   const VERSION = '2.9.10 (2020-10-16)';
+
+   public function __construct() {
+
+      add_action('admin_menu', array($this, 'action_admin_menu'));
+
+   } // __construct();
+
+   function action_admin_menu() {
+      add_menu_page(
+         'List Table 001', // Page <title/> text;
+         'List Table 001', // Sidebar menu text; 
+         'manage_options', // Capability required to enable page;
+         'usi-wordpress-solutions-list-table.php', // Menu page slug name;
+         array($this, 'render_list'), // Render page callback;
+         'dashicons-bell', // URL of icon for menu item;
+         null // Position in menu order;
+      );
+
+   } // action_admin_menu():
 
    public function column_default($item, $column_name) {
       switch( $column_name ) {
@@ -52,17 +69,17 @@ class USI_WordPress_Solutions_List extends WP_List_Table {
 
    } // prepare_items();
 
-   public static function render_list() {
+   public function render_list() {
 
-      $list = new USI_WordPress_Solutions_List();
+      parent::__construct();
 
-      $list->prepare_items();
+      $this->prepare_items();
 
       echo
          '<div class="wrap">' . 
            '<div id="icon-users" class="icon32"></div>' .
            '<h2>List Table 001</h2>';
-            $list->display();
+            $this->display();
       echo
          '</div>';
 
@@ -82,18 +99,6 @@ class USI_WordPress_Solutions_List extends WP_List_Table {
 
 } // USI_WordPress_Solutions_List();
 
-if (is_admin()) {
-   add_action('admin_menu', 'add_menu_example_list_table_page');
-}
-
-function add_menu_example_list_table_page() {
-   add_menu_page(
-      'List Table 001', 
-      'List Table 001', 
-      'manage_options', 
-      'usi-wordpress-solutions-user-sessions.php', 
-      array('USI_WordPress_Solutions_List', 'render_list')
-   );
-}
+if (is_admin()) new USI_WordPress_Solutions_List();
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

@@ -15,9 +15,25 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
-class USI_WordPress_Solutions_Popup_2 {
+/*
+class USI_WordPress_Solutions_Popup is used in:
 
-   const VERSION = '2.9.5 (2020-09-14)';
+ru-application.php
+usi-media-solutions-manage.php
+
+
+
+class USI_WordPress_Solutions_Popup_Iframe is used in:
+
+ru-email-action.php
+ru-report.php
+usi-test-solutions-settings.php
+usi-wordpress-solutions-settings-settings.php
+usi-wordpress-solutions-versions.php
+*/
+class USI_WordPress_Solutions_Popup_Iframe {
+
+   const VERSION = '2.9.10 (2020-10-16)';
 
    private static $scripts = array();
 
@@ -95,11 +111,11 @@ class USI_WordPress_Solutions_Popup_2 {
          : null
          ;
 
-      if (empty(self::$scripts[$id])) {
+      if (empty(self::$scripts[$id])) { // IF popup html not set;
 
-         if (empty(self::$scripts[0])) {
+         if (empty(self::$scripts[0])) { // IF popup javaascript not set;
 
-            $divider = USI_WordPress_Solutions_Static::divider(0, 'usi-popup');
+            $divider = USI_WordPress_Solutions_Static::divider(0, $id);
 
             self::$scripts[0] = <<<EOD
 $divider<script> 
@@ -153,7 +169,8 @@ EOD;
 
             USI_WordPress_Solutions::admin_footer_script(self::$scripts[0]);
 
-         }
+         } // ENDIF popup javaascript not set;
+
 // The {$id}-head div is equivalent to the WordPress thickbox TB_title div;
 // The {$id}-title div is equivalent to the WordPress thickbox TB_ajaxWindowTitle div;
          $divider = USI_WordPress_Solutions_Static::divider(0, $id);
@@ -177,13 +194,13 @@ $divider
 EOD;
          USI_WordPress_Solutions::admin_footer_script(self::$scripts[$id]);
 
-      }
+      }  // ENDIF popup html not set;
 
       return($invoke);
 
    } // build();
 
-} // Class USI_WordPress_Solutions_Popup_2;
+} // Class USI_WordPress_Solutions_Popup_Iframe;
 
 // https://codex.wordpress.org/Javascript_Reference/ThickBox
 // http://codylindley.com/thickbox/
@@ -256,7 +273,7 @@ class USI_WordPress_Solutions_Popup {
    public static function build($options) {
 
       if (!empty($options['iframe'])) {
-         return(USI_WordPress_Solutions_Popup_2::build($options));
+         return(USI_WordPress_Solutions_Popup_Iframe::build($options));
       }
 
       $accept = !empty($options['accept']) ?          $options['accept']  : null;
