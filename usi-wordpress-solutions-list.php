@@ -9,7 +9,7 @@ if (!class_exists('WP_List_Table')) { require_once(ABSPATH . 'wp-admin/includes/
 
 class USI_WordPress_Solutions_List extends WP_List_Table {
 
-   const VERSION = '2.9.10 (2020-10-16)';
+   const VERSION = '2.10.1 (2020-11-02)';
 
    public function __construct() {
 

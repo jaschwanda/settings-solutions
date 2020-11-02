@@ -17,14 +17,14 @@ Copyright (c) 2020 by Jim Schwanda.
 
 require_once('usi-wordpress-solutions-capabilities.php');
 require_once('usi-wordpress-solutions-diagnostics.php');
-require_once('usi-wordpress-solutions-popup.php');
+require_once('usi-wordpress-solutions-popup-iframe.php');
 require_once('usi-wordpress-solutions-settings.php');
 require_once('usi-wordpress-solutions-updates.php');
 require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.10 (2020-10-16)';
+   const VERSION = '2.10.1 (2020-11-02)';
 
    protected $is_tabbed = true;
 
@@ -76,16 +76,22 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
    function sections() {
 
-      $phpinfo_anchor = USI_WordPress_Solutions_Popup::build(
+      $phpinfo_anchor = USI_WordPress_Solutions_Popup_Iframe::build(
          array(
             'close'  => __('Close', USI_WordPress_Solutions::TEXTDOMAIN),
             'height' => '640px',
             'id'     => 'usi-popup-phpinfo',
+            'title'  => 'phpinfo()',
+            'width'  => '980px',
+         )
+      );
+
+      $phpinfo_anchor = USI_WordPress_Solutions_Popup_Iframe::link(
+         array(
+            'id'     => 'usi-popup-phpinfo',
             'iframe' => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-phpinfo-scan.php',
             'link'   => array('text' => 'phpinfo()'),
             'tip'    => __('Display PHP information', USI_WordPress_Solutions::TEXTDOMAIN),
-            'title'  => 'phpinfo()',
-            'width'  => '980px',
          )
       );
 

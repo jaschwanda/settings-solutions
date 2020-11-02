@@ -23,7 +23,7 @@ This popup displays a confirmation message for a list of items in a WordPress ta
 
 class USI_WordPress_Solutions_Popup_Action {
 
-   const VERSION = '2.9.10 (2020-10-16)';
+   const VERSION = '2.10.1 (2020-11-02)';
 
    const HEIGHT_HEAD_FOOT = 93;
 
@@ -182,10 +182,21 @@ jQuery(document).ready(
             var list = '';
             var text = '';
             var delete_count = 0;
-            for (var i = 0; i < ids.length; i++) {
-               if (ids[i].checked) {
-                  list += (list.length ? ',' : '') + ids[i].getAttribute('usi-popup-id');
-                  text += (delete_count++ ? '<br/>' : '') + ids[i].getAttribute('usi-popup-info');
+            if (ids.length) {
+               for (var i = 0; i < ids.length; i++) {
+                  if (ids[i].checked) {
+                     list += (list.length ? ',' : '') + ids[i].getAttribute('usi-popup-id');
+                     text += (delete_count++ ? '<br/>' : '') + ids[i].getAttribute('usi-popup-info');
+                  }
+               }
+            } else {
+               var ids  = $('input[name="post[]"]');
+               for (var i = 0; i < ids.length; i++) {
+                  if (ids[i].checked) {
+                     var id = ids[i].getAttribute('id').substr(10);
+                     list += (list.length ? ',' : '') + id;
+                     text += (delete_count++ ? '<br/>' : '') + $('#usi-popup-delete-' + id).attr('usi-popup-info');
+                  }
                }
             }
             if (!delete_count) {
@@ -252,9 +263,15 @@ EOD;
 
    public static function column_cb($args) {
 
-      $id       = !empty($args['id'])       ? $args['id']       : null;
       $id_field = !empty($args['id_field']) ? $args['id_field'] : null;
       $info     = !empty($args['info'])     ? $args['info']     : null;
+      $post     = !empty($args['post'])     ? $args['post']     : null;
+
+      if ($post) {
+         $id    = $post->ID;
+      } else {
+         $id    = !empty($args['id'])       ? $args['id']       : null;
+      }
 
       return(
          '<input class="usi-popup-checkbox" name="' . $id_field . '[' . $id . ']" type="checkbox" ' .
@@ -268,8 +285,13 @@ EOD;
       $id_field = !empty($args['id_field']) ? $args['id_field'] : null;
       $info     = !empty($args['info'])     ? $args['info']     : null;
       $item     = !empty($args['item'])     ? $args['item']     : null;
+      $post     = !empty($args['post'])     ? $args['post']     : null;
 
-      $id       = !empty($item[$id_field])  ? $item[$id_field]  : null;
+      if ($post) {
+         $id    = $post->ID;
+         $url   = !empty($args['url'])      ? $args['url']      : null;
+      } else {
+         $id    = !empty($item[$id_field])  ? $item[$id_field]  : null;
 
       $url      = esc_url(
          wp_nonce_url( 
@@ -280,9 +302,10 @@ EOD;
                ), 
                get_admin_url() . (!empty($args['url']) ? $args['url'] : null)
             ), 
-            $action . '_' . $id
+            'bulk-' . ($args['bulk'] ?? $action . '_' . $id)
          )
       );
+      }
 
       return(
          '<a id="usi-popup-' . $action . '-' . $id . '" href="' . $url . '" usi-popup-action="' . $action . 

@@ -20,20 +20,10 @@ class USI_WordPress_Solutions_Popup is used in:
 
 ru-application.php
 usi-media-solutions-manage.php
-
-
-
-class USI_WordPress_Solutions_Popup_Iframe is used in:
-
-ru-email-action.php
-ru-report.php
-usi-test-solutions-settings.php
-usi-wordpress-solutions-settings-settings.php
-usi-wordpress-solutions-versions.php
 */
-class USI_WordPress_Solutions_Popup_Iframe {
+class USI_WordPress_Solutions_Popup_Iframe3 {
 
-   const VERSION = '2.9.10 (2020-10-16)';
+   const VERSION = '2.10.1 (2020-11-02)';
 
    private static $scripts = array();
 
@@ -200,7 +190,7 @@ EOD;
 
    } // build();
 
-} // Class USI_WordPress_Solutions_Popup_Iframe;
+} // Class USI_WordPress_Solutions_Popup_Iframe3;
 
 // https://codex.wordpress.org/Javascript_Reference/ThickBox
 // http://codylindley.com/thickbox/
@@ -255,7 +245,7 @@ usi-wordpress-solutions-versions.php
    - iframe with source from usi-wordpress-solutions-versions-scan.php
    - change browser size causes popup to change, close button vanishes
 
-ru-email-action.php
+ru-email-inbox.php
    - inline
 
 usi-variable-solutions-table.php
@@ -273,7 +263,7 @@ class USI_WordPress_Solutions_Popup {
    public static function build($options) {
 
       if (!empty($options['iframe'])) {
-         return(USI_WordPress_Solutions_Popup_Iframe::build($options));
+         die(__METHOD__.':'.__LINE__.':not supported');
       }
 
       $accept = !empty($options['accept']) ?          $options['accept']  : null;

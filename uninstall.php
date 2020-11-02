@@ -22,7 +22,7 @@ require_once('usi-wordpress-solutions.php');
 
 final class USI_WordPress_Solutions_Uninstall_Uninstall {
 
-   const VERSION = '2.9.10 (2020-10-16)';
+   const VERSION = '2.10.1 (2020-11-02)';
 
    private function __construct() {
    } // __construct();

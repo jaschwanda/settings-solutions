@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.9.10 (2020-10-16)';
+   const VERSION = '2.10.1 (2020-11-02)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -511,11 +511,22 @@ do_settings_sections </table>';
 
       $rows     = isset($args['rows'])     ? ' rows="'  . $args['rows']  . '"' : null;
 
-      $readonly = !empty($args['readonly']) ? ((('checkbox' == $type) || ('radio' == $type) || ('select' == $type)) ? ' disabled' : ' readonly') : null;
-
       $value    = esc_attr(self::get_value($args));
 
       $maxlen   = !empty($args['maxlength']) ? (is_integer($args['maxlength']) ? ' maxlength="' . $args['maxlength'] . '"' : null) : null;
+
+      // Some fields don't have a "readonly" attribute, so we have to use disabled "instead",
+      // but then the value of the disabled field is not posted to the server, so we add a
+      // hidden field to post the value back to the server;
+      $readonly = $disable_hidden = null;
+      if (!empty($args['readonly'])) {
+        if (('checkbox' == $type) || ('radio' == $type) || ('select' == $type)) {
+           $readonly = ' disabled';
+           if ($value) $disable_hidden = '<input' . $name . ' type="hidden" value="' . $value . '" />';
+        } else {
+           $readonly = ' readonly';
+        }
+      }
 
       $attributes = $id . $class . $name . $attr . $min . $max . $maxlen . $readonly . $rows;
 
@@ -526,14 +537,15 @@ do_settings_sections </table>';
             $label = !empty($choice['label']);
             echo $prefix . (!empty($choice['prefix']) ? $choice['prefix'] : '') .
                ($label ? '<label>' : '') . '<input type="radio"' . $attributes . ' value="' . esc_attr($choice['value']) . '"' . 
-               checked($choice['value'], $value, false) . ' />' . $choice['notes'] . ($label ? '</label>' : '') .
+               checked($choice['value'], $value, false) . ' />'  . $choice['notes'] . ($label ? '</label>' : '') .
                (!empty($choice['suffix']) ? $choice['suffix'] : '');
          }
+         if ($disable_hidden) echo $disable_hidden;
          break;
 
       case 'checkbox':
          // Not sure why we have to convert 'true' to true, but checked() sometimes wouldn't check otherwise;
-         echo $prefix . '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />' . $suffix;
+         echo $prefix . '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />' . $disable_hidden . $suffix;
          break;
 
       case 'null-number':
@@ -551,7 +563,7 @@ do_settings_sections </table>';
          break;
 
       case 'select':
-         echo $prefix . self::fields_render_select($attributes, $args['options'], $value) . $suffix;
+         echo $prefix . self::fields_render_select($attributes, $args['options'], $value) . $disable_hidden . $suffix;
          break;
 
       case 'textarea':

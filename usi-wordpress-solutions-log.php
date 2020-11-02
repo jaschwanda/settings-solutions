@@ -21,7 +21,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI {
 
-   const VERSION = '2.9.10 (2020-10-16)';
+   const VERSION = '2.10.1 (2020-11-02)';
 
    private static $info   = null;
    private static $mysqli = null;
