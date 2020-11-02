@@ -76,7 +76,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
    function sections() {
 
-      $phpinfo_anchor = USI_WordPress_Solutions_Popup_Iframe::build(
+      USI_WordPress_Solutions_Popup_Iframe::build(
          array(
             'close'  => __('Close', USI_WordPress_Solutions::TEXTDOMAIN),
             'height' => '640px',
