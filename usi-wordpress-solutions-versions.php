@@ -35,7 +35,6 @@ class USI_WordPress_Solutions_Versions {
                'close'   => __('Close', $text_domain),
                'height' => '500px',
                'id'     => 'usi-popup-version',
-               'title'  => $title . ' &nbsp; &nbsp; ' . __('Version', $text_domain) . ' ' . $version,
                'width'  => '500px',
             )
          );
@@ -51,6 +50,7 @@ class USI_WordPress_Solutions_Versions {
                'iframe' => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-versions-scan.php?' . urlencode($file),
                'link'   => array('text' => $link),
                'tip'    => __('Display detailed version information', $text_domain),
+               'title'  => $title . ' &nbsp; &nbsp; ' . __('Version', $text_domain) . ' ' . $version,
             )
          )
       );

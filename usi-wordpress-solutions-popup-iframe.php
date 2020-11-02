@@ -59,13 +59,6 @@ class USI_WordPress_Solutions_Popup_Iframe {
          }
       }
 
-      if (!empty($options['title'])) {
-         $title    = esc_attr($options['title']);
-      } else {
-         $title    = 'WordPress-Solutions Popup';
-      }
-      self::$attributes[$id] .= ' usi-popup-title="' . $title . '"';
-
       if (empty($options['width'])) {
          $size    .= ' width:300px;';
       } else {
@@ -188,6 +181,13 @@ EOD;
          $attributes .= ' usi-popup-iframe="' . $iframe . '"';
          $type     = 'iframe';
       }
+
+      if (!empty($options['title'])) {
+         $title    = esc_attr($options['title']);
+      } else {
+         $title    = 'WordPress-Solutions Popup';
+      }
+      $attributes .= ' usi-popup-title="' . $title . '"';
 
       $extra  = !empty($options['extra'] ) ?    ' ' . $options['extra']   : null;
       $tag    = !empty($options['tag']   ) ?          $options['tag']     : 'a';
