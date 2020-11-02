@@ -81,7 +81,6 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             'close'  => __('Close', USI_WordPress_Solutions::TEXTDOMAIN),
             'height' => '640px',
             'id'     => 'usi-popup-phpinfo',
-            'title'  => 'phpinfo()',
             'width'  => '980px',
          )
       );
@@ -92,6 +91,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             'iframe' => plugins_url(null, __FILE__) . '/usi-wordpress-solutions-phpinfo-scan.php',
             'link'   => array('text' => 'phpinfo()'),
             'tip'    => __('Display PHP information', USI_WordPress_Solutions::TEXTDOMAIN),
+            'title'  => 'phpinfo()',
          )
       );
 
