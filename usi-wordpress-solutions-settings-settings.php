@@ -59,8 +59,11 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
    } // filter_plugin_row_meta();
 
    function fields_sanitize($input) {
+
       $input = parent::fields_sanitize($input);
+
       unset($input['versions']['export']);
+
       if (!empty($_REQUEST['submit']) && ('Execute Versions' == $_REQUEST['submit'])) {
          if (!empty($input['versions']['mode'])) {
             if ('export' == $input['versions']['mode']) {
@@ -71,7 +74,55 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             }
          }
       }
+
+      if (!empty($_REQUEST['submit']) && ('eXport Posts' == $_REQUEST['submit'])) {
+
+         if (!empty($input['xport']['parent-post']) && !empty($input['xport']['post-type'])) {
+
+            $parent_post = get_posts(
+               $args = array(
+                  'numberposts' => 1,
+                  'post_status' => 'publish',
+                  'post_type' => $input['xport']['post-type'],
+                  'title' => $input['xport']['parent-post'],
+               )
+            );
+
+            usi::log('$args=', $args, '\n$post_parent=', $parent_post);
+
+            if (!empty($parent_post[0]->ID)) {
+
+               $forms = get_posts(
+                  $args = array(
+                     'numberposts' => -1,
+                     'post_parent' => $parent_post[0]->ID,
+                     'post_status' => 'publish',
+                     'post_type' => $input['xport']['post-type'],
+                  )
+               );
+               usi::log('$args=', $args, '\n$forms=', $forms);
+
+               $text = null;
+
+               foreach ($forms as $form) {
+
+                  $text .= '"' . $form->post_title . '":' . PHP_EOL . '{' . PHP_EOL;
+
+                  $text .= str_replace('","', '",' . PHP_EOL . '"', trim(trim($form->post_content, '}'), '{'));
+
+                  $text .= PHP_EOL . '}' . PHP_EOL;
+
+               }
+
+               $input['xport']['content'] = $text;
+
+            }
+
+         }
+      }
+
       return($input);
+
    } // fields_sanitize();
 
    function sections() {
@@ -119,7 +170,10 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
       $sections = array(
 
          'preferences' => array(
-            'header_callback' => array($this, 'sections_header'),
+            'header_callback' => array($this, 'sections_header', '    <p>' . __('The WordPress-Solutions plugin is used by many Universal Solutions plugins and themes to simplify the ' .
+         'implementation of WordPress functionality. Additionally, you can place all of the Universal Solutions settings pages ' .
+         'at the end of the Settings sub-menu, or you can sort the Settings sub-menu alphabetically or not at all.', 
+          USI_WordPress_Solutions::TEXTDOMAIN) . '</p>' . PHP_EOL),
             'label' => __('Preferences', USI_WordPress_Solutions::TEXTDOMAIN), 
             'localize_labels' => 'yes',
             'localize_notes' => 3, // <p class="description">__()</p>;
@@ -213,7 +267,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
          'versions' => array(
             'label' => __('Versions', USI_WordPress_Solutions::TEXTDOMAIN), 
-            'footer_callback' => array($this, 'sections_footer_versions'),
+            'footer_callback' => array($this, 'sections_footer', 'Execute Versions'),
             'localize_labels' => 'yes',
             'localize_notes' => 3, // <p class="description">__()</p>;
             'settings' => array(
@@ -226,6 +280,32 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                      array(0 => 'import', 1 => 'Import source version information'),
                   ),
                   'type' => 'select', 
+               ),
+            ),
+         ), // versions;
+
+         'xport' => array(
+            'label' => __('eXporter', USI_WordPress_Solutions::TEXTDOMAIN), 
+            'header_callback' => array($this, 'sections_header', '    <p>' . __('Export custom post content.', USI_WordPress_Solutions::TEXTDOMAIN) . '</p>' . PHP_EOL),
+            'footer_callback' => array($this, 'sections_footer', 'eXport Posts'),
+            'localize_labels' => 'yes',
+            'localize_notes' => 3, // <p class="description">__()</p>;
+            'settings' => array(
+               'post-type' => array(
+                  'f-class' => 'regular-text', 
+                  'type' => 'text', 
+                  'label' => 'Post Type',
+               ),
+               'parent-post' => array(
+                  'f-class' => 'large-text', 
+                  'type' => 'text', 
+                  'label' => 'Parent Post',
+               ),
+               'content' => array(
+                  'f-class' => 'large-text', 
+                  'rows' => 6,
+                  'type' => 'textarea', 
+                  'label' => 'Content',
                ),
             ),
          ), // versions;
@@ -266,17 +346,14 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
    } // sections();
 
-   function sections_footer_versions() {
+   function sections_footer($params) {
       echo '    ';
-      submit_button(__('Execute Versions', USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
+      submit_button(__($params, USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
       return(null);
-   } // sections_footer_versions();
+   } // sections_footer();
 
-   function sections_header() {
-      echo '    <p>' . __('The WordPress-Solutions plugin is used by many Universal Solutions plugins and themes to simplify the ' .
-         'implementation of WordPress functionality. Additionally, you can place all of the Universal Solutions settings pages ' .
-         'at the end of the Settings sub-menu, or you can sort the Settings sub-menu alphabetically or not at all.', 
-          USI_WordPress_Solutions::TEXTDOMAIN) . '</p>' . PHP_EOL;
+   function sections_header($params) {
+      echo $params;
    } // sections_header();
 
 } // Class USI_WordPress_Solutions_Settings_Settings;
