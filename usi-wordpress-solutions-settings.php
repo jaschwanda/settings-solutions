@@ -558,6 +558,14 @@ do_settings_sections </table>';
          echo $prefix . '<input type="' . $type . '"' . $attributes . ' value="' . $value . '" />' . $suffix;
          break;
 
+      case 'money':
+         if ($readonly) {
+            echo $prefix . '<input type="text"' . $attributes . ' value="' . '$ ' . number_format($value) . '" />' . $suffix;
+         } else {
+            echo $prefix . '<input type="number"' . $attributes . ' value="' . $value . '" />' . $suffix;
+         }
+         break;
+
       case 'html':
          echo $args['html'];
          break;
@@ -713,6 +721,7 @@ do_settings_sections </table>';
       if (!empty($args['value'])) return($args['value']);
       $type = !empty($args['type']) ? $args['type']  : 'text';
       if ('hidden' == $type) return(isset($args['value']) ? $args['value'] : null);
+      if ('money'  == $type) return(0);
       if ('number' == $type) return(0);
       return(null);
    } // get_value();

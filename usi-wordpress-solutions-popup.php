@@ -18,12 +18,11 @@ Copyright (c) 2020 by Jim Schwanda.
 /*
 class USI_WordPress_Solutions_Popup is used in:
 
-ru-application.php
 usi-media-solutions-manage.php
 */
 class USI_WordPress_Solutions_Popup_Iframe3 {
 
-   const VERSION = '2.10.1 (2020-11-02)';
+   const VERSION = '2.10.2 (2020-11-18)';
 
    private static $scripts = array();
 

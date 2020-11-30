@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Diagnostics {
 
-   const VERSION = '2.10.1 (2020-11-02)';
+   const VERSION = '2.10.2 (2020-11-18)';
 
    private $options     = null;
    private $text_domain = null;
@@ -80,7 +80,7 @@ class USI_WordPress_Solutions_Diagnostics {
             session_start(); 
             $session_id = session_id();
          }
-         if (($session_id == $options['diagnostics']['session']) || ('all' == $options['diagnostics']['session'])) {
+         if (($session_id == $options['diagnostics']['session']) || ('all' == strtolower($options['diagnostics']['session']))) {
             if (!empty($options['diagnostics']['code'])) $log = (int)$options['diagnostics']['code'];
          }
       }

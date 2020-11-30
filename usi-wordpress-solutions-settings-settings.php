@@ -92,7 +92,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
             if (!empty($parent_post[0]->ID)) {
 
-               $forms = get_posts(
+               $posts = get_posts(
                   $args = array(
                      'numberposts' => -1,
                      'post_parent' => $parent_post[0]->ID,
@@ -100,15 +100,15 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                      'post_type' => $input['xport']['post-type'],
                   )
                );
-               usi::log('$args=', $args, '\n$forms=', $forms);
+               usi::log('$args=', $args, '\n$posts=', $posts);
 
                $text = null;
 
-               foreach ($forms as $form) {
+               foreach ($posts as $post) {
 
-                  $text .= '"' . $form->post_title . '":' . PHP_EOL . '{' . PHP_EOL;
+                  $text .= '"' . $post->post_title . '":' . PHP_EOL . '{' . PHP_EOL;
 
-                  $text .= str_replace('","', '",' . PHP_EOL . '"', trim(trim($form->post_content, '}'), '{'));
+                  $text .= str_replace('","', '",' . PHP_EOL . '"', trim(trim($post->post_content, '}'), '{'));
 
                   $text .= PHP_EOL . '}' . PHP_EOL;
 
@@ -305,7 +305,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                   'f-class' => 'large-text', 
                   'rows' => 6,
                   'type' => 'textarea', 
-                  'label' => 'Content',
+                  'label' => 'Post Content',
                ),
             ),
          ), // versions;

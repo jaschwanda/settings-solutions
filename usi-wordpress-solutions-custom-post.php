@@ -17,10 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Custom_Post {
 
-   const VERSION    = '2.10.1 (2020-11-02)';
-
-   const DEBUG_OFF  = 0x0000; // USI_WordPress_Solutions_Custom_Post;
-   const DEBUG_INIT = 0x0001; // USI_WordPress_Solutions_Custom_Post;
+   const VERSION    = '2.10.2 (2020-11-18)';
 
    protected $autosave_disable = true;
    protected $defaults = array();
@@ -44,8 +41,6 @@ class USI_WordPress_Solutions_Custom_Post {
       }
 
       $this->log = USI_WordPress_Solutions_Diagnostics::get_log($options);
-
-      if (self::DEBUG_INIT & $this->log) usi::log('$options=', $options);
 
       if ($this->autosave_disable) add_action('admin_enqueue_scripts', array($this, 'action_admin_enqueue_scripts'));
 

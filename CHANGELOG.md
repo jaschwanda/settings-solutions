@@ -3,7 +3,7 @@
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
 ## 2.10.2 (2020-11-18) ##
-* Added eXporter to settings to export posts.
+* Added eXporter to settings to export posts, updated popup usage list, added money settings field type.
 
 ## 2.10.1 (2020-11-02) ##
 * Added USI_WordPress_Solutions_Popup_Action class.

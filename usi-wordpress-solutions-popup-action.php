@@ -20,12 +20,22 @@ Copyright (c) 2020 by Jim Schwanda.
 This popup displays a confirmation message for a list of items in a WordPress table.
 
 */
+/*
+class USI_WordPress_Solutions_Popup_Action is used in:
+
+ru-application.php
+ru-docusign.php
+ru-form.php
+ru-work.php
+*/
 
 class USI_WordPress_Solutions_Popup_Action {
 
-   const VERSION = '2.10.1 (2020-11-02)';
+   const VERSION = '2.10.2 (2020-11-18)';
 
    const HEIGHT_HEAD_FOOT = 93;
+
+   private static $admin_notice = null;
 
    private static $scripts = array();
 
@@ -279,6 +289,40 @@ EOD;
       );
 
    } // column_cb();
+
+   public static function delete_single_post($pre_delete_function = null, $admin_notice = null) {
+
+      if (!empty($_REQUEST['what2do']) && !empty($_REQUEST['_wpnonce']) && !empty($_REQUEST['post']) && ('delete' == $_REQUEST['what2do'])) {
+
+         if (wp_create_nonce('what2do=delete') == $_REQUEST['_wpnonce']) {
+
+            $post_id = (int)$_REQUEST['post'];
+
+            if (is_callable($pre_delete_function)) call_user_func_array($pre_delete_function, array($post_id));
+
+            wp_delete_post($post_id, true);
+
+            self::$admin_notice = $admin_notice;
+
+            add_action(
+               'admin_notices', 
+               function () {
+                  echo ''
+                  . '<div id="message" class="updated notice is-dismissible">'
+                  .   '<p>' . self::$admin_notice . '</p>'
+                  .   '<button type="button" class="notice-dismiss">'
+                  .   '<span class="screen-reader-text">' . __('Dismiss this notice', USI_WordPress_Solutions::TEXTDOMAIN) . '</span>'
+                  .   '</button>'
+                  . '</div>'
+                  ;
+               }
+            );
+
+         }
+
+      }
+
+   } // delete_single_post();
 
    public static function row_action($args, $action, $text) {
 
