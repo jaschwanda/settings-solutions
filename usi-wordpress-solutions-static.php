@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.10.1 (2020-11-02)';
+   const VERSION = '2.10.3 (2020-12-04)';
 
    private static $calls_action_admin_head = 0;
 
@@ -86,6 +86,38 @@ class USI_WordPress_Solutions_Static {
       if (!is_string($variable) || !ctype_digit($variable)) return(false);
       return(intval($variable));
    } // is_int();
+
+   public static function remove_directory($directory) { 
+
+      // This function can be called with a bogus or empty directory and it will fail silently;
+
+      if (is_dir($directory)) { 
+
+         @ $objects = scandir($directory);
+
+         foreach ($objects as $object) { 
+
+            if (('.' != $object) && ('..' != $object)) { 
+
+               if (is_dir($directory . DIRECTORY_SEPARATOR . $object) && !is_link($directory . '/' . $object)) {
+
+                  self::delete_folder($directory . DIRECTORY_SEPARATOR . $object);
+
+               } else {
+
+                 @ unlink($directory . DIRECTORY_SEPARATOR . $object); 
+
+               }
+
+            } 
+
+         }
+
+      }
+
+      @ rmdir($directory); 
+
+   } // remove_directory();
 
    public static function url() {
       return('http' . (is_ssl() ? 's' : '') . '://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']);
