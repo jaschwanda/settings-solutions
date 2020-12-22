@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.10.4 (2020-12-21) ##
+* Improved money field functionality.
+
 ## 2.10.3 (2020-12-04) ##
 * Added remove_directory() method to the USI_WordPress_Solutions_Static class.
 

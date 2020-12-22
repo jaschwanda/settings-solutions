@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.10.1 (2020-11-02)';
+   const VERSION = '2.10.4 (2020-12-21)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -560,7 +560,8 @@ do_settings_sections </table>';
 
       case 'money':
          if ($readonly) {
-            echo $prefix . '<input type="text"' . $attributes . ' value="' . '$ ' . number_format($value) . '" />' . $suffix;
+            $decimal = !empty($args['decimal']) ? (int)$args['decimal'] : 0;
+            echo $prefix . '<input type="text"' . $attributes . ' value="' . '$ ' . number_format(ltrim($value, '$'), $decimal) . '" />' . $suffix;
          } else {
             echo $prefix . '<input type="number"' . $attributes . ' value="' . $value . '" />' . $suffix;
          }
