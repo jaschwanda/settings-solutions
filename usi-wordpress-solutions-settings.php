@@ -559,9 +559,11 @@ do_settings_sections </table>';
          break;
 
       case 'money':
+         $value = str_replace(array('$', ' ', ','), '', $value);
+         if (empty($value)) $value = 0;
          if ($readonly) {
             $decimal = !empty($args['decimal']) ? (int)$args['decimal'] : 0;
-            echo $prefix . '<input type="text"' . $attributes . ' value="' . '$ ' . number_format(ltrim($value, '$'), $decimal) . '" />' . $suffix;
+            echo $prefix . '<input type="text"' . $attributes . ' value="' . '$ ' . number_format($value, $decimal) . '" />' . $suffix;
          } else {
             echo $prefix . '<input type="number"' . $attributes . ' value="' . $value . '" />' . $suffix;
          }
