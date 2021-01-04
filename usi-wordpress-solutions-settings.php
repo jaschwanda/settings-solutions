@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.10.4 (2020-12-21)';
+   const VERSION = '2.10.5 (2021-01-04)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -124,7 +124,7 @@ class USI_WordPress_Solutions_Settings {
       if ('menu' == $this->page) add_action('admin_notices', array($this, 'action_admin_notices'));
 
       if ($this->impersonate) {
-         add_action('init', array( $this, 'action_init'));
+         add_action('init', array(__CLASS__, 'action_init'));
          add_filter('user_row_actions', array($this, 'filter_user_row_actions'), 10, 2);
       }
 
@@ -278,19 +278,21 @@ class USI_WordPress_Solutions_Settings {
       }
    } // action_admin_notices();
 
-   function action_init() { 
-      if ($this->impersonate && !empty($_REQUEST['action']) && !empty( $_REQUEST['user_id']) && ('impersonate' == $_REQUEST['action'])) {
-         if ($user = get_userdata($user_id = $_REQUEST['user_id'])) {
-            if (wp_verify_nonce($_REQUEST['_wpnonce'], "impersonate_$user_id")) {
-               if (!empty(USI_WordPress_Solutions::$options['admin-options']['history'])) {
-                  $old_user = get_userdata($old_user_id = get_current_user_id());
-                  USI_WordPress_Solutions_History::history($old_user_id, 'user', 
-                     'User <' . $old_user->display_name . '> impersonating user <' . $user->display_name . '>', $user_id, $_REQUEST);
+   public static function action_init() { 
+      if (!empty(USI_WordPress_Solutions::$options['admin-options']['impersonate'])) {
+         if (!empty($_REQUEST['action']) && !empty( $_REQUEST['user_id']) && ('impersonate' == $_REQUEST['action'])) {
+            if ($user = get_userdata($user_id = $_REQUEST['user_id'])) {
+               if (wp_verify_nonce($_REQUEST['_wpnonce'], "impersonate_$user_id")) {
+                  if (!empty(USI_WordPress_Solutions::$options['admin-options']['history'])) {
+                     $old_user = get_userdata($old_user_id = get_current_user_id());
+                     USI_WordPress_Solutions_History::history($old_user_id, 'user', 
+                        'User <' . $old_user->display_name . '> impersonating user <' . $user->display_name . '>', $user_id, $_REQUEST);
+                  }
+                  wp_clear_auth_cookie();
+                  wp_set_current_user($user_id, $user->user_login);
+                  wp_set_auth_cookie($user_id);
+                  do_action('wp_login', $user->user_login, $user);
                }
-               wp_clear_auth_cookie();
-               wp_set_current_user($user_id, $user->user_login);
-               wp_set_auth_cookie($user_id);
-               do_action('wp_login', $user->user_login, $user);
             }
          }
       }

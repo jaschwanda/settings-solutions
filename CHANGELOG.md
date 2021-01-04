@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.10.5 (2021-01-04) ##
+* Converted the USI_WordPress_Solutions_Settings::action_init() function to be static so it could be called by other plugins to impersonate a user.
+
 ## 2.10.4 (2020-12-21) ##
 * Improved money field functionality.
 
