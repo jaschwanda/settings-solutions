@@ -24,11 +24,14 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.10.1 (2020-11-02)';
+   const VERSION = '2.10.6 (2021-01-20)';
 
+   protected $debug     = 0;
    protected $is_tabbed = true;
 
    function __construct() {
+
+      $this->debug = USI_WordPress_Solutions_Diagnostics::get_log(USI_WordPress_Solutions::$options);
 
       parent::__construct(
          array(
@@ -79,6 +82,8 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
 
          if (!empty($input['xport']['parent-post']) && !empty($input['xport']['post-type'])) {
 
+            $log = (USI_WordPress_Solutions::DEBUG_XPORT == (USI_WordPress_Solutions::DEBUG_XPORT & $this->debug));
+
             $parent_post = get_posts(
                $args = array(
                   'numberposts' => 1,
@@ -88,7 +93,7 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                )
             );
 
-            usi::log('$args=', $args, '\n$post_parent=', $parent_post);
+            if ($log) usi::log('$args=', $args, '\n$post_parent=', $parent_post);
 
             if (!empty($parent_post[0]->ID)) {
 
@@ -100,7 +105,8 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                      'post_type' => $input['xport']['post-type'],
                   )
                );
-               usi::log('$args=', $args, '\n$posts=', $posts);
+
+               if ($log) usi::log('$args=', $args, '\n$posts=', $posts);
 
                $text = null;
 
@@ -163,6 +169,10 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
             'DEBUG_UPDATE' => array(
                'value' => USI_WordPress_Solutions::DEBUG_UPDATE,
                'notes' => 'Log USI_WordPress_Solutions_Update methods.',
+            ),
+            'DEBUG_XPORT' => array(
+               'value' => USI_WordPress_Solutions::DEBUG_XPORT,
+               'notes' => 'Log USI_WordPress_Solutions xport functionality.',
             ),
          )
       );
