@@ -11,11 +11,12 @@ if (!class_exists('WP_List_Table')) {
 
 class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
-   const VERSION = '2.10.1 (2020-11-02)';
+   const VERSION = '2.10.7 (2021-02-02)';
 
    public static function action_admin_head() {
 
       $columns = array(
+         'cb'      => 5, 
          'id'      => 5, 
          'user'    => 40, 
          'created' => 20, 
@@ -53,6 +54,17 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
       }
 
    } // action_admin_menu();
+
+   function column_cb($item) {
+      $args = array(
+         'id'       => $item->ID,
+         'id_field' => 'ID',
+         'info'     => $this->info($item),
+      );
+
+      return(USI_WordPress_Solutions_Popup_Action::column_cb($args));
+
+    } // column_cb();
 
    public function column_default($item, $column_name) {
 
@@ -120,9 +132,17 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
    } // column_default();
 
+   function get_bulk_actions() {
+
+      return(array('kill' => __('Log user out', USI_WordPress_Solutions::TEXTDOMAIN)));
+
+   } // get_bulk_actions();
+
    public function get_columns() {
+
       return(
          array(
+            'cb'      => '<input type="checkbox" />',
             'id'      => 'ID',
             'user'    => 'User',
             'created' => 'Created',
@@ -130,15 +150,26 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
             'ip'      => 'Ip',
          ) 
       );
+
    } // get_columns();
 
    public function get_hidden_columns() {
+
       return(array());
+
    } // get_hidden_columns();
 
    public function get_sortable_columns() {
+
       return(array());
+
    } // get_sortable_columns();
+
+   function info($item) {
+
+      return(' &nbsp; &nbsp; ' . ' #' . $item->ID . ' &nbsp; &nbsp; due: ' . 'name');
+
+   } // info();
 
    public function prepare_items() {
 
@@ -154,24 +185,52 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
    public static function render_list() {
 
+      if ('usi-wordpress-solutions-user-sessions' == (!empty($_GET['page']) ? $_GET['page'] : null)) {
+
+         $_wpnonce = !empty($_REQUEST['_wpnonce']) ? $_REQUEST['_wpnonce'] : null;
+
+         if (wp_verify_nonce($_wpnonce, 'bulk-settings_page_usi-wordpress-solutions-user-sessions')) {
+
+            $action1 = !empty($_REQUEST['action'])  ? 'kill' == $_REQUEST['action']  : false;
+            $action2 = !empty($_REQUEST['action2']) ? 'kill' == $_REQUEST['action2'] : false;
+
+            if (!empty($_REQUEST['ID']) && ($action1 || $action2)) {
+
+               foreach ($_REQUEST['ID'] as $user_id) {
+                  $sessions = WP_Session_Tokens::get_instance($user_id);
+                  $sessions->destroy_all();
+               }
+
+            }
+
+         }
+
+      }
+
       $list = new USI_WordPress_Solutions_User_Sessions();
 
       $list->prepare_items();
 
-      echo
-         '<div class="wrap">' . 
-           '<div id="icon-users" class="icon32"></div>' .
-           '<h2>Users Currently Logged In</h2>';
-            $list->display();
-      echo
-         '</div>';
+      echo ''
+      . '<div class="wrap">' . PHP_EOL
+      . '  <div id="icon-users" class="icon32"></div>' . PHP_EOL
+      . '    <h2>Users Currently Logged In</h2>' . PHP_EOL
+      . '    <form action="" method="post" name="usi-session-list">' . PHP_EOL
+      ;
+      $list->display();
+      echo ''
+      . '    </form>' . PHP_EOL
+      . '  </div><!--icon-users-->' . PHP_EOL
+     ;
 
    } // render_list();
 
    private function table_data() {
+
       $active_users = array();
       $current_time = time();
       $users        = get_users(array('meta_key' => 'session_tokens', 'meta_compare' => 'EXISTS'));
+
       foreach ($users as $user) {
          $session_tokens = get_user_meta($user->ID, 'session_tokens', true);
          $key = key($session_tokens);
@@ -180,7 +239,9 @@ class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
             $active_users[] = $user;
          }
       }
+
       return($active_users);
+
    } // table_data();
 
 } // USI_WordPress_Solutions_User_Sessions();
