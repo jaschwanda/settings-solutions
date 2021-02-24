@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Updates {
 
-   const VERSION = '2.10.1 (2020-11-02)';
+   const VERSION = '2.11.0 (2021-02-24)';
 
    public $section = null;
 

@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.0 (2021-02-24) ##
+* Set all versions numbers to same version.
+
 ## 2.10.7 (2021-02-02) ##
 * Added ability to force user logout from active sessions list.
 

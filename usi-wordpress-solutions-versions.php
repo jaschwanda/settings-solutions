@@ -19,7 +19,7 @@ require_once('usi-wordpress-solutions-popup-iframe.php');
 
 class USI_WordPress_Solutions_Versions {
 
-   const VERSION = '2.10.1 (2020-11-02)';
+   const VERSION = '2.11.0 (2021-02-24)';
 
    private static $built = false;
 
