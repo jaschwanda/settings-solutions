@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.0 (2021-02-24)';
+   const VERSION = '2.11.1 (2021-03-10)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -513,7 +513,7 @@ do_settings_sections </table>';
 
       $rows     = isset($args['rows'])     ? ' rows="'  . $args['rows']  . '"' : null;
 
-      $value    = esc_attr(self::get_value($args));
+      $value    = 'textarea' == $type      ? esc_textarea(self::get_value($args)) : esc_attr(self::get_value($args));
 
       $maxlen   = !empty($args['maxlength']) ? (is_integer($args['maxlength']) ? ' maxlength="' . $args['maxlength'] . '"' : null) : null;
 
@@ -723,12 +723,15 @@ do_settings_sections </table>';
    } // free_render();
 
    private static function get_value($args) {
+
       if (!empty($args['value'])) return($args['value']);
       $type = !empty($args['type']) ? $args['type']  : 'text';
       if ('hidden' == $type) return(isset($args['value']) ? $args['value'] : null);
       if ('money'  == $type) return(0);
       if ('number' == $type) return(0);
+
       return(null);
+
    } // get_value();
 
    function hook_activation() {
