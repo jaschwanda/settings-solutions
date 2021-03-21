@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.2 (2021-03-21) ##
+* Moved section_header() so that all sub-classes can utilize.
+
 ## 2.11.1 (2021-03-10) ##
 * Changed esc_attr() to esc_textarea() for text area settings fields.
 

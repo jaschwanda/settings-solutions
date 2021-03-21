@@ -24,7 +24,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.0 (2021-02-24)';
+   const VERSION = '2.11.2 (2021-03-21)';
 
    protected $debug     = 0;
    protected $is_tabbed = true;
@@ -361,10 +361,6 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
       submit_button(__($params, USI_WordPress_Solutions::TEXTDOMAIN), 'primary', 'submit', true); 
       return(null);
    } // sections_footer();
-
-   function sections_header($params) {
-      echo $params;
-   } // sections_header();
 
 } // Class USI_WordPress_Solutions_Settings_Settings;
 

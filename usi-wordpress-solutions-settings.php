@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.1 (2021-03-10)';
+   const VERSION = '2.11.2 (2021-03-21)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -1009,6 +1009,10 @@ do_settings_sections </table>';
    function sections() { // Should be over ridden by extending class;
       return(null);
    } // sections();
+
+   function sections_header($html) {
+      echo $html;
+   } // sections_header();
 
    private static function set_grid($grid) {
       self::$grid = (('none' == $grid) || ('over' == $grid)) ? $grid : false;
