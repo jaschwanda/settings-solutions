@@ -15,13 +15,9 @@ https://github.com/jaschwanda/wordpress-solutions/blob/master/LICENSE.md
 Copyright (c) 2020 by Jim Schwanda.
 */
 
-// clean up subscripts;
-// add log file;
-// use try/catch;
+if (!class_exists('USI')) { final class USI {
 
-final class USI {
-
-   const VERSION = '2.11.0 (2021-02-24)';
+   const VERSION = '2.11.3 (2021-03-25)';
 
    private static $info   = null;
    private static $mysqli = null;
@@ -104,6 +100,6 @@ final class USI {
       self::$offset = 0;
    } // log2();
 
-} // Class USI;
+} } // Class USI;
 
 // --------------------------------------------------------------------------------------------------------------------------- // ?>

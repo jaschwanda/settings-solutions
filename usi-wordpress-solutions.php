@@ -102,11 +102,15 @@ final class USI_WordPress_Solutions {
    } // __construct();
 
    public function action_admin_print_footer_scripts() {
+
       if (self::$scripts) echo self::$scripts;
+
    } // action_admin_print_footer_scripts();
 
    public static function admin_footer_script($script) {
+
       self::$scripts .= PHP_EOL . $script;
+
    } // admin_footer_script();
 
 } // Class USI_WordPress_Solutions;

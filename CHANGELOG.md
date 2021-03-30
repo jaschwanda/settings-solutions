@@ -2,6 +2,10 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.3 (2021-03-35) ##
+* Added TinyMCE editor to settings functionality.
+* Made USI::log() class protected by if defined logic so that file can be included anywhere.
+
 ## 2.11.2 (2021-03-21) ##
 * Moved section_header() so that all sub-classes can utilize.
 

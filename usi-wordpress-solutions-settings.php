@@ -35,6 +35,7 @@ class USI_WordPress_Solutions_Settings {
    protected $capability = 'manage_options';
    protected $capabilities = null;
    protected $debug = 0;
+   protected $editor = null;
    protected $enctype = null;
    protected $field = null; // Field being rendered by do_settings_fields() functions;
    protected $hide = null;
@@ -76,6 +77,7 @@ class USI_WordPress_Solutions_Settings {
 
       if (!empty($config['capability']))   $this->capability   = $config['capability'];
       if (!empty($config['capabilities'])) $this->capabilities = $config['capabilities'];
+      if (!empty($config['editor']))       $this->editor       = $config['editor'];
       if (!empty($config['hide']))         $this->hide         = $config['hide'];
       if (!empty($config['icon_url']))     $this->icon_url     = $config['icon_url'];
       if (!empty($config['name']))         $this->name         = $config['name'];
@@ -118,6 +120,8 @@ class USI_WordPress_Solutions_Settings {
 
       }
 
+      add_action('admin_enqueue_scripts', array($this, 'action_admin_enqueue_scripts'));
+      add_action('admin_footer', array($this, 'action_admin_footer'));
       add_action('admin_menu', array($this, 'action_admin_menu'));
 
       // Add notices for custom options pages, WordPress does settings pages automatically;
@@ -145,9 +149,52 @@ class USI_WordPress_Solutions_Settings {
 
    } // __construct();
 
+   function action_admin_enqueue_scripts() {
+
+      if ($this->editor) {
+         wp_register_script('usi_wordpress_tiny', plugins_url('tinyMCE/tinymce.min.js', __FILE__));
+         wp_enqueue_script('usi_wordpress_tiny');
+      }
+
+   } // action_admin_enqueue_scripts();
+
+   function action_admin_footer(){ 
+
+      if ($this->editor) {
+         echo ''
+         . '<script>' . PHP_EOL
+         . "tinymce.init({" . PHP_EOL
+         . "menubar:false," . PHP_EOL
+         . "plugins:[''" . PHP_EOL
+         . "+' lists'" . PHP_EOL
+         . "+' charmap'" . PHP_EOL
+         . "+' table'" . PHP_EOL
+         . "+' help'" . PHP_EOL
+         . "]," . PHP_EOL
+         . "toolbar1:''" . PHP_EOL
+         . "+' undo redo |'" . PHP_EOL
+         . "+' formatselect |'" . PHP_EOL
+         . "+' bold italic underline |'" . PHP_EOL
+         . "+' alignleft aligncenter alignright alignjustify |'" . PHP_EOL
+         . "+' bullist numlist outdent indent |'" . PHP_EOL
+         . "+' table tabledelete | tableprops tablerowprops tablecellprops | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol |'" . PHP_EOL
+         . "+' charmap |'" . PHP_EOL
+         . "+' help '" . PHP_EOL
+         ."," . PHP_EOL
+         . "selector:'.usi-wordpress-tiny'" . PHP_EOL
+         . '});' . PHP_EOL
+         . '</script>' . PHP_EOL
+         ;
+      }
+
+   } // action_admin_footer();
+
    function action_admin_head($css = null) {
+
       if (!empty($this->options['css'])) $css .= $this->options['css'];
+
       USI_WordPress_Solutions_Static::action_admin_head($css);
+
    } // action_admin_head();
 
    function action_admin_init() {
@@ -301,17 +348,6 @@ class USI_WordPress_Solutions_Settings {
    public function capabilities() { 
       return($this->capabilities); 
    } // capabilities();
-
-/*
-do_settings_sections <h2>{$section['title']}</h2>
-do_settings_sections call_user_func($section['callback']);
-do_settings_sections <table class="form-table" role="presentation">
-do_settings_fields     <tr{$class}>
-do_settings_fields       <th scope="row"><label></label></th>
-do_settings_fields       <td>do_settings_fields call_user_func($field['callback']);</td>
-do_settings_fields     </tr>
-do_settings_sections </table>';
-*/
 
    // This function riped from wp-admin/includes/template.php;
    function do_settings_fields($page, $section) {
@@ -513,7 +549,7 @@ do_settings_sections </table>';
 
       $rows     = isset($args['rows'])     ? ' rows="'  . $args['rows']  . '"' : null;
 
-      $value    = 'textarea' == $type      ? esc_textarea(self::get_value($args)) : esc_attr(self::get_value($args));
+      $value    = 'textarea' == $type      ? self::get_value($args) : esc_attr(self::get_value($args));
 
       $maxlen   = !empty($args['maxlength']) ? (is_integer($args['maxlength']) ? ' maxlength="' . $args['maxlength'] . '"' : null) : null;
 
@@ -522,12 +558,16 @@ do_settings_sections </table>';
       // hidden field to post the value back to the server;
       $readonly = $disable_hidden = null;
       if (!empty($args['readonly'])) {
-        if (('checkbox' == $type) || ('radio' == $type) || ('select' == $type)) {
-           $readonly = ' disabled';
-           if ($value) $disable_hidden = '<input' . $name . ' type="hidden" value="' . $value . '" />';
-        } else {
-           $readonly = ' readonly';
-        }
+         if (('checkbox' == $type) || ('radio' == $type) || ('select' == $type)) {
+            $readonly = ' disabled';
+            if ($value) $disable_hidden = '<input' . $name . ' type="hidden" value="' . $value . '" />';
+         } else {
+            $readonly = ' readonly';
+         }
+      } else {
+         if (('textarea' == $type) && !empty($args['edit'])) {
+            $class    = ($class ? trim($class,'"') . ' ' : ' class="') . 'usi-wordpress-tiny"';
+         }
       }
 
       $attributes = $id . $class . $name . $attr . $min . $max . $maxlen . $readonly . $rows;
@@ -580,7 +620,23 @@ do_settings_sections </table>';
          break;
 
       case 'textarea':
-         echo $prefix . '<textarea' . $attributes . '>' . $value . '</textarea>' . $suffix;
+
+         if (!empty($args['edit'])) {
+
+            $value = str_replace(array('&lt;', '&gt;', '&quot;'), array('<', '>', '"'), $value);
+
+            if (!empty($args['readonly'])) {
+               echo $prefix . (!empty($args['lead']) ? $args['lead'] : '') . $value . (!empty($args['tail']) ? $args['tail'] : '') . $suffix;
+            } else {
+               echo $prefix . '<textarea' . $attributes . '>' . $value . '</textarea>' . $suffix;
+            }
+
+         } else {
+
+            echo $prefix . '<textarea' . $attributes . '>' . esc_textarea($value) . '</textarea>' . $suffix;
+
+         }
+
          break;
 
       }
@@ -599,7 +655,11 @@ do_settings_sections </table>';
 
    function fields_sanitize($input) {
 
+      // FOREACH section in the settings;
       foreach ($this->sections as $section_id => $section) {
+
+         // This handles field sanitization on a section by section basis where the
+         // sanitize function name is given and differs from fields_sanitize();
          if (!empty($section['fields_sanitize'])) {
             $object = $section['fields_sanitize'][0];
             $method = $section['fields_sanitize'][1];
@@ -607,7 +667,34 @@ do_settings_sections </table>';
                $input = $object->$method($input, $section_id);
             }
          }
-      }
+
+         $settings = $section['settings'];
+
+         foreach ($input as $key => $value) {
+
+            switch (!empty($settings[$key]['type']) ? $settings[$key]['type'] : null) {
+            case 'checkbox':
+            case 'file':
+            case 'hidden':
+            case 'money':
+            case 'null-number':
+            case 'number':
+            case 'password':
+            case 'radio':
+            case 'select':
+            case 'text':     
+               $input[$key] = sanitize_text_field($value); 
+               break;
+            case 'textarea': 
+               if (!empty($settings[$key]['edit'])) $value = str_replace(array('<', '>', '"'), array('&lt;', '&gt;', '&quot;'), $value);
+               $input[$key] = sanitize_textarea_field($value); 
+               // $input[$key] = $value; 
+               break;
+            }
+
+         }
+
+      } // ENDFOR section in the settings;
 
       USI_WordPress_Solutions_History::history(get_current_user_id(), 'code', 
          'Modified <' . $this->name . '> settings', 0, $input);
@@ -785,7 +872,10 @@ do_settings_sections </table>';
          $i . USI_WordPress_Solutions_Static::divider(2, $this->name) .
          $i . USI_WordPress_Solutions_Static::divider(2) .
          $i . '<form id="myForm" action="options.php"' . $this->enctype . ' method="post">' . $n;
+$pdf = (!empty($_GET['mode']) && ('pdf' == $_GET['mode']));
+if ($pdf) {
 
+}
       if ($this->is_tabbed) {
          echo 
             $i2 . '<h2 class="nav-tab-wrapper">' . $n;

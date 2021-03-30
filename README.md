@@ -5,6 +5,13 @@ The WordPress-Solutions plugin is a helper class used by various WordPress plugi
 ## Installation ##
 This module should be installed in the usi-wordpress-solutions folder under the main WordPress plugins folder.
 
+### mPDF Installation
+Go to the /extractions/mypdf folder and enter:
+```
+composer require mpdf/mpdf
+```
+to get the latest version of mpdf.
+
 ## License ##
 > WordPress-Solutions is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License 
 as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
