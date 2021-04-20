@@ -12,6 +12,9 @@ composer require mpdf/mpdf
 ```
 to get the latest version of mpdf.
 
+### TinyMCE Installation
+Go to the /extractions/tinymce_5.7.1/tinymce/js/tinymce folder and copy everything to the tinyMCE folder.
+
 ## License ##
 > WordPress-Solutions is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License 
 as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
