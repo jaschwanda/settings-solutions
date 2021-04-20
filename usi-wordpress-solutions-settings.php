@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.2 (2021-03-21)';
+   const VERSION = '2.11.3 (2021-04-20)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -40,7 +40,12 @@ class USI_WordPress_Solutions_Settings {
    protected $field = null; // Field being rendered by do_settings_fields() functions;
    protected $hide = null;
    protected $icon_url = null;
+   protected $is_all = false;
+   protected $is_page = false;
+   protected $is_pdf = false;
+   protected $is_options = false;
    protected $is_tabbed = false;
+   protected $jquery = null;
    protected $name = null;
    protected $option_name = null;
    protected $option_page = true; // Options are paged via section_id's;
@@ -49,6 +54,9 @@ class USI_WordPress_Solutions_Settings {
    protected $override_do_settings_sections = true;
    protected $page = null;
    protected $page_slug = null;
+   protected $pdf_buffer = null;
+   protected $pdf_file = null;
+   protected $pdf_title = null;
    protected $position = null;
    protected $prefix = null;
    protected $query = null;
@@ -63,6 +71,8 @@ class USI_WordPress_Solutions_Settings {
 
    function __construct($config) {
 
+      global $pagenow;
+
       if (!empty($config['prefix'])) $this->prefix = $config['prefix'];
 
       $this->impersonate = !empty(USI_WordPress_Solutions::$options['admin-options']['impersonate']);
@@ -72,6 +82,10 @@ class USI_WordPress_Solutions_Settings {
       $this->option_name = $this->prefix . '-options' . (!empty($config['suffix']) ? $config['suffix'] : '');
 
       $this->page_slug   = self::page_slug($this->prefix);
+
+      $this->is_page     = !empty($_GET['page']) && ($_GET['page'] == $this->page_slug) && (('admin.php' == $pagenow) || ('options-general.php' == $pagenow));
+
+      $this->is_options  = !empty($_POST['option_page']) && ($_POST['option_page'] == $this->page_slug) && ('options.php' == $pagenow);
 
       $add_settings_link = empty($config['no_settings_link']);
 
@@ -88,8 +102,6 @@ class USI_WordPress_Solutions_Settings {
       if (!empty($config['roles']))        $this->roles        = $config['roles'];
       if (!empty($config['text_domain']))  $this->text_domain  = $config['text_domain'];
 
-      global $pagenow;
-
       if ('plugins.php' == $pagenow) {
 
          if ($add_settings_link) add_filter('plugin_action_links', array($this, 'filter_plugin_action_links'), 10, 2);
@@ -98,10 +110,7 @@ class USI_WordPress_Solutions_Settings {
 
          if (is_callable($filter_plugin_row_meta)) add_filter('plugin_row_meta', $filter_plugin_row_meta, 10, 2);
 
-      } else if (
-         ((('admin.php' == $pagenow) || ('options-general.php' == $pagenow)) && !empty($_GET['page']) && ($_GET['page'] == $this->page_slug)) ||
-         (('options.php' == $pagenow) && !empty($_POST['option_page']) && ($_POST['option_page'] == $this->page_slug)) 
-         ) {
+      } else if ($this->is_page || $this->is_options) {
 
          add_action('admin_head', array($this, 'action_admin_head'));
 
@@ -132,6 +141,11 @@ class USI_WordPress_Solutions_Settings {
          add_filter('user_row_actions', array($this, 'filter_user_row_actions'), 10, 2);
       }
 
+      if ($this->is_pdf) {
+         ob_start(array($this, 'ob_start_callback'));
+         if (!$this->is_all) add_action('shutdown', array($this, 'action_shutdown'));
+      }
+
       if (!empty(USI_WordPress_Solutions::$options['preferences']['menu-sort'])) {
          switch (USI_WordPress_Solutions::$options['preferences']['menu-sort']) {
          case 'alpha':
@@ -152,37 +166,33 @@ class USI_WordPress_Solutions_Settings {
    function action_admin_enqueue_scripts() {
 
       if ($this->editor) {
+
          wp_register_script('usi_wordpress_tiny', plugins_url('tinyMCE/tinymce.min.js', __FILE__));
-         wp_enqueue_script('usi_wordpress_tiny');
+         wp_enqueue_script('usi_wordpress_tiny', null, null, null, true);
+
+         if (is_string($this->editor)) {
+            wp_register_script('usi_wordpress_tiny_config', plugins_url() . '/' . $this->editor);
+         } else {
+            wp_register_script('usi_wordpress_tiny_config', plugins_url('tinyMCE/usi-wordpress-solutions.js', __FILE__));
+         }
+
+         wp_enqueue_script('usi_wordpress_tiny_config', null, null, null, true);
+
       }
 
    } // action_admin_enqueue_scripts();
 
+   // Child classes should call this at the tail to handle all child echos;
    function action_admin_footer(){ 
 
-      if ($this->editor) {
+      if ($this->jquery) {
          echo ''
          . '<script>' . PHP_EOL
-         . "tinymce.init({" . PHP_EOL
-         . "menubar:false," . PHP_EOL
-         . "plugins:[''" . PHP_EOL
-         . "+' lists'" . PHP_EOL
-         . "+' charmap'" . PHP_EOL
-         . "+' table'" . PHP_EOL
-         . "+' help'" . PHP_EOL
-         . "]," . PHP_EOL
-         . "toolbar1:''" . PHP_EOL
-         . "+' undo redo |'" . PHP_EOL
-         . "+' formatselect |'" . PHP_EOL
-         . "+' bold italic underline |'" . PHP_EOL
-         . "+' alignleft aligncenter alignright alignjustify |'" . PHP_EOL
-         . "+' bullist numlist outdent indent |'" . PHP_EOL
-         . "+' table tabledelete | tableprops tablerowprops tablecellprops | tableinsertrowbefore tableinsertrowafter tabledeleterow | tableinsertcolbefore tableinsertcolafter tabledeletecol |'" . PHP_EOL
-         . "+' charmap |'" . PHP_EOL
-         . "+' help '" . PHP_EOL
-         ."," . PHP_EOL
-         . "selector:'.usi-wordpress-tiny'" . PHP_EOL
-         . '});' . PHP_EOL
+         . 'jQuery(document).ready(' . PHP_EOL
+         . '   function($) {' . PHP_EOL
+         . $this->jquery
+         . '   }' . PHP_EOL
+         . ');' . PHP_EOL
          . '</script>' . PHP_EOL
          ;
       }
@@ -345,8 +355,40 @@ class USI_WordPress_Solutions_Settings {
       }
    } // action_init();
 
+   function action_shutdown() { 
+
+      require_once(__DIR__ . '/mPDF/vendor/autoload.php');
+
+      $mpdf = new \Mpdf\Mpdf();
+
+      $beg  = strpos($this->pdf_buffer, '<!-- PDF-BEG -->');
+
+      $end  = strpos($this->pdf_buffer, '<!-- PDF-END -->');
+
+      if ($beg && $end) {
+
+         $buf = substr($this->pdf_buffer, $beg + 16, $end - $beg - 16);
+
+         $css = apply_filters('usi_wordpress_pdf_css', null);
+
+         $mpdf->WriteHTML($css, \Mpdf\HTMLParserMode::HEADER_CSS);
+
+      } else {
+
+         $buf = '<p>Could not find PDF markers in given page.</p>';
+
+      }
+
+      $mpdf->WriteHTML($buf, \Mpdf\HTMLParserMode::HTML_BODY);
+
+      $mpdf->Output($this->pdf_file, \Mpdf\Output\Destination::INLINE);
+
+   } // action_shutdown();
+
    public function capabilities() { 
+
       return($this->capabilities); 
+
    } // capabilities();
 
    // This function riped from wp-admin/includes/template.php;
@@ -387,6 +429,7 @@ class USI_WordPress_Solutions_Settings {
             echo $i4 . '</tr>' . $n;
          }
       }
+
    } // do_settings_fields();
 
    // This function riped from wp-admin/includes/template.php;
@@ -495,6 +538,12 @@ class USI_WordPress_Solutions_Settings {
 
    } // do_settings_sections_advanced();
 
+   public static function esc_tiny($value) {
+
+      return(str_replace(array('&lt;', '&gt;', '&quot;'), array('<', '>', '"'), $value));
+
+   } // esc_tiny();
+
    function fields_render($args) {
       if (USI_WordPress_Solutions::DEBUG_RENDER == (USI_WordPress_Solutions::DEBUG_RENDER & $this->debug)) {
          if ($this->field) {
@@ -549,9 +598,21 @@ class USI_WordPress_Solutions_Settings {
 
       $rows     = isset($args['rows'])     ? ' rows="'  . $args['rows']  . '"' : null;
 
-      $value    = 'textarea' == $type      ? self::get_value($args) : esc_attr(self::get_value($args));
-
       $maxlen   = !empty($args['maxlength']) ? (is_integer($args['maxlength']) ? ' maxlength="' . $args['maxlength'] . '"' : null) : null;
+
+      $value    = self::get_value($args);
+
+      switch ($type) {
+      case 'textarea':
+         $value = esc_textarea($value);
+         break;
+      case 'tiny':
+         // We don't use esc_textarea() here because it will remove all of the TinyMCE formatting;
+         $value = self::esc_tiny($value);
+         break;
+      default:
+         $value = esc_attr($value);
+      }
 
       // Some fields don't have a "readonly" attribute, so we have to use disabled "instead",
       // but then the value of the disabled field is not posted to the server, so we add a
@@ -565,7 +626,7 @@ class USI_WordPress_Solutions_Settings {
             $readonly = ' readonly';
          }
       } else {
-         if (('textarea' == $type) && !empty($args['edit'])) {
+         if ('tiny' == $type) {
             $class    = ($class ? trim($class,'"') . ' ' : ' class="') . 'usi-wordpress-tiny"';
          }
       }
@@ -573,6 +634,11 @@ class USI_WordPress_Solutions_Settings {
       $attributes = $id . $class . $name . $attr . $min . $max . $maxlen . $readonly . $rows;
 
       switch ($type) {
+
+      case 'checkbox':
+         // Not sure why we have to convert 'true' to true, but checked() sometimes wouldn't check otherwise;
+         echo $prefix . '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />' . $disable_hidden . $suffix;
+         break;
 
       case 'radio':
          foreach ($args['choices'] as $choice) {
@@ -583,11 +649,6 @@ class USI_WordPress_Solutions_Settings {
                (!empty($choice['suffix']) ? $choice['suffix'] : '');
          }
          if ($disable_hidden) echo $disable_hidden;
-         break;
-
-      case 'checkbox':
-         // Not sure why we have to convert 'true' to true, but checked() sometimes wouldn't check otherwise;
-         echo $prefix . '<input type="checkbox"' . $attributes . ' value="true"' . checked('true' == $value ? true : $value, true, false) . ' />' . $disable_hidden . $suffix;
          break;
 
       case 'null-number':
@@ -620,23 +681,15 @@ class USI_WordPress_Solutions_Settings {
          break;
 
       case 'textarea':
+         echo $prefix . '<textarea' . $attributes . '>' . $value . '</textarea>' . $suffix;
+         break;
 
-         if (!empty($args['edit'])) {
-
-            $value = str_replace(array('&lt;', '&gt;', '&quot;'), array('<', '>', '"'), $value);
-
-            if (!empty($args['readonly'])) {
-               echo $prefix . (!empty($args['lead']) ? $args['lead'] : '') . $value . (!empty($args['tail']) ? $args['tail'] : '') . $suffix;
-            } else {
-               echo $prefix . '<textarea' . $attributes . '>' . $value . '</textarea>' . $suffix;
-            }
-
+      case 'tiny':
+         if (!empty($args['readonly'])) {
+            echo $prefix . (!empty($args['lead']) ? $args['lead'] : '') . $value . (!empty($args['tail']) ? $args['tail'] : '') . $suffix;
          } else {
-
-            echo $prefix . '<textarea' . $attributes . '>' . esc_textarea($value) . '</textarea>' . $suffix;
-
+            echo $prefix . '<textarea' . $attributes . '>' . $value . '</textarea>' . $suffix;
          }
-
          break;
 
       }
@@ -671,7 +724,6 @@ class USI_WordPress_Solutions_Settings {
          $settings = $section['settings'];
 
          foreach ($input as $key => $value) {
-
             switch (!empty($settings[$key]['type']) ? $settings[$key]['type'] : null) {
             case 'checkbox':
             case 'file':
@@ -682,13 +734,22 @@ class USI_WordPress_Solutions_Settings {
             case 'password':
             case 'radio':
             case 'select':
-            case 'text':     
-               $input[$key] = sanitize_text_field($value); 
+            case 'text':
+               $length = strlen($value);
+               $ascii  = null;
+               for ($i = 0; $i < $length; $i++) {
+                  $c = ord($value[$i]);
+                  if (127 < $c) continue;
+                  if ( 20 > $c) continue;
+                  $ascii .= chr($c);
+               }
+               $input[$key] = sanitize_text_field($ascii); 
                break;
+
+            case 'tiny': 
+               $value = str_replace(array('<', '>', '"'), array('&lt;', '&gt;', '&quot;'), $value);
             case 'textarea': 
-               if (!empty($settings[$key]['edit'])) $value = str_replace(array('<', '>', '"'), array('&lt;', '&gt;', '&quot;'), $value);
                $input[$key] = sanitize_textarea_field($value); 
-               // $input[$key] = $value; 
                break;
             }
 
@@ -697,7 +758,7 @@ class USI_WordPress_Solutions_Settings {
       } // ENDFOR section in the settings;
 
       USI_WordPress_Solutions_History::history(get_current_user_id(), 'code', 
-         'Modified <' . $this->name . '> settings', 0, $input);
+         'Updated <' . $this->name . '> settings', 0, $input);
 
       return($input);
 
@@ -769,22 +830,24 @@ class USI_WordPress_Solutions_Settings {
 
    function free_render() {
 
-      ob_start();
-      settings_fields($this->page_slug);
-      $settings_fields = ob_get_clean();
-
       $i  = '  ';
       $i2 = '    ';
       $n  = PHP_EOL;
 
-      echo 
-         $n . '<div class="wrap">' . $n .
-         ($this->title ? $i . $this->title . $n : '') .
-         $i . USI_WordPress_Solutions_Static::divider(2) .
-         $i . USI_WordPress_Solutions_Static::divider(2, $this->name) .
-         $i . USI_WordPress_Solutions_Static::divider(2) .
-         $i . '<form id="myForm" action="options.php"' . $this->enctype . ' method="post">' . $n .
-              str_replace('<input', $n . $i2 . '<input', $settings_fields) . $n;
+      ob_start();
+      settings_fields($this->page_slug);
+      $settings_fields = ob_get_clean();
+
+      echo '' 
+      . $n . '<div class="wrap">' . $n
+      . ($this->title ? $i . $this->title . $n : '')
+      . $i . USI_WordPress_Solutions_Static::divider(2)
+      . $i . USI_WordPress_Solutions_Static::divider(2, $this->name)
+      . $i . USI_WordPress_Solutions_Static::divider(2)
+      . $i . '<form id="myForm" action="options.php"' . $this->enctype . ' method="post">' . $n
+      . str_replace('<input', $n . $i2 . '<input', $settings_fields) . $n
+      . ($this->is_pdf ? '<!-- PDF-BEG -->' . $n . $this->pdf_title : '')
+      ;
 
       global $wp_settings_sections, $wp_settings_fields;
 
@@ -799,13 +862,15 @@ class USI_WordPress_Solutions_Settings {
          }
       }
 
-      echo 
-         $n .
-         $i . '</form>' . $n .
-         $i . USI_WordPress_Solutions_Static::divider(2) .
-         $i . USI_WordPress_Solutions_Static::divider(2, $this->name) .
-         $i . USI_WordPress_Solutions_Static::divider(2) .
-              '</div><!-- wrap -->' . $n;
+      echo ''
+      . $n
+      . ($this->is_pdf ? '<!-- PDF-END -->' . $n : '')
+      . $i . '</form>' . $n
+      . $i . USI_WordPress_Solutions_Static::divider(2)
+      . $i . USI_WordPress_Solutions_Static::divider(2, $this->name)
+      . $i . USI_WordPress_Solutions_Static::divider(2)
+      . '</div><!-- wrap -->' . $n
+      ;
 
    } // free_render();
 
@@ -837,11 +902,23 @@ class USI_WordPress_Solutions_Settings {
    } // hook_activation();
 
    public function name() { 
+
       return($this->name); 
+
    } // name();
 
+   function ob_start_callback(string $buffer, int $phase) {
+
+      $this->pdf_buffer = $buffer;
+
+      return($this->is_all ? $buffer : null); // Return nothing otherwise the mPDF functions won't write out the PDF;
+
+   } // ob_start_callback();
+
    public function options() { 
+
       return($this->options); 
+
    } // options();
 
    // To include more options on this page, override this function and call parent::page_render($options);
@@ -865,20 +942,18 @@ class USI_WordPress_Solutions_Settings {
          if (isset($section['options']['grid'])) self::set_grid($section['options']['grid']);
       }
 
-      echo 
-         $n . '<div class="wrap">' . $n .
-         $i . '<h1>' . ($page_header ? $page_header : __($this->name . ' Settings', $this->text_domain)) . $title_buttons . '</h1>' . $n .
-         $i . USI_WordPress_Solutions_Static::divider(2) .
-         $i . USI_WordPress_Solutions_Static::divider(2, $this->name) .
-         $i . USI_WordPress_Solutions_Static::divider(2) .
-         $i . '<form id="myForm" action="options.php"' . $this->enctype . ' method="post">' . $n;
-$pdf = (!empty($_GET['mode']) && ('pdf' == $_GET['mode']));
-if ($pdf) {
+      echo ''
+      . $n . '<div class="wrap">' . $n
+      . $i . '<h1>' . ($page_header ? $page_header : __($this->name . ' Settings', $this->text_domain)) . $title_buttons . '</h1>' . $n
+      . $i . USI_WordPress_Solutions_Static::divider(2)
+      . $i . USI_WordPress_Solutions_Static::divider(2, $this->name)
+      . $i . USI_WordPress_Solutions_Static::divider(2)
+      . $i . '<form id="myForm" action="options.php"' . $this->enctype . ' method="post">' . $n
+      . ($this->is_pdf ? '<!-- PDF-BEG -->' . $n . $this->pdf_title : '')
+      ;
 
-}
       if ($this->is_tabbed) {
-         echo 
-            $i2 . '<h2 class="nav-tab-wrapper">' . $n;
+         echo $i2 . '<h2 class="nav-tab-wrapper">' . $n;
          if ($this->sections) { // IF sections exist;
             foreach ($this->sections as $section_id => $section) {
                if (empty($section) || !empty($section['not_tabbed'])) continue;
@@ -887,14 +962,17 @@ if ($pdf) {
                   $active_class = ' nav-tab-active';
                   $submit_text = isset($section['submit']) ? $section['submit'] : 'Save ' . $section['label'];
                }
-               echo $i3 . '<a href="' . ('menu' == $this->page ? 'admin' : 'options-general') . '.php?page=' . 
-                  $this->page_slug . '&tab=' . $section_id . $tab_parameter . ($this->query ? $this->query : '') . 
-                  '" class="nav-tab' . $active_class . '">' . __($section['label'], $this->text_domain) . '</a>' . $n;
+               echo ''
+               . $i3 . '<a href="' . ('menu' == $this->page ? 'admin' : 'options-general') . '.php?page='
+               . $this->page_slug . '&tab=' . $section_id . $tab_parameter . ($this->query ? $this->query : '')
+               . '" class="nav-tab' . $active_class . '">' . __($section['label'], $this->text_domain) . '</a>' . $n
+               ;
             }
          } // ENDIF sections exist;
-         echo
-            $i2 . '</h2>' . $n2 .
-            $i2 . '<input type="hidden" name="' . $this->prefix . '-tab" value="' . $this->active_tab . '" />' . $n2;
+         echo ''
+         . $i2 . '</h2>' . $n2
+         . $i2 . '<input type="hidden" name="' . $this->prefix . '-tab" value="' . $this->active_tab . '" />' . $n2
+         ;
       }
 
       settings_fields($this->page_slug);
@@ -953,13 +1031,15 @@ if ($pdf) {
 
       if ($wrap_submit) echo '</p>';
 
-      echo 
-         $n .
-         $i . '</form>' . $n .
-         $i . USI_WordPress_Solutions_Static::divider(2) .
-         $i . USI_WordPress_Solutions_Static::divider(2, $this->name) .
-         $i . USI_WordPress_Solutions_Static::divider(2) .
-         $trailing_code;
+      echo ''
+      . $n
+      . ($this->is_pdf ? '<!-- PDF-END -->' . $n : '')
+      . $i . '</form>' . $n
+      . $i . USI_WordPress_Solutions_Static::divider(2)
+      . $i . USI_WordPress_Solutions_Static::divider(2, $this->name)
+      . $i . USI_WordPress_Solutions_Static::divider(2)
+      . $trailing_code
+      ;
 
    } // page_render();
 
@@ -1012,8 +1092,8 @@ if ($pdf) {
                $section['usi-title'] = __($section['title'], $this->text_domain);
                unset($section['title']);
             }
-            if (isset($section['options'])) {
-               $this->options['css'] = !empty($section['options']['css']) ? $section['options']['css']    : '';
+            if (!empty($section['options']['css'])) {
+               $this->options['css'] = $section['options']['css'];
             }
 
             foreach ($section['settings'] as $name => & $setting) {

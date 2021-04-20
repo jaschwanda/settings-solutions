@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Custom_Post {
 
-   const VERSION    = '2.11.0 (2021-02-24)';
+   const VERSION    = '2.11.3 (2021-04-20)';
 
    protected $autosave_disable = true;
    protected $defaults = array();

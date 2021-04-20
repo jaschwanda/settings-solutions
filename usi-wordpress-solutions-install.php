@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_Install {
 
-   const VERSION = '2.11.0 (2021-02-24)';
+   const VERSION = '2.11.3 (2021-04-20)';
 
    const VERSION_DATA = '1.0';
 

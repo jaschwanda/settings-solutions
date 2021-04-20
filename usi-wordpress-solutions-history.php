@@ -19,7 +19,7 @@ require_once('usi-wordpress-solutions.php');
 
 final class USI_WordPress_Solutions_History {
 
-   const VERSION = '2.11.0 (2021-02-24)';
+   const VERSION = '2.11.3 (2021-04-20)';
 
    private static $pre_post_update_data = null;
    private static $pre_post_update_id   = 0;
@@ -74,7 +74,7 @@ final class USI_WordPress_Solutions_History {
    public static function action_profile_update($user_id) {
       $user = get_userdata($user_id);
       self::history(get_current_user_id(), 'user', 
-         'Modified <' . $user->data->display_name . '> user profile', $user_id, $_REQUEST);
+         'Updated <' . $user->data->display_name . '> user profile', $user_id, $_REQUEST);
    } // action_profile_update();
 
    public static function action_user_register($user_id) {

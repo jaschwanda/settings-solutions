@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 if (!class_exists('USI')) { final class USI {
 
-   const VERSION = '2.11.3 (2021-03-25)';
+   const VERSION = '2.11.3 (2021-04-20)';
 
    private static $info   = null;
    private static $mysqli = null;
@@ -88,7 +88,8 @@ if (!class_exists('USI')) { final class USI {
          self::$mysqli_stmt->prepare('INSERT INTO `' . DB_WP_PREFIX . 'USI_log` (`user_id`, `action`) VALUES (?, ?)');     
          self::$mysqli_stmt->bind_param('is', self::$user, self::$info);
       }
-      self::$info = substr($info, 0, 65535);
+   // self::$info = substr($info, 0, 65535);    // If `action` field is TEXT;
+      self::$info = substr($info, 0, 16777215); // If `action` field is MEDIUMTEXT;
       self::$user = get_current_user_id();
       self::$mysqli_stmt->execute();
 

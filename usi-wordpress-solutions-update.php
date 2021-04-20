@@ -19,7 +19,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Update {
 
-   const VERSION = '2.11.0 (2021-02-24)';
+   const VERSION = '2.11.3 (2021-04-20)';
 
    protected $access_token = null;
    protected $active = null;
