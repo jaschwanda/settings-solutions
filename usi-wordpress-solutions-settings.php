@@ -651,9 +651,11 @@ class USI_WordPress_Solutions_Settings {
          if ($disable_hidden) echo $disable_hidden;
          break;
 
+      case 'file':
+         echo $prefix . '<input type="' . $type . '"' . $attributes . ' />' . $suffix;
+         break;
       case 'null-number':
          $type = 'number';
-      case 'file':
       case 'hidden':
       case 'number':
       case 'password':
