@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.3 (2021-04-20)';
+   const VERSION = '2.11.4 (2021-05-06)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -656,6 +656,7 @@ class USI_WordPress_Solutions_Settings {
          break;
       case 'null-number':
          $type = 'number';
+      case 'email':
       case 'hidden':
       case 'number':
       case 'password':
@@ -730,6 +731,7 @@ class USI_WordPress_Solutions_Settings {
             case 'checkbox':
             case 'file':
             case 'hidden':
+            case 'email':
             case 'money':
             case 'null-number':
             case 'number':

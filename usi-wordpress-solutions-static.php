@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 class USI_WordPress_Solutions_Static {
 
-   const VERSION = '2.11.3 (2021-04-20)';
+   const VERSION = '2.11.4 (2021-05-06)';
 
    private static $calls_action_admin_head = 0;
 
@@ -41,12 +41,12 @@ class USI_WordPress_Solutions_Static {
 
       foreach ($columns as $name => $value) { 
          if (is_array($value)) {
-            $width    = !empty($value['width']) ? 'width:' . $value['width'] . ';' : '';
+            $width    = !empty($value['width']) ? 'width:' . $value['width'] . '!important;' : '';
             $ellipsis = !empty($value['ellipsis']) ? 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;' : '';
             $html    .= ".wp-list-table .column-$name{{$border}{$width}{$ellipsis}}" . PHP_EOL;
          } else {
             $percent  = number_format(100 * $value / $total, 1);
-            $html    .= ".wp-list-table .column-$name{{$border}width:$percent%;$space$style}" . PHP_EOL;
+            $html    .= ".wp-list-table .column-$name{{$border}width:$percent%!important;$space$style}" . PHP_EOL;
          }
       }
 

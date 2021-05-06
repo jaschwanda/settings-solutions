@@ -15,7 +15,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 final class USI_WordPress_Solutions_Versions_Scan {
 
-   const VERSION = '2.11.3 (2021-04-20)';
+   const VERSION = '2.11.4 (2021-05-06)';
 
    private function __construct() {
    } // __construct();
@@ -24,6 +24,7 @@ final class USI_WordPress_Solutions_Versions_Scan {
       $files = scandir($path);
       $html  = '';
       foreach ($files as $file) {
+         if ('.usi-ignore' == $file) break;
          $full_path = $path . DIRECTORY_SEPARATOR . $file;
          if (('.' == $file) || ('..' == $file)) {
          } else if (is_dir($full_path)) {

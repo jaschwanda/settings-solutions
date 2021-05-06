@@ -2,6 +2,10 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.4 (2021-05-06) ##
+* Added e-mail field type and validation function.
+* Added .usi-ignore file to skip sub folder from version scanning.
+
 ## 2.11.3 (2021-04-20) ##
 * Set all versions numbers to same version.
 * Added TinyMCE editor to settings functionality.
