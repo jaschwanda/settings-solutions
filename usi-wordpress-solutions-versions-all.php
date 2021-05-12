@@ -4,7 +4,7 @@ defined('ABSPATH') or die('Accesss not allowed.');
 
 class USI_WordPress_Solutions_Versions_All {
 
-   const VERSION = '2.11.3 (2021-04-20)';
+   const VERSION = '2.11.5 (2021-05-12)';
 
    private static function scan(& $lines, $level, $path, $parent = null) {
       $offset  = strrpos($path, DIRECTORY_SEPARATOR) + 1;
@@ -16,6 +16,7 @@ class USI_WordPress_Solutions_Versions_All {
          if (('ru' != $prefix[0]) && ('theme' != $prefix[0]) && ('usi' != $prefix[0])) return($lines);
       }
       foreach ($files as $file) {
+         if ('.usi-ignore' == $file) break;
          $full_path = $path . DIRECTORY_SEPARATOR . $file;
          if (('.' == $file) || ('..' == $file)) {
          } else if (is_dir($full_path)) {
