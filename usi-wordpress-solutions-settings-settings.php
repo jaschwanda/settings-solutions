@@ -24,7 +24,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.3 (2021-04-20)';
+   const VERSION = '2.11.6 (2021-05-18)';
 
    protected $debug     = 0;
    protected $is_tabbed = true;
@@ -234,6 +234,11 @@ class USI_WordPress_Solutions_Settings_Settings extends USI_WordPress_Solutions_
                   'type' => 'checkbox', 
                   'label' => 'Enable User Switching',
                   'notes' => 'Enables administrators to impersonate another WordPress user.',
+               ),
+               'pass-reset' => array(
+                  'type' => 'checkbox', 
+                  'label' => 'Remove Password Reset',
+                  'notes' => 'Remove the password reset link option from the row actions in the user display.',
                ),
                'options_php' => array(
                   'type' => 'html', 

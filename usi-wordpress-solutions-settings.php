@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.4 (2021-05-06)';
+   const VERSION = '2.11.6 (2021-05-18)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -76,6 +76,8 @@ class USI_WordPress_Solutions_Settings {
       if (!empty($config['prefix'])) $this->prefix = $config['prefix'];
 
       $this->impersonate = !empty(USI_WordPress_Solutions::$options['admin-options']['impersonate']);
+
+      $this->remove_rest = !empty(USI_WordPress_Solutions::$options['admin-options']['pass-reset']);
 
       $this->debug       = USI_WordPress_Solutions_Diagnostics::get_log(USI_WordPress_Solutions::$options);
 
@@ -136,8 +138,8 @@ class USI_WordPress_Solutions_Settings {
       // Add notices for custom options pages, WordPress does settings pages automatically;
       if ('menu' == $this->page) add_action('admin_notices', array($this, 'action_admin_notices'));
 
-      if ($this->impersonate) {
-         add_action('init', array(__CLASS__, 'action_init'));
+      if ($this->impersonate || $this->remove_rest) {
+         if ($this->impersonate) add_action('init', array(__CLASS__, 'action_init'));
          add_filter('user_row_actions', array($this, 'filter_user_row_actions'), 10, 2);
       }
 
@@ -336,6 +338,7 @@ class USI_WordPress_Solutions_Settings {
    } // action_admin_notices();
 
    public static function action_init() { 
+
       if (!empty(USI_WordPress_Solutions::$options['admin-options']['impersonate'])) {
          if (!empty($_REQUEST['action']) && !empty( $_REQUEST['user_id']) && ('impersonate' == $_REQUEST['action'])) {
             if ($user = get_userdata($user_id = $_REQUEST['user_id'])) {
@@ -353,6 +356,7 @@ class USI_WordPress_Solutions_Settings {
             }
          }
       }
+
    } // action_init();
 
    function action_shutdown() { 
@@ -803,26 +807,36 @@ class USI_WordPress_Solutions_Settings {
    } // filter_plugin_action_links();
 
    function filter_user_row_actions(array $actions, WP_User $user) {
-      $current_user = wp_get_current_user();
-      if (($user->ID != $current_user->ID) && current_user_can('usi_wordpress_impersonate_user')) {
-         $actions['impersonate'] = sprintf(
-            '<a href="%s">%s</a>',
-            esc_url(
-               wp_nonce_url( 
-                  add_query_arg( 
-                     array(
-                        'action'  => 'impersonate',
-                        'user_id' => $user->ID,
+
+      if ($this->impersonate) {
+
+         $current_user = wp_get_current_user();
+
+         if (($user->ID != $current_user->ID) && current_user_can('usi_wordpress_impersonate_user')) {
+            $actions['impersonate'] = sprintf(
+               '<a href="%s">%s</a>',
+               esc_url(
+                  wp_nonce_url( 
+                     add_query_arg( 
+                        array(
+                           'action'  => 'impersonate',
+                           'user_id' => $user->ID,
+                        ), 
+                        get_admin_url() . 'user-edit.php?user_id=' . $user->ID
                      ), 
-                     get_admin_url() . 'user-edit.php?user_id=' . $user->ID
-                  ), 
-                  'impersonate_' . $user->ID
-               )
-            ),
-            esc_html__('Impersonate', 'user-switching')
-         );
+                     'impersonate_' . $user->ID
+                  )
+               ),
+               esc_html__('Impersonate', 'user-switching')
+            );
+         }
+
       }
+
+      if ($this->remove_rest) unset($actions['resetpassword']);
+
       return($actions);
+
    } // filter_user_row_actions();
 
 // In case you get the "options page not found" error, fiddle with this;

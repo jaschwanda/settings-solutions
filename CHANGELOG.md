@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.6 (2021-05-18) ##
+* Added feature to remove the password reset link option from the row actions in the user display.
+
 ## 2.11.5 (2021-05-12) ##
 * Added .usi-ignore file to skip sub folder from version scanning in the all-scan module.
 
