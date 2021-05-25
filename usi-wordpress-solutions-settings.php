@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.6 (2021-05-18)';
+   const VERSION = '2.11.7 (2021-05-25)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -361,31 +361,47 @@ class USI_WordPress_Solutions_Settings {
 
    function action_shutdown() { 
 
-      require_once(__DIR__ . '/mPDF/vendor/autoload.php');
+      $reporting_options = error_reporting(0);
 
-      $mpdf = new \Mpdf\Mpdf();
+      try {
 
-      $beg  = strpos($this->pdf_buffer, '<!-- PDF-BEG -->');
+         require_once(__DIR__ . '/mPDF/vendor/autoload.php');
 
-      $end  = strpos($this->pdf_buffer, '<!-- PDF-END -->');
+         $mpdf = new \Mpdf\Mpdf();
 
-      if ($beg && $end) {
+         $beg  = strpos($this->pdf_buffer, '<!-- PDF-BEG -->');
 
-         $buf = substr($this->pdf_buffer, $beg + 16, $end - $beg - 16);
+         $end  = strpos($this->pdf_buffer, '<!-- PDF-END -->');
 
-         $css = apply_filters('usi_wordpress_pdf_css', null);
+         if ($beg && $end) {
 
-         $mpdf->WriteHTML($css, \Mpdf\HTMLParserMode::HEADER_CSS);
+            $buf = substr($this->pdf_buffer, $beg + 16, $end - $beg - 16);
 
-      } else {
+            $css = apply_filters('usi_wordpress_pdf_css', null);
 
-         $buf = '<p>Could not find PDF markers in given page.</p>';
+            $mpdf->WriteHTML($css, \Mpdf\HTMLParserMode::HEADER_CSS);
+
+         } else {
+
+            $buf = '<p>Could not find PDF markers in given page.</p>';
+
+         }
+
+         $mpdf->WriteHTML($buf, \Mpdf\HTMLParserMode::HTML_BODY);
+
+         $mpdf->Output($this->pdf_file, \Mpdf\Output\Destination::INLINE);
+
+      } catch (\Mpdf\MpdfException $e) {
+
+         $error = 'PDF conversion failed:' . $e->getMessage();
+
+         usi::log('mPDF:', $error);
+
+         echo '<br/>' . $error;
 
       }
 
-      $mpdf->WriteHTML($buf, \Mpdf\HTMLParserMode::HTML_BODY);
-
-      $mpdf->Output($this->pdf_file, \Mpdf\Output\Destination::INLINE);
+      error_reporting($reporting_options);
 
    } // action_shutdown();
 

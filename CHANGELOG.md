@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.7 (2021-05-25) ##
+* Added PHP error reporting function to settings, addressed false errors in mPDF creation.
+
 ## 2.11.6 (2021-05-18) ##
 * Added feature to remove the password reset link option from the row actions in the user display.
 
