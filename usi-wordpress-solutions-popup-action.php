@@ -31,7 +31,7 @@ ru-work.php
 
 class USI_WordPress_Solutions_Popup_Action {
 
-   const VERSION = '2.11.3 (2021-04-20)';
+   const VERSION = '2.11.8 (2021-05-29)';
 
    const HEIGHT_HEAD_FOOT = 93;
 
@@ -346,7 +346,7 @@ EOD;
                ), 
                get_admin_url() . (!empty($args['url']) ? $args['url'] : null)
             ), 
-            'bulk-' . ($args['bulk'] ?? $action . '_' . $id)
+            'bulk-' . (!empty($args['bulk']) ? $args['bulk'] : $action . '_' . $id)
          )
       );
       }

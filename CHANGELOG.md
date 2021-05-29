@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.8 (2021-05-29) ##
+* Modified to ensure backwards compatibility with PHP 5.4 versions.
+
 ## 2.11.7 (2021-05-25) ##
 * Added PHP error reporting function to settings, addressed false errors in mPDF creation.
 

@@ -9,9 +9,12 @@ if (!class_exists('WP_List_Table')) {
    require_once(ABSPATH . 'wp-admin/includes/class-wp-list-table.php');
 }
 
+require_once('usi-wordpress-solutions-popup-action.php');
+require_once('usi-wordpress-solutions-static.php');
+
 class USI_WordPress_Solutions_User_Sessions extends WP_List_Table {
 
-   const VERSION = '2.11.3 (2021-04-20)';
+   const VERSION = '2.11.8 (2021-05-29)';
 
    public static function action_admin_head() {
 
