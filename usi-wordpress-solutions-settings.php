@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.7 (2021-05-25)';
+   const VERSION = '2.11.8 (2021-05-29)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -34,6 +34,7 @@ class USI_WordPress_Solutions_Settings {
    protected $active_tab = null;
    protected $capability = 'manage_options';
    protected $capabilities = null;
+   protected $datepick = null;
    protected $debug = 0;
    protected $editor = null;
    protected $enctype = null;
@@ -93,6 +94,7 @@ class USI_WordPress_Solutions_Settings {
 
       if (!empty($config['capability']))   $this->capability   = $config['capability'];
       if (!empty($config['capabilities'])) $this->capabilities = $config['capabilities'];
+      if (!empty($config['datepick']))     $this->datepick     = $config['datepick'];
       if (!empty($config['editor']))       $this->editor       = $config['editor'];
       if (!empty($config['hide']))         $this->hide         = $config['hide'];
       if (!empty($config['icon_url']))     $this->icon_url     = $config['icon_url'];
@@ -166,6 +168,30 @@ class USI_WordPress_Solutions_Settings {
    } // __construct();
 
    function action_admin_enqueue_scripts() {
+
+      // https://phptechnologytutorials.wordpress.com/2014/04/01/use-wordpress-default-jquery-ui-datepicker-in-your-theme/
+
+      if ($this->datepick) {
+
+         wp_enqueue_script('jquery');
+         wp_enqueue_script('jquery-ui-core');
+         wp_enqueue_script('jquery-ui-datepicker');
+
+         wp_enqueue_style('jquery-ui-css', 'https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/jquery-ui.css');
+
+         $this->jquery .= ''
+         . "      $('.datepicker').datepicker(" . PHP_EOL
+         . '         {' . PHP_EOL
+         . '            changeMonth : true,' . PHP_EOL
+         . '            changeYear  : true,' . PHP_EOL
+         . "            dateFormat  : 'yy-mm-dd'" . PHP_EOL
+         . '         }' . PHP_EOL
+         . '      );' . PHP_EOL
+         . "      $('.datepicker').keydown(function(event) {event.preventDefault();});" . PHP_EOL
+         . "      $('.datepicker').keypress(function(event) {event.preventDefault();});" . PHP_EOL
+         ;
+
+      }
 
       if ($this->editor) {
 
