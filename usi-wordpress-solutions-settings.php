@@ -170,6 +170,7 @@ class USI_WordPress_Solutions_Settings {
    function action_admin_enqueue_scripts() {
 
       // https://phptechnologytutorials.wordpress.com/2014/04/01/use-wordpress-default-jquery-ui-datepicker-in-your-theme/
+      // https://trentrichardson.com/examples/timepicker/
 
       if ($this->datepick) {
 
@@ -183,8 +184,7 @@ class USI_WordPress_Solutions_Settings {
          . "      $('.datepicker').datepicker(" . PHP_EOL
          . '         {' . PHP_EOL
          . '            changeMonth : true,' . PHP_EOL
-         . '            changeYear  : true,' . PHP_EOL
-         . "            dateFormat  : 'yy-mm-dd'" . PHP_EOL
+         . '            changeYear  : true' . PHP_EOL
          . '         }' . PHP_EOL
          . '      );' . PHP_EOL
          . "      $('.datepicker').keydown(function(event) {event.preventDefault();});" . PHP_EOL
