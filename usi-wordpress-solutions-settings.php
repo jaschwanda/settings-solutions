@@ -34,7 +34,7 @@ class USI_WordPress_Solutions_Settings {
    protected $active_tab = null;
    protected $capability = 'manage_options';
    protected $capabilities = null;
-   protected $datepick = null;
+   protected $datepicker = null;
    protected $debug = 0;
    protected $editor = null;
    protected $enctype = null;
@@ -94,7 +94,7 @@ class USI_WordPress_Solutions_Settings {
 
       if (!empty($config['capability']))   $this->capability   = $config['capability'];
       if (!empty($config['capabilities'])) $this->capabilities = $config['capabilities'];
-      if (!empty($config['datepick']))     $this->datepick     = $config['datepick'];
+      if (!empty($config['datepicker']))   $this->datepicker   = $config['datepicker'];
       if (!empty($config['editor']))       $this->editor       = $config['editor'];
       if (!empty($config['hide']))         $this->hide         = $config['hide'];
       if (!empty($config['icon_url']))     $this->icon_url     = $config['icon_url'];
@@ -172,7 +172,7 @@ class USI_WordPress_Solutions_Settings {
       // https://phptechnologytutorials.wordpress.com/2014/04/01/use-wordpress-default-jquery-ui-datepicker-in-your-theme/
       // https://trentrichardson.com/examples/timepicker/
 
-      if ($this->datepick) {
+      if ($this->datepicker) {
 
          wp_enqueue_script('jquery');
          wp_enqueue_script('jquery-ui-core');
