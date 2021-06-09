@@ -3,6 +3,7 @@
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
 ## 2.11.9 (2021-06-09) ##
+* Fixed some PHP warnings resulting from new PHP version.
 * Re-ordered some functions alphavetically.
 
 ## 2.11.8 (2021-05-29) ##

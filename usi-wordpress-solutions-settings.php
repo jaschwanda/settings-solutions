@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.8 (2021-05-29)';
+   const VERSION = '2.11.9 (2021-06-09)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -1227,9 +1227,9 @@ class USI_WordPress_Solutions_Settings {
       if (isset($this->sections[$section_id]['grid'])) self::set_grid($this->sections[$section_id]['grid']);
 
       $section_callback = $this->section_callbacks[$this->section_callback_offset];
-      $object = $section_callback[0];
-      $method = $section_callback[1];
-      $params = !empty($section_callback[2]) ? $section_callback[2] : null;
+      $object = $section_callback[0] ?? null;
+      $method = $section_callback[1] ?? null;
+      $params = $section_callback[2] ?? null;
       if (method_exists($object, $method)) $object->$method($params);
 
       $this->section_callback_offset++;
