@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.10 (2021-06-10) ##
+* Set jQuery datepicker plugin date format.
+
 ## 2.11.9 (2021-06-09) ##
 * Fixed some PHP warnings resulting from new PHP version.
 * Re-ordered some functions alphavetically.

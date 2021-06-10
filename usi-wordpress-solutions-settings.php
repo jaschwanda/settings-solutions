@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.9 (2021-06-09)';
+   const VERSION = '2.11.10 (2021-06-10)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -184,7 +184,8 @@ class USI_WordPress_Solutions_Settings {
          . "      $('.datepicker').datepicker(" . PHP_EOL
          . '         {' . PHP_EOL
          . '            changeMonth : true,' . PHP_EOL
-         . '            changeYear  : true' . PHP_EOL
+         . '            changeYear  : true,' . PHP_EOL
+         . '            dateFormat  : "yy-mm-dd"' . PHP_EOL
          . '         }' . PHP_EOL
          . '      );' . PHP_EOL
          . "      $('.datepicker').keydown(function(event) {event.preventDefault();});" . PHP_EOL
