@@ -1,6 +1,6 @@
 <?php // ------------------------------------------------------------------------------------------------------------------------ //
 
-defined('ABSPATH') or die('Accesss not allowed.');
+//defined('ABSPATH') || class_exists('USI_Page_Cache') or die('Accesss not allowed.');
 
 /*
 WordPress-Solutions is free software: you can redistribute it and/or modify it under the terms of the GNU General Public 
@@ -17,7 +17,7 @@ Copyright (c) 2020 by Jim Schwanda.
 
 if (!class_exists('USI')) { final class USI {
 
-   const VERSION = '2.11.3 (2021-04-20)';
+   const VERSION = '2.11.11 (2021-06-11)';
 
    private static $info   = null;
    private static $mysqli = null;
@@ -36,7 +36,6 @@ if (!class_exists('USI')) { final class USI {
             if (empty($trace[self::$offset+1])) {
                $info .= $trace[self::$offset+0]['file'];
             } else {
-            // $info .= !empty($trace[self::$offset+1]['class']) ? $trace[self::$offset+1]['class'] . ':' : $trace[self::$offset+1]['file'];
                $info .= !empty($trace[self::$offset+1]['class']) ? $trace[self::$offset+1]['class'] . ':' : $trace[self::$offset+0]['file'];
                if (!empty($trace[self::$offset+1]['function'])) {
                   switch ($trace[self::$offset+1]['function']) {
@@ -83,14 +82,17 @@ if (!class_exists('USI')) { final class USI {
       }
 
       if (!self::$mysqli) {
-         self::$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+         if (method_exists('USI_Page_Cache', 'dbs_connect')) {
+            self::$mysqli = USI_Page_Cache::dbs_connect();
+         } else {
+            self::$mysqli = new mysqli(DB_HOST, DB_USER, DB_PASSWORD, DB_NAME);
+         }
          self::$mysqli_stmt = new mysqli_stmt(self::$mysqli);
          self::$mysqli_stmt->prepare('INSERT INTO `' . DB_WP_PREFIX . 'USI_log` (`user_id`, `action`) VALUES (?, ?)');     
          self::$mysqli_stmt->bind_param('is', self::$user, self::$info);
       }
-   // self::$info = substr($info, 0, 65535);    // If `action` field is TEXT;
       self::$info = substr($info, 0, 16777215); // If `action` field is MEDIUMTEXT;
-      self::$user = get_current_user_id();
+      self::$user = function_exists('get_current_user_id') ? get_current_user_id() : 0;
       self::$mysqli_stmt->execute();
 
    } // log();

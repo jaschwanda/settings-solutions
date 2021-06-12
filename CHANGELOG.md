@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.11 (2021-06-11) ##
+* Changed usi::log() to accomondate the Page Solutions plugin.
+
 ## 2.11.10 (2021-06-10) ##
 * Set jQuery datepicker plugin date format.
 
