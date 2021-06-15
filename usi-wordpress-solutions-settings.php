@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.10 (2021-06-10)';
+   const VERSION = '2.11.12 (2021-06-15)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -169,6 +169,7 @@ class USI_WordPress_Solutions_Settings {
 
    function action_admin_enqueue_scripts() {
 
+      // https://api.jqueryui.com/datepicker/
       // https://phptechnologytutorials.wordpress.com/2014/04/01/use-wordpress-default-jquery-ui-datepicker-in-your-theme/
       // https://trentrichardson.com/examples/timepicker/
 
@@ -185,7 +186,15 @@ class USI_WordPress_Solutions_Settings {
          . '         {' . PHP_EOL
          . '            changeMonth : true,' . PHP_EOL
          . '            changeYear  : true,' . PHP_EOL
-         . '            dateFormat  : "yy-mm-dd"' . PHP_EOL
+         . '            closeText   : "Clear",' . PHP_EOL
+         . '            dateFormat  : "yy-mm-dd",' . PHP_EOL
+         . '            onClose     : function (dateText, inst) {' . PHP_EOL
+         . '               if ($(window.event.srcElement).hasClass("ui-datepicker-close")) {' . PHP_EOL
+         . '                  document.getElementById(this.id).value = "";' . PHP_EOL
+         . '               }' . PHP_EOL
+         . '            },' . PHP_EOL
+         . '            showButtonPanel    : true,' . PHP_EOL 
+         . '            showMonthAfterYear : true' . PHP_EOL 
          . '         }' . PHP_EOL
          . '      );' . PHP_EOL
          . "      $('.datepicker').keydown(function(event) {event.preventDefault();});" . PHP_EOL
