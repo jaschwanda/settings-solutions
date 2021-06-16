@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.12 (2021-06-15)';
+   const VERSION = '2.11.13 (2021-06-16)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -782,7 +782,7 @@ class USI_WordPress_Solutions_Settings {
 
          $settings = $section['settings'];
 
-         foreach ($input as $key => $value) {
+         if (is_array($input)) foreach ($input as $key => $value) {
             switch (!empty($settings[$key]['type']) ? $settings[$key]['type'] : null) {
             case 'checkbox':
             case 'file':

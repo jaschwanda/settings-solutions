@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.13 (2021-06-16) ##
+* Added check in processing settings.
+
 ## 2.11.12 (2021-06-15) ##
 * Added clear function to datepicker widget.
 
