@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.13 (2021-06-16)';
+   const VERSION = '2.11.14 (2021-06-24)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -782,38 +782,50 @@ class USI_WordPress_Solutions_Settings {
 
          $settings = $section['settings'];
 
-         if (is_array($input)) foreach ($input as $key => $value) {
-            switch (!empty($settings[$key]['type']) ? $settings[$key]['type'] : null) {
-            case 'checkbox':
-            case 'file':
-            case 'hidden':
-            case 'email':
-            case 'money':
-            case 'null-number':
-            case 'number':
-            case 'password':
-            case 'radio':
-            case 'select':
-            case 'text':
-               $length = strlen($value);
-               $ascii  = null;
-               for ($i = 0; $i < $length; $i++) {
-                  $c = ord($value[$i]);
-                  if (127 < $c) continue;
-                  if ( 20 > $c) continue;
-                  $ascii .= chr($c);
+         if (is_array($input) && is_array($settings)) { // IF input array;
+
+            foreach ($input as $key => $value) {
+               switch (!empty($settings[$key]['type']) ? $settings[$key]['type'] : null) {
+               case 'checkbox':
+               case 'file':
+               case 'hidden':
+               case 'email':
+               case 'money':
+               case 'null-number':
+               case 'number':
+               case 'password':
+               case 'radio':
+               case 'select':
+               case 'text':
+                  $length = strlen($value);
+                  $ascii  = null;
+                  for ($i = 0; $i < $length; $i++) {
+                     $c = ord($value[$i]);
+                     if (127 < $c) continue;
+                     if ( 20 > $c) continue;
+                     $ascii .= chr($c);
+                  }
+                  $input[$key] = sanitize_text_field($ascii); 
+                  break;
+
+               case 'tiny': 
+                  $value = str_replace(array('<', '>', '"'), array('&lt;', '&gt;', '&quot;'), $value);
+               case 'textarea': 
+                  $input[$key] = sanitize_textarea_field($value); 
+                  break;
+               } // END switch;
+            } // END foreach;
+
+            // Search for all the checkbox that aren't checked and make sure they are cleared if previously checked;
+            foreach ($settings as $key => $value) {
+               if (!empty($value['type']) && ('checkbox' == $value['type'])) {
+                  if (empty($input[$key]) && !empty($this->options[$key])) {
+                     $this->options[$key] = $input[$key] = false;
+                  }
                }
-               $input[$key] = sanitize_text_field($ascii); 
-               break;
+            } // END foreach;
 
-            case 'tiny': 
-               $value = str_replace(array('<', '>', '"'), array('&lt;', '&gt;', '&quot;'), $value);
-            case 'textarea': 
-               $input[$key] = sanitize_textarea_field($value); 
-               break;
-            }
-
-         }
+         } // ENDIF input array;
 
       } // ENDFOR section in the settings;
 

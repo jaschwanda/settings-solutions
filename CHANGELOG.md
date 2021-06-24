@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.14 (2021-06-24) ##
+* Addressed an issue where checked check boxes couldn't be cleared.
+
 ## 2.11.13 (2021-06-16) ##
 * Added check in processing settings.
 
