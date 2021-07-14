@@ -2,6 +2,9 @@
 
 WordPress-Solutions plugin changes are logged here using <a href="http://semver.org/">Semantic Versioning</a>.
 
+## 2.11.15 (2021-07-14) ##
+* Added headers and footers to PDF dumps.
+
 ## 2.11.14 (2021-06-24) ##
 * Addressed an issue where checked check boxes couldn't be cleared.
 

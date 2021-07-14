@@ -25,7 +25,7 @@ require_once('usi-wordpress-solutions-versions.php');
 
 class USI_WordPress_Solutions_Settings {
 
-   const VERSION = '2.11.14 (2021-06-24)';
+   const VERSION = '2.11.15 (2021-07-14)';
 
    private static $grid         = false;
    private static $label_option = null; // Null means default behavior, label to left of field;
@@ -56,8 +56,9 @@ class USI_WordPress_Solutions_Settings {
    protected $page = null;
    protected $page_slug = null;
    protected $pdf_buffer = null;
+   protected $pdf_footer = null;
    protected $pdf_file = null;
-   protected $pdf_title = null;
+   protected $pdf_header = null;
    protected $position = null;
    protected $prefix = null;
    protected $query = null;
@@ -408,6 +409,10 @@ class USI_WordPress_Solutions_Settings {
          $beg  = strpos($this->pdf_buffer, '<!-- PDF-BEG -->');
 
          $end  = strpos($this->pdf_buffer, '<!-- PDF-END -->');
+
+         if ($this->pdf_header) $mpdf->SetHTMLHeader($this->pdf_header);
+
+         if ($this->pdf_footer) $mpdf->SetHTMLFooter($this->pdf_footer);
 
          if ($beg && $end) {
 
@@ -922,13 +927,13 @@ class USI_WordPress_Solutions_Settings {
 
       echo '' 
       . $n . '<div class="wrap">' . $n
-      . ($this->title ? $i . $this->title . $n : '')
+      . ($this->is_pdf ? '' : $i . $this->title . $n)
       . $i . USI_WordPress_Solutions_Static::divider(2)
       . $i . USI_WordPress_Solutions_Static::divider(2, $this->name)
       . $i . USI_WordPress_Solutions_Static::divider(2)
       . $i . '<form id="myForm" action="options.php"' . $this->enctype . ' method="post">' . $n
       . str_replace('<input', $n . $i2 . '<input', $settings_fields) . $n
-      . ($this->is_pdf ? '<!-- PDF-BEG -->' . $n . $this->pdf_title : '')
+      . ($this->is_pdf ? '<!-- PDF-BEG -->' . $n . $this->title : '')
       ;
 
       global $wp_settings_sections, $wp_settings_fields;
@@ -1031,7 +1036,7 @@ class USI_WordPress_Solutions_Settings {
       . $i . USI_WordPress_Solutions_Static::divider(2, $this->name)
       . $i . USI_WordPress_Solutions_Static::divider(2)
       . $i . '<form id="myForm" action="options.php"' . $this->enctype . ' method="post">' . $n
-      . ($this->is_pdf ? '<!-- PDF-BEG -->' . $n . $this->pdf_title : '')
+      . ($this->is_pdf ? '<!-- PDF-BEG -->' . $n . $this->title : '')
       ;
 
       if ($this->is_tabbed) {
